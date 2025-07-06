@@ -4,7 +4,7 @@ Welcome to my **Product Design Portfolio**! This repository showcases a collecti
 
 ## About Me
 
-Hi, I’m **Dara Phillips** — a product designer who bridges design and development. My process is rooted in user-centered thinking, visual storytelling, and interactive prototyping.
+Hi, I’m **Dara Phillips** - a product designer who bridges design and development. My process is rooted in user-centered thinking, visual storytelling, and interactive prototyping.
 
 ## Portfolio Highlights
 
