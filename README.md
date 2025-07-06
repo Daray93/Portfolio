@@ -1,12 +1,12 @@
-# 🎨 Product Design Portfolio
+# Product Design Portfolio
 
-Welcome to my **Product Design Portfolio**! This repository showcases a collection of my design work — from prototypes to polished UI designs and front-end code. I combine creative design tools with technical skills to craft meaningful digital experiences.
+Welcome to my **Product Design Portfolio**! This repository showcases a collection of my design work - from prototypes to polished UI designs, front-end code and VR development. I combine creative design tools with technical skills to craft meaningful digital experiences.
 
-## 🧑‍💻 About Me
+## About Me
 
 Hi, I’m **Dara Phillips** — a product designer who bridges design and development. My process is rooted in user-centered thinking, visual storytelling, and interactive prototyping.
 
-## 🌟 Portfolio Highlights
+## Portfolio Highlights
 
 - **Project 1: AOEDE**  
   *Figma prototype design.*  
@@ -20,14 +20,14 @@ Hi, I’m **Dara Phillips** — a product designer who bridges design and develo
   🔗 [View Live Project](https://neuroloop-13690.web.app/)
 
 - **Project 3: Wedding Mate**  
-  *Figma Prototype.*  
+  *Figma prototype for a wedding planning app.*  
   **Role:** UX/UI Designer  
-  **Tools:** Figma 
-  🔗 [View Demo]([./projects/project-3/README.md](https://www.figma.com/proto/pnB9iOaa9tQIPrnxkEpPHV/Big-day-App?node-id=93-407&t=bmNGashJ7klz9i07-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=325%3A3392))
+  **Tools:** Figma  
+  🔗 [View Demo](https://www.figma.com/proto/pnB9iOaa9tQIPrnxkEpPHV/Big-day-App?node-id=93-407&t=bmNGashJ7klz9i07-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=325%3A3392)
 
-## 🛠️ Tools & Technologies
+## Tools & Technologies
 
-### 🖌️ Design Tools
+### Design Tools
 
 - **Figma** (Design & Prototyping)
 - **Adobe Illustrator**
@@ -35,26 +35,26 @@ Hi, I’m **Dara Phillips** — a product designer who bridges design and develo
 - **Spline** (3D Design)
 - **Unity** (VR Development)
 
-### 💻 Code Skills
+### Code Skills
 
 - **HTML**, **CSS**, **JavaScript**
 - **React**
 - **Responsive Design**
 - Basic **version control** with Git
 
-## 📁 How to Explore
+## How to Explore
 
 - Browse the `/projects` folder to explore each project.
 - Each folder contains assets such as mockups, wireframes, and code snippets.
 - Project-specific READMEs offer detailed documentation and visuals.
 
-## 📬 Contact
+## Contact
 
 Want to collaborate or chat about design?
 
-- 💼 [LinkedIn](https://www.linkedin.com/in/daraphillips01010/)  
-- 🌐 [Portfolio Website](https://www.daraphillips.com)
+ [LinkedIn](https://www.linkedin.com/in/daraphillips01010/)  
+ [Portfolio Website](https://www.daraphillips.com)
 
 ---
 
-Thanks for visiting! 🌟
+Thanks for visiting!
