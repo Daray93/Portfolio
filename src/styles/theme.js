@@ -1,65 +1,114 @@
-import { link } from "framer-motion/client";
+// theme.js
 
-export const lightTheme = {
-  body: "#fefefe",
-  text: "#121212",
-  toggleBorder: "f0f0f0",
-  background: "#f0f0f0",
-  subtitle: "#121212",
-  tagline: "#131313",
-  footerBg: "#d6d6d6",
-  footerText: "#121212",
-  accent: "rgba(1, 91, 32, 0.76)",
-  accentHover: "rgba(0, 0, 0, 0.76)",
-  textPrimary: "#121212", // ✅ added
-  textSecondary: "#555",
-  projectsBg: "#ececec",  // <-- new light project background
-  projectDescription: "rgba(70, 70, 70, 0.76)",  // <-- new light project description color
-  scrollButtonBg: "rgba(1, 91, 32, 0.76)",       // ✅ added
-  scrollButtonHoverBg: "rgba(1, 69, 24, 0.76)",  // ✅ added
-  welcomeText: "rgba(1, 91, 32, 0.76)",
-  textAreaBg: "#f0f0f0", // ✅ added
-  contactText: "#121212", // ✅ added
-  linkHover: "rgba(1, 91, 32, 0.76)", // Optional: add a link hover color
-  sectionBgOverview: "#f5f5f5", // ✅ added
-  sectionBgOne: "#f5f5f5",
-  sectionBgTwo: "#f5f5f5",
-  sectionBgThree: "#f5f5f5",
-  sectionBgFour: "#f5f5f5",
-  paragraphBgOne: "#f5f5f5",
-  paragraphBgTwo: "#f5f5f5",
-  paragraphBgThree: "#f5f5f5",
-  paragraphBgFour: "#f5f5f5",
-};
+export const theme = {
+  /* =====================
+     Core Surfaces
+  ===================== */
+  body: "#ffffff",              // app background
+  background: "#fafafa",        // secondary sections
+  cardBackground: "#f8fafc", 
+  cardInset: "#cbd6e373",         // cards
+  surfaceSubtle: "#f4f4f5",     // hover fills, soft panels
+  border: "#e5e5e7",            // default borders
+  divider: "#ededee",
 
-export const darkTheme = {
-  body: "#121212",
-  text: "#fefefe",
-  toggleBorder: "#fefefe",
-  background: "#181818",
-  subtitle: "#fefefe",
-  tagline: "#f0f0f0",
-  footerBg: "#161616",
-  footerText: "#f0f0f0",
-  accent: "rgb(52, 147, 96)", 
-  accentHover: "rgb(245, 245, 245)",
-  textPrimary: "#f0f0f0", // ✅ added
-  textSecondary: "rgb(245, 245, 245)",
-  projectsBg: "#1a1a1a",  // <-- new dark project background
-  projectDescription: "rgba(210, 210, 210, 0.86)",  // <-- new dark project description color
-  scrollButtonBg: "rgba(52, 147, 96, 0.97)",       // ✅ added
-  scrollButtonHoverBg: "rgba(52, 147, 96, 0.66)",   // ✅ added
-  welcomeText: "rgba(52, 147, 96, 0.97)", 
-  textAreaBg: "#161616", // ✅ added
-  contactText: "#f0f0f0", // ✅ added
-  linkHover: "rgb(52, 147, 96)", // Optional: add a link hover color
-  sectionBgOverview: "rgb(28, 28, 28)", // ✅ added
-  sectionBgOne: "rgb(28, 28, 28)",
-  sectionBgTwo: "rgb(28, 28, 28)",
-  sectionBgThree: "rgb(28, 28, 28)",
-  sectionBgFour: "rgb(28, 28, 28)",
-  paragraphBgOne: "rgb(28, 28, 28)",
-  paragraphBgTwo: "rgb(28, 28, 28)",
-  paragraphBgThree: "rgb(28, 28, 28)",
-  paragraphBgFour: "rgb(28, 28, 28)",
+  /* =====================
+     Typography
+  ===================== */
+  text: "#020618",              // near-black, premium feel
+  textSecondary: "#45556c",     // body secondary
+  textTertiary: "#8b8f94",      // captions, meta
+  subtitle: "#6b6f75",
+  muted: "#9aa0a6",
+
+  /* =====================
+     Brand Accent
+     (swap once globally)
+  ===================== */
+  accent: "#2563eb",            // blue-600 (calm, professional)
+  accentSoft: "#eff6ff",
+  accentHover: "#1d4ed8",
+  accentText: "#ffffff",
+
+  /* =====================
+     Buttons
+  ===================== */
+  buttonPrimaryBg: "#2563eb",
+  buttonPrimaryText: "#fafafa",
+  buttonPrimaryHover: "#1d4ed8",
+  buttonPrimaryHoverText: "#fafafa",
+
+  buttonSecondaryBg: "#ffffff",
+  buttonSecondaryText: "#020618",
+  buttonSecondaryBorder: "#e5e5e7",
+  buttonSecondaryHover: "#f4f4f5",
+
+  /* =====================
+     Forms
+  ===================== */
+  inputBg: "#ffffff",
+  inputBorder: "#e5e5e7",
+  inputBorderHover: "#c7c7cc",
+  inputBorderFocus: "#2563eb",
+  inputError: "#ef4444",
+  inputSuccess: "#22c55e",
+  placeholder: "#9aa0a6",
+
+  /* =====================
+     Links
+  ===================== */
+  link: "#020618",
+  linkHover: "#2563eb",
+
+  /* =====================
+     Skeletons / Loading
+  ===================== */
+  skeletonBase: "#ededee",
+  skeletonHighlight: "#f6f6f7",
+
+  /* =====================
+     Tags / Pills
+  ===================== */
+  tagBg: "#f4f4f5",
+  tagText: "#52525b",
+
+  /* =====================
+     Effects
+  ===================== */
+  shadowSm: "0 2px 8px rgba(0,0,0,0.04)",
+  shadowMd: "0 6px 20px rgba(0,0,0,0.06)",
+  shadowLg: "0 12px 32px rgba(0,0,0,0.08)",
+
+  glow: `
+    radial-gradient(
+      60% 60% at 50% 50%,
+      rgba(37, 99, 235, 0.12) 0%,
+      rgba(255, 255, 255, 0) 70%
+    )
+  `,
+
+  /* =====================
+     Layout System
+  ===================== */
+
+   radius: {
+   xl: "clamp(16px, 2vw, 24px)", // large containers
+   lg: "clamp(12px, 1.5vw, 16px)", // cards
+   md: "clamp(8px, 1vw, 12px)", // media
+   sm: "clamp(6px, 0.8vw, 8px)", // buttons/inputs
+   xs: "clamp(4px, 0.5vw, 6px)", // pills/chips
+   },
+
+  space: {
+    0: "0",
+    1: "4px",
+    2: "8px",
+    3: "12px",
+    4: "16px",
+    5: "24px",
+    6: "32px",
+    7: "48px",
+    8: "64px",
+    9: "96px",
+  },
 };

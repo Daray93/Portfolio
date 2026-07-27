@@ -1,12 +1,73 @@
-# React + Vite
+# Dara Phillips — Product Design Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal portfolio site for Dara Phillips, Product Designer. Built as a single-page React app showcasing case studies (Neuroloop, Kropt, OrthoVive) with custom interactions, animation, and a bespoke cursor/UI system.
 
-Currently, two official plugins are available:
+Live site: [daraphillips.com](https://daraphillips.com)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **React 19** + **Vite** — app shell and build tooling
+- **React Router v7** — client-side routing
+- **styled-components** — theming and component styles
+- **Framer Motion** / **GSAP** — animation and transitions
+- **MUI (Material UI)** — select UI primitives
+- **React Hook Form** + **EmailJS** — contact form handling
+- **Firebase Hosting** — deployment
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the dev server:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Lint the project:
+
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```text
+src/
+  components/       Shared UI (Navbar, Footer, cursor, cards, feedback widgets)
+  components/case-study/   Reusable case study layout primitives (hero, nav, sections)
+  pages/            Route-level pages (Home, Kropt, Neuroloop, OrthoVive)
+  styles/           Theme tokens and global styles
+  assets/           Images, videos, and logos used across case studies
+```
+
+## Deployment
+
+The site is deployed to Firebase Hosting. Build output goes to `dist/` per `firebase.json`, with all routes rewritten to `index.html` to support client-side routing.
+
+```bash
+npm run build
+firebase deploy
+```
+
+## Case Studies
+
+- **Neuroloop** — `/neuroloop`
+- **Kropt** — `/kropt`
+- **OrthoVive** — `/orthovive`
