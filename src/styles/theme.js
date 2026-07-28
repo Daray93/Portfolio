@@ -4,73 +4,73 @@ export const theme = {
   /* =====================
      Core Surfaces
   ===================== */
-  body: "#ffffff",              // app background
-  background: "#fafafa",        // secondary sections
-  cardBackground: "#f8fafc", 
-  cardInset: "#cbd6e373",         // cards
-  surfaceSubtle: "#f4f4f5",     // hover fills, soft panels
-  border: "#e5e5e7",            // default borders
-  divider: "#ededee",
+  body: "#f2f0ea",              // app background (warm cream)
+  background: "#f7f6f1",        // secondary sections
+  cardBackground: "#f8f7f3",
+  cardInset: "#e5e1d573",         // cards
+  surfaceSubtle: "#eeece5",     // hover fills, soft panels
+  border: "#e2ded2",            // default borders
+  divider: "#e8e4d8",
 
   /* =====================
      Typography
   ===================== */
-  text: "#020618",              // near-black, premium feel
-  textSecondary: "#45556c",     // body secondary
-  textTertiary: "#8b8f94",      // captions, meta
-  subtitle: "#6b6f75",
-  muted: "#9aa0a6",
+  text: "#17171a",              // near-black, premium feel
+  textSecondary: "#514f48",     // body secondary
+  textTertiary: "#8a877d",      // captions, meta
+  subtitle: "#6e6b62",
+  muted: "#a19d92",
 
   /* =====================
      Brand Accent
      (swap once globally)
   ===================== */
-  accent: "#2563eb",            // blue-600 (calm, professional)
-  accentSoft: "#eff6ff",
-  accentHover: "#1d4ed8",
+  accent: "#6c5ce7",            // blue-violet
+  accentSoft: "#eeeaff",
+  accentHover: "#5848d1",
   accentText: "#ffffff",
 
   /* =====================
      Buttons
   ===================== */
-  buttonPrimaryBg: "#2563eb",
-  buttonPrimaryText: "#fafafa",
-  buttonPrimaryHover: "#1d4ed8",
-  buttonPrimaryHoverText: "#fafafa",
+  buttonPrimaryBg: "#17171a",
+  buttonPrimaryText: "#f7f6f1",
+  buttonPrimaryHover: "#000000",
+  buttonPrimaryHoverText: "#ffffff",
 
-  buttonSecondaryBg: "#ffffff",
-  buttonSecondaryText: "#020618",
-  buttonSecondaryBorder: "#e5e5e7",
-  buttonSecondaryHover: "#f4f4f5",
+  buttonSecondaryBg: "#f7f6f1",
+  buttonSecondaryText: "#17171a",
+  buttonSecondaryBorder: "#e2ded2",
+  buttonSecondaryHover: "#eeece5",
 
   /* =====================
      Forms
   ===================== */
   inputBg: "#ffffff",
-  inputBorder: "#e5e5e7",
-  inputBorderHover: "#c7c7cc",
-  inputBorderFocus: "#2563eb",
+  inputBorder: "#e2ded2",
+  inputBorderHover: "#c9c4b4",
+  inputBorderFocus: "#6c5ce7",
   inputError: "#ef4444",
   inputSuccess: "#22c55e",
-  placeholder: "#9aa0a6",
+  placeholder: "#a19d92",
 
   /* =====================
      Links
   ===================== */
-  link: "#020618",
-  linkHover: "#2563eb",
+  link: "#17171a",
+  linkHover: "#6c5ce7",
 
   /* =====================
      Skeletons / Loading
   ===================== */
-  skeletonBase: "#ededee",
-  skeletonHighlight: "#f6f6f7",
+  skeletonBase: "#e8e4d8",
+  skeletonHighlight: "#f2f0ea",
 
   /* =====================
      Tags / Pills
   ===================== */
-  tagBg: "#f4f4f5",
-  tagText: "#52525b",
+  tagBg: "#eeece5",
+  tagText: "#57544c",
 
   /* =====================
      Effects
@@ -82,7 +82,7 @@ export const theme = {
   glow: `
     radial-gradient(
       60% 60% at 50% 50%,
-      rgba(37, 99, 235, 0.12) 0%,
+      rgba(108, 92, 231, 0.12) 0%,
       rgba(255, 255, 255, 0) 70%
     )
   `,
