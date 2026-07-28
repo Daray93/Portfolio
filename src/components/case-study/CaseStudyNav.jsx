@@ -138,7 +138,7 @@ const MobileList = styled.div`
   white-space: nowrap;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   padding: 0 1rem 6px;
 `;
 
@@ -267,19 +267,31 @@ export default function CaseStudyNav({ sections, frameRef }) {
 
   /* ---------- Hide FAB on scroll ---------- */
   useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+
+    const update = () => {
       const current = window.scrollY;
       if (current > lastScrollY.current + 6) setFabHidden(true);
       else if (current < lastScrollY.current - 6) setFabHidden(false);
       lastScrollY.current = current;
+      ticking = false;
     };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   /* ---------- Page + Section Progress ---------- */
   useEffect(() => {
-    const handleScroll = () => {
+    let ticking = false;
+
+    const compute = () => {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
       const docHeight = document.documentElement.scrollHeight - vh;
@@ -302,10 +314,17 @@ export default function CaseStudyNav({ sections, frameRef }) {
 
       setSectionProgress(next);
       setActiveId(current);
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(compute);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    compute();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [sections]);
 
