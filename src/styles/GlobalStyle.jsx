@@ -1,11 +1,11 @@
 import { createGlobalStyle } from "styled-components";
-import "@fontsource/manrope/200.css";
+// Only the weights actually referenced by a `font-weight:` anywhere in
+// src/ -- 200 and 800 were being shipped unused.
 import "@fontsource/manrope/300.css";
 import "@fontsource/manrope/400.css";
 import "@fontsource/manrope/500.css";
 import "@fontsource/manrope/600.css";
 import "@fontsource/manrope/700.css";
-import "@fontsource/manrope/800.css";
 
 const GlobalStyle = createGlobalStyle`
   /* ---------------- Base ---------------- */

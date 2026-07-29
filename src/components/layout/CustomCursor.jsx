@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-import eye from "../../assets/shared/Eye.png";
+import { FiLock, FiEye } from "react-icons/fi";
 import LoaderIcon from "../icons/ComingSoon";
 import ZoomIcon from "../icons/ZoomIcon";
 
@@ -29,7 +29,7 @@ const CursorWrapper = styled.div`
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 2000;
+  z-index: 9999;
   transform: translate3d(0, 0, 0);
   will-change: transform;
 `;
@@ -82,6 +82,23 @@ const Pill = styled.div`
       color: white;
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     `}
+
+  ${({ $variant, theme }) =>
+    $variant === "locked" &&
+    css`
+      background: ${theme.buttonPrimaryBg};
+      color: ${theme.body};
+    `}
+
+  /* Fixed light styling (not theme-derived) for the Kropt cell, whose
+     preview art is dark -- stays a light pill in both site themes rather
+     than flipping to a dark-on-dark pill when the site is in dark mode. */
+  ${({ $variant }) =>
+    $variant === "view-light" &&
+    css`
+      background: rgba(245, 245, 242, 0.92);
+      color: #17171a;
+    `}
 `;
 
 const IconWrap = styled.span`
@@ -101,7 +118,7 @@ const Ripple = styled.span`
   position: absolute;
   inset: -8px;
   border-radius: 999px;
-  border: 2px solid #2564eb49;
+  border: 2px solid ${({ theme }) => theme.buttonPrimaryBg}49;
   animation: ${ripple} 0.45s ease forwards;
 `;
 
@@ -238,7 +255,16 @@ const CustomCursor = () => {
         {mode === "view" && (
           <Pill $click={click} $variant="view">
             <IconWrap>
-              <img src={eye} alt="" width={18} height={18} />
+              <FiEye size={18} />
+            </IconWrap>
+            View
+          </Pill>
+        )}
+
+        {mode === "view-light" && (
+          <Pill $click={click} $variant="view-light">
+            <IconWrap>
+              <FiEye size={18} />
             </IconWrap>
             View
           </Pill>
@@ -258,6 +284,15 @@ const CustomCursor = () => {
               <LoaderIcon size={18} color="white" />
             </IconWrap>
             Coming soon
+          </Pill>
+        )}
+
+        {mode === "locked" && (
+          <Pill $click={click} $variant="locked">
+            <IconWrap>
+              <FiLock size={16} />
+            </IconWrap>
+            Locked
           </Pill>
         )}
       </CursorInner>

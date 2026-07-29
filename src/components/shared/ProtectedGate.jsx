@@ -48,7 +48,7 @@ const PasswordModal = styled.div`
 
   h3 {
     margin: 0 0 0.25rem;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: "General Sans", sans-serif;
     color: ${({ theme }) => theme.text};
     font-size: clamp(1rem, 2.5vw, 1.2rem);
   }
@@ -209,7 +209,7 @@ const ModalSecondaryButton = styled.button`
 
 // ---------------- Component ----------------
 
-export default function ProtectedGate({ open, onClose }) {
+export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive" }) {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -257,7 +257,7 @@ export default function ProtectedGate({ open, onClose }) {
       setFeedbackMsg("");
       setPassword("");
       onClose();
-      navigate("/orthovive");
+      navigate(redirectTo);
       return;
     } catch (err) {
       const newAttempts = attempts + 1;

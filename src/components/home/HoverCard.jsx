@@ -1,17 +1,30 @@
 import styled from "styled-components";
+import { motion } from "framer-motion";
+import { FiLock } from "react-icons/fi";
 
-export default function PasswordCard({ title, category, onClick }) {
+const MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
+
+export default function PasswordCard({ title, category, icon, morphId, onClick }) {
   return (
-    <Card onClick={onClick}>
-      <LockBadge>
-        <LockIcon aria-hidden="true">
-          <svg width="0.8rem" height="0.8rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-        </LockIcon>
-        Password protected
-      </LockBadge>
+    <Card
+      onClick={onClick}
+      data-cursor="locked"
+      $morph={!!morphId}
+      layoutId={morphId}
+      layout={!!morphId}
+      transition={MORPH_TRANSITION}
+    >
+      {icon && (
+        <IconWrap aria-hidden="true">
+          <MotionIcon
+            src={icon}
+            alt=""
+            layoutId={morphId ? `${morphId}-media` : undefined}
+            layout={!!morphId}
+            transition={MORPH_TRANSITION}
+          />
+        </IconWrap>
+      )}
 
       {(title || category) && (
         <Overlay>
@@ -22,57 +35,87 @@ export default function PasswordCard({ title, category, onClick }) {
         </Overlay>
       )}
 
-      <HoverReveal>
-        <HoverLockIcon aria-hidden="true">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-        </HoverLockIcon>
-        <HoverLabel>Enter password to view</HoverLabel>
-      </HoverReveal>
+      <LockBadge aria-hidden="true">
+        <FiLock />
+      </LockBadge>
     </Card>
   );
 }
 
 /* ---------------- styles ---------------- */
 
-const Card = styled.div`
+const Card = styled(motion.div)`
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 24px;
-  background: ${({ theme }) => theme.cardBg};
   cursor: none;
+
+  /* Plain (non-morph, e.g. Audanote) usage stays exactly as before --
+     chrome only changes when this card is the source of a homepage->
+     case-study morph, so it carries its own border/shadow once it
+     leaves the grid cell that used to provide them. Background stays
+     cardBackground either way -- unlike the full-bleed image/video
+     cards, this one only shows a centered icon, so the flat panel
+     color is always visible and needs to match the rest of the grid.
+     Radius always matches CardSurface's own clamp (rather than a fixed
+     24px for the non-morph case) so it stays correct at every
+     breakpoint instead of only happening to line up at some sizes. */
+  border-radius: clamp(18px, 2.5vw, 32px);
+  background: ${({ theme }) => theme.cardBackground};
+  border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
+  box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};
 `;
 
-const LockBadge = styled.div`
+const IconWrap = styled.span`
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 5px;
-  background: transparent;
+  justify-content: center;
+`;
+
+const MotionIcon = styled(motion.img)`
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+`;
+
+const LockBadge = styled.span`
+  position: absolute;
+  top: clamp(0.6rem, 1.5vw, 1rem);
+  right: clamp(0.6rem, 1.5vw, 1rem);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   border: 1px solid ${({ theme }) => theme.border};
+  background: ${({ theme }) => theme.navSurface};
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 0.85rem;
-  border-radius: 20px;
-  padding: 4px 10px 4px 7px;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 400;
-  transition: opacity 0.25s ease;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
 
   ${Card}:hover & {
-    opacity: 0;
+    opacity: 1;
   }
-`;
 
-const LockIcon = styled.span`
-  display: flex;
-  align-items: center;
+  &:hover {
+    background: ${({ theme }) => theme.buttonGhostHoverBg};
+    color: ${({ theme }) => theme.buttonGhostHoverText};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* No hover on touch devices -- stays visible below 560px instead of
+     being permanently hidden (see HoverIconBadge in Splash.jsx). */
+  @media (max-width: 560px) {
+    opacity: 1;
+  }
 `;
 
 const Overlay = styled.div`
@@ -98,7 +141,7 @@ const Title = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
   font-weight: 500;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "General Sans", sans-serif;
   letter-spacing: 0.01em;
 `;
 
@@ -115,33 +158,4 @@ const Category = styled.span`
   background: ${({ $bg }) => $bg || "#bebebe2b"};
   color: ${({ $color }) => $color || "#000"};
   border: 1px solid ${({ $color }) => ($color ? `${$color}55` : "#00000022")};
-`;
-
-const HoverReveal = styled.div`
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-
-  ${Card}:hover & {
-    opacity: 1;
-  }
-`;
-
-const HoverLockIcon = styled.span`
-  color: ${({ $color }) => $color || "#000"};
-  display: flex;
-`;
-
-const HoverLabel = styled.span`
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 0.82rem;
-  font-weight: 400;
-  color: ${({ $color }) => $color || "#000"};
-  letter-spacing: 0.04em;
 `;

@@ -38,7 +38,7 @@ const TitleSquare = styled.div`
 const Title = styled.h2`
   cursor: none;
   font-weight: 400;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "General Sans", sans-serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;

@@ -1,21 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { NavLink, useLocation } from "react-router-dom";
-import NIcon from "../../case-studies/neuroloop/assets/NeuroloopLogo.png";
-import KIcon from "../../case-studies/kropt/assets/KroptLogo.svg";
-import OIcon from "../../case-studies/orthovive/assets/OrthoVive.svg";
-import IBHFIcon from "../../case-studies/ibhf/assets/ibhf.png";
-import AvocadoIcon from "../../case-studies/operation-avocado/assets/Mobile-Logo-OA.png";
-import { motion, AnimatePresence } from "framer-motion";
-import ProtectedGate from "../shared/ProtectedGate";
+import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { FiSun, FiMoon } from "react-icons/fi";
+import PillNav from "../shared/PillNav";
+import { FILTERS } from "../shared/filters";
+import { useThemeMode } from "../../styles/ThemeModeContext";
 
 // ---------------- Styled Components ----------------
+// Fixed, deterministic height shared by Nav and its spacer below --
+// no measurement/timing race, they can never drift apart.
+// Below 560px the nav drops its top bar entirely and becomes just the
+// floating pill filter, docked to the bottom of the viewport instead --
+// the logo and theme toggle are hidden at that size rather than sharing
+// a bar with the pill (see LogoText/ThemeToggle below). $hidden still
+// slides it fully out of view on scroll, just downward instead of up
+// since it now lives at the bottom.
 const Nav = styled.nav`
   width: 100%;
-  background: ${({ theme }) => theme.body};
-  padding: 1rem 0;
-  position: relative;
+  height: ${({ theme }) => theme.space[8]};
+  display: flex;
+  align-items: center;
+  background: transparent;
+  position: fixed;
+  top: ${({ theme }) => theme.space[3]};
+  left: 0;
+  right: 0;
   z-index: 1000;
+  transform: translateY(
+    ${({ $hidden, theme }) => ($hidden ? `calc(-100% - ${theme.space[3]})` : "0")}
+  );
+  transition: transform 0.3s ease;
+
+  @media (max-width: 560px) {
+    top: auto;
+    bottom: ${({ theme }) => theme.space[3]};
+    height: auto;
+    transform: translateY(
+      ${({ $hidden, theme }) => ($hidden ? `calc(100% + ${theme.space[3]})` : "0")}
+    );
+  }
+`;
+
+// Reserves the nav's height (plus the breathing room above it) in
+// normal flow so page content doesn't jump underneath it now that
+// Nav itself is position:fixed. Not needed on mobile -- Nav no longer
+// sits at the top there, so it shouldn't reserve top space either.
+const NavSpacer = styled.div`
+  height: ${({ theme }) => `calc(${theme.space[8]} + ${theme.space[3]})`};
+
+  @media (max-width: 560px) {
+    height: 0;
+  }
 `;
 
 const NavContainer = styled.div`
@@ -30,6 +65,16 @@ const NavContainer = styled.div`
 
   @media (max-width: 768px) {
     padding: 0 1rem;
+  }
+
+  /* Only the pill filter shows below 560px (see LogoText/ThemeToggle) --
+     center it now that it's the sole child instead of being pinned left
+     by justify-content: space-between. Side padding matches
+     SplashContainer's own mobile padding (1.25rem) so the pill's outer
+     edge lines up with the grid cards above it. */
+  @media (max-width: 560px) {
+    justify-content: center;
+    padding: 0 1.25rem;
   }
 `;
 
@@ -48,94 +93,94 @@ const LogoText = styled(NavLink)`
     background: ${({ theme }) => theme.cardBackground};
     border: 1px solid ${({ theme }) => theme.skeletonBase};
   }
+
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 
-const Menu = styled.ul`
+const NavCenter = styled.div`
   display: flex;
-  align-items: center;
-  list-style: none;
-  margin: 0;
-  padding: 0;
   flex: 1;
   justify-content: center;
-  gap: 1rem;
 `;
 
-const MenuItem = styled.li`
-  position: relative;
-`;
-
-const MenuLink = styled(NavLink)`
-  font-family: "Manrope", sans-serif;
-  font-weight: 500;
-  color: ${({ theme }) => theme.textSecondary};
-  text-decoration: none;
-  padding: 0.5rem 1rem;
+const ThemeToggle = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
   border-radius: 8px;
-  cursor: none;
   border: 1px solid transparent;
+  background: transparent;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: none;
 
   &:hover {
     color: ${({ theme }) => theme.text};
     background: ${({ theme }) => theme.cardBackground};
     border: 1px solid ${({ theme }) => theme.skeletonBase};
   }
-`;
 
-// Dropdown container
-const DropdownContainer = styled(motion.div)`
-  position: absolute;
-  top: 140%;
-  left: -20%;
-  background: ${({ theme }) => theme.cardBackground};
-  border: 1px solid ${({ theme }) => theme.skeletonBase};
-  border-radius: 16px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-`;
-
-// Dropdown items
-const DropdownLink = styled(NavLink)`
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.7rem;
-  border-radius: 8px;
-  background: ${({ bg }) => bg || "transparent"};
-  color: ${({ theme }) => theme.text};
-  text-decoration: none;
-  font-weight: 500;
-  overflow: hidden;
-  min-height: 2.5rem;
-
-  &:hover {
-    background: ${({ hoverBg }) => hoverBg};
-    color: ${({ theme }) => theme.text};
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
   }
-`;
 
-const DropdownIcon = styled.img`
-  width: 1.8em;
-  height: 1.8em;
-  flex-shrink: 0;
-`;
-
-const TightLabel = styled.span`
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 
 // ---------------- Navbar Component ----------------
 export default function Navbar() {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { mode, toggleMode } = useThemeMode();
+
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const update = () => {
+      const current = window.scrollY;
+      if (current > lastScrollY.current + 6 && current > 80) setHidden(true);
+      else if (current < lastScrollY.current - 6) setHidden(false);
+      lastScrollY.current = current;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // The filter only really "means" anything on the homepage grid --
+  // elsewhere it's just a nav shortcut back to a filtered home.
+  const activeFilter = location.pathname === "/" ? searchParams.get("filter") || "all" : "all";
+
+  const handleFilterChange = (id) => {
+    if (location.pathname !== "/") {
+      navigate(id === "all" ? "/" : `/?filter=${id}`);
+      return;
+    }
+    if (id === "all") {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", id);
+    }
+    setSearchParams(searchParams);
+  };
 
   // Hide on case study routes
   const hideOnCaseStudy =
@@ -145,89 +190,30 @@ export default function Navbar() {
   if (hideOnCaseStudy) return null;
 
   return (
-    <Nav>
+    <>
+    <Nav $hidden={hidden}>
       <NavContainer>
         <LogoText to="/">dp</LogoText>
 
-        <Menu>
-          <MenuItem
-            onMouseEnter={() => setDropdownOpen(true)}
-            onMouseLeave={() => setDropdownOpen(false)}
-          >
-            <MenuLink as="a">case studies</MenuLink>
+        <NavCenter>
+          <PillNav
+            options={FILTERS}
+            activeId={activeFilter}
+            onChange={handleFilterChange}
+            groupId="site-filter"
+          />
+        </NavCenter>
 
-            <AnimatePresence>
-              {dropdownOpen && (
-                <DropdownContainer
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  <DropdownLink
-                    to="/operation-avocado"
-                    bg="#a5d6a722"
-                    hoverBg="#66bb6a33"
-                  >
-                    <DropdownIcon
-                      src={AvocadoIcon}
-                      alt="Operation Avocado Logo"
-                      style={{ borderRadius: "22%" }}
-                    />
-                    <TightLabel>
-                      <span>Operation</span>
-                      <span>Avocado</span>
-                    </TightLabel>
-                  </DropdownLink>
-
-                  <DropdownLink
-                    to="/orthovive"
-                    bg="#a5a5a522"
-                    hoverBg="#3a3a3a22"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setDropdownOpen(false);
-                      setShowPasswordModal(true);
-                    }}
-                  >
-                    <DropdownIcon src={OIcon} alt="OrthoVive Logo" />
-                    OrthoVive
-                  </DropdownLink>
-
-                  <DropdownLink to="/ibhf" bg="#ffe79072" hoverBg="#dfc05082">
-                    <DropdownIcon src={IBHFIcon} alt="Irish Bee & Heritage Foundation Logo" />
-                    ibhf.ie
-                  </DropdownLink>
-
-                  <DropdownLink to="/kropt" bg="#daff908d" hoverBg="#b7df5082">
-                    <DropdownIcon src={KIcon} alt="Kropt Logo" />
-                    Kropt
-                  </DropdownLink>
-
-                  <DropdownLink
-                    to="/neuroloop"
-                    bg="#03b8fa4a"
-                    hoverBg="#03b8fa7a"
-                  >
-                    <DropdownIcon src={NIcon} alt="Neuroloop Logo" />
-                    Neuroloop
-                  </DropdownLink>
-
-                </DropdownContainer>
-              )}
-            </AnimatePresence>
-          </MenuItem>
-        </Menu>
-
-        <LogoText as="a" href="mailto:daraphillips.design@gmail.com">
-          contact
-        </LogoText>
+        <ThemeToggle
+          type="button"
+          onClick={toggleMode}
+          aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {mode === "dark" ? <FiSun /> : <FiMoon />}
+        </ThemeToggle>
       </NavContainer>
-
-      <ProtectedGate
-        open={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-      />
     </Nav>
+    <NavSpacer />
+    </>
   );
 }

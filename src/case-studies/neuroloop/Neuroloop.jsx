@@ -4,11 +4,13 @@ import {
   CaseStudyPage,
   CaseStudySection,
   CaseStudyHero,
+  CaseStudyMorphMedia,
 } from "../../components/case-study/Index";
 import OtherProjects from "../../components/shared/OtherProjects";
 import styled from "styled-components";
 
 // Assets
+import neuroloopTeaser from "./assets/NeuroloopTeaser.mp4";
 import Survey1 from "./assets/Survey1.png";
 import Survey2 from "./assets/Survey2.png";
 import Survey3 from "./assets/Survey3.png";
@@ -314,11 +316,14 @@ export default function NeuroloopCaseStudy() {
           { id: "design", label: "The Design" },
           { id: "outcomes", label: "Project Outcomes" },
         ]}
+        morphId="morph-neuroloop"
       >
         <CaseStudyPage>
 
           {/* ---------- 01 Solution ---------- */}
           <CaseStudySection id="solution">
+            <CaseStudyMorphMedia morphId="morph-neuroloop" video={neuroloopTeaser} />
+
             <CaseStudyHero
               title="Neuroloop"
               subtitle="Learn how social media shapes your brain"

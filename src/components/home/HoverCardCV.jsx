@@ -1,73 +1,30 @@
-import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
+import { FiEye, FiFileText } from "react-icons/fi";
 
-export default function HoverCardCV({ src, poster, title, onOpen }) {
-  const videoRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  /* ---------- Mobile detect ---------- */
-  useEffect(() => {
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    if (/android|iphone|ipad|ipod|mobile/i.test(ua)) setIsMobile(true);
-  }, []);
-
-  /* ---------- Reset video on mount ---------- */
-  useEffect(() => {
-    if (!videoRef.current) return;
-    videoRef.current.pause();
-    videoRef.current.currentTime = 0;
-  }, []);
-
-  const playVideo = () => {
-    if (!videoRef.current) return;
-    videoRef.current.play().catch(() => {});
-  };
-
-  const stopVideo = () => {
-    if (!videoRef.current) return;
-    videoRef.current.pause();
-    videoRef.current.currentTime = 0;
-  };
-
-  /* ---------- Auto play on mobile ---------- */
-  useEffect(() => {
-    if (isMobile) playVideo();
-  }, [isMobile]);
-
+export default function HoverCardCV({ title, onOpen }) {
   return (
     <Card
       onClick={onOpen}
-      onMouseEnter={!isMobile ? playVideo : undefined}
-      onMouseLeave={!isMobile ? stopVideo : undefined}
-      onTouchStart={isMobile ? playVideo : undefined}
-      onTouchEnd={isMobile ? stopVideo : undefined}
       role="link"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onOpen();
       }}
     >
-      <Video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        muted
-        playsInline
-        autoPlay={isMobile}
-        preload="metadata"
-      />
+      <IconWrap
+        aria-hidden="true"
+        whileHover={{
+          y: [0, -14, 0],
+          transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" },
+        }}
+      >
+        <FiFileText />
+      </IconWrap>
 
-      <BottomBar>
-        <PrimaryButton
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen();
-          }}
-          aria-label="Open CV"
-        >
-          <span>Read.cv</span>
-        </PrimaryButton>
-      </BottomBar>
+      <EyeBadge aria-hidden="true">
+        <FiEye />
+      </EyeBadge>
 
       {title && (
         <TitleWrapper>
@@ -81,13 +38,17 @@ export default function HoverCardCV({ src, poster, title, onOpen }) {
 
 /* ---------------- styles ---------------- */
 
+// No independent border-radius/background/border here -- this card is
+// always rendered inside Splash.jsx's CardSurface, which already draws
+// the grid cell's chrome (clamp(18px, 2.5vw, 32px) radius, border,
+// shadow). Duplicating it here at a fixed 30px produced two concentric
+// borders at mismatched radii, most visible at the smaller mobile cell
+// size. Unlike HoverCard/HoverCardVoir/ScreenshotPanCard, this one never
+// morphs out of the grid, so it never needs to look complete standalone.
 const Card = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 30px;
-  overflow: hidden;
-  background: transparent;
   cursor: none;
   outline: none;
 
@@ -96,45 +57,64 @@ const Card = styled.div`
   }
 `;
 
-const Video = styled.video`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-`;
-
-const BottomBar = styled.div`
+const IconWrap = styled(motion.div)`
   position: absolute;
-  inset: auto 0 0 0;
-  padding: 0 1.5rem 1.5rem;
+  inset: 0;
   display: flex;
-  gap: 1rem;
   align-items: center;
-  justify-content: flex-end;
-  background: ${({ theme }) => theme.cardBackground};
-  z-index: 3;
+  justify-content: center;
+  color: ${({ theme }) => theme.textSecondary};
+
+  svg {
+    width: 56px;
+    height: 56px;
+    stroke-width: 1.25;
+
+    /* This cell runs a third of the row width on mobile as part of the
+       email/LinkedIn/CV trio (see Splash.jsx), instead of the full
+       width it got before -- shrink to match. */
+    @media (max-width: 560px) {
+      width: 34px;
+      height: 34px;
+    }
+  }
 `;
 
-const PrimaryButton = styled.button`
-  display: inline-flex;
+const EyeBadge = styled.span`
+  position: absolute;
+  top: clamp(0.6rem, 1.5vw, 1rem);
+  right: clamp(0.6rem, 1.5vw, 1rem);
+  width: 32px;
+  height: 32px;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.buttonSecondaryBorder};
-  background: ${({ theme }) => theme.buttonSecondaryBg};
-  color: ${({ theme }) => theme.buttonSecondaryText};
-  font-size: 0.95rem;
-  transition: all 0.25s ease;
-  box-shadow: ${({ theme }) => theme.shadowSm};
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.border};
+  background: ${({ theme }) => theme.navSurface};
+  color: ${({ theme }) => theme.textSecondary};
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
 
-  &:hover {
-    background: ${({ theme }) => theme.surfaceSubtle};
-    color: ${({ theme }) => theme.accentHover};
+  ${Card}:hover & {
+    opacity: 1;
   }
 
-  &:active {
-    transform: scale(0.9);
+  &:hover {
+    background: ${({ theme }) => theme.buttonGhostHoverBg};
+    color: ${({ theme }) => theme.buttonGhostHoverText};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* No hover on touch devices -- stays visible below 560px instead of
+     being permanently hidden (see HoverIconBadge in Splash.jsx). */
+  @media (max-width: 560px) {
+    opacity: 1;
   }
 `;
 
@@ -147,12 +127,19 @@ const TitleWrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   pointer-events: none;
+
+  /* This cell runs icon-only at the trio's mobile size (see Splash.jsx)
+     -- same as the LinkedIn cell next to it -- rather than the label
+     colliding with the centered icon in a much smaller box. */
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 
 const Title = styled.div`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "General Sans", sans-serif;
   font-weight: 500;
   letter-spacing: 0.01em;
 `;

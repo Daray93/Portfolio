@@ -6,6 +6,7 @@ import {
   CaseStudyPage,
   CaseStudySection,
   CaseStudyHero,
+  CaseStudyMorphMedia,
 } from "../../components/case-study/Index";
 
 import OtherProjects from "../../components/shared/OtherProjects";
@@ -13,6 +14,7 @@ import useProtectedAccess from "../../components/shared/useProtectedAccess";
 import styled from "styled-components";
 
 // Assets
+import OrthoViveLogo from "./assets/OrthoVive.png";
 import BriefPhoto from "./assets/OrthoVive-Brief.png";
 import PrototypeV1_1 from "./assets/OrthoVive-Brief.png";
 import PrototypeV1_2 from "./assets/OrthoVive-Brief.png";
@@ -158,11 +160,14 @@ export default function ProjectNameCaseStudy() {
           { id: "v2", label: "Refined Prototype" },
           { id: "outcomes", label: "Project Outcomes" },
         ]}
+        morphId="morph-orthovive"
       >
         <CaseStudyPage>
 
           {/* ---------- Brief ---------- */}
           <CaseStudySection id="brief">
+            <CaseStudyMorphMedia morphId="morph-orthovive" image={OrthoViveLogo} imageFit="contain" />
+
             <CaseStudyHero
               title="ProjectName"
               subtitle="From brief to working prototype with Claude + Figma"

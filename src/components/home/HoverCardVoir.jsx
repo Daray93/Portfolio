@@ -1,15 +1,23 @@
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
+
+const MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
 
 /**
  * HoverCardVoir
  * - Plays video on hover (desktop)
- * - Plays on tap / automatically muted on mobile
+ * - Plays automatically, muted, once scrolled into view (mobile --
+ *   no hover to trigger it, but gated to visibility so it doesn't
+ *   start streaming the instant the page loads)
  * - Fully responsive
  * - Masonry / bento safe
  * - Shows tag with per-project color
  * - Supports per-card crop control
  * - Optional "In Progress" pill (top right)
+ * - Optional `morphId`: shares a layoutId with a CaseStudyMorphMedia on the
+ *   linked case study page, so this card visibly grows into that page's
+ *   hero media across the route change (see Splash.jsx / App.jsx).
  */
 export default function HoverCardVoir({
   src,
@@ -19,9 +27,11 @@ export default function HoverCardVoir({
   crop = "scale(1.08) translateY(-4%)",
   tagColor = "#F59E0B",
   tagBackground = "#F59E0B", // default accent
-  inProgress = false
+  inProgress = false,
+  morphId,
 }) {
   const videoRef = useRef(null);
+  const cardRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile devices
@@ -50,30 +60,52 @@ export default function HoverCardVoir({
     videoRef.current.currentTime = 0;
   };
 
-  // Auto-play muted videos on mobile
+  // No hover on mobile, so the muted preview autoplays there instead --
+  // but gated to when the card actually scrolls into view, not on
+  // mount. These video previews run 3.5-6.5MB each; playing every one
+  // the instant the homepage loads meant a phone visitor downloaded and
+  // streamed several MB of video before scrolling to see any of it.
   useEffect(() => {
-    if (isMobile) {
-      playVideo();
-    }
+    if (!isMobile || !cardRef.current) return undefined;
+    const el = cardRef.current;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) playVideo();
+        else stopVideo();
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, [isMobile]);
 
   return (
     <Card
+      ref={cardRef}
+      $morph={!!morphId}
+      layoutId={morphId}
+      layout={!!morphId}
+      transition={MORPH_TRANSITION}
       onMouseEnter={!isMobile ? playVideo : undefined}
       onMouseLeave={!isMobile ? stopVideo : undefined}
-      onTouchStart={isMobile ? playVideo : undefined}
-      onTouchEnd={isMobile ? stopVideo : undefined}
     >
-      <Video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        muted
-        playsInline
-        autoPlay={isMobile} // autoplay only on mobile when muted
-        preload="metadata"
-        style={{ transform: crop }}
-      />
+      {/* Crop is a static cosmetic pan/zoom (mostly to hide a watermark
+          baked into the source footage) -- kept on this plain wrapper so
+          it never fights framer-motion's own transform on the video
+          below while that video is mid-morph. */}
+      <CropMask style={{ transform: crop }}>
+        <Video
+          ref={videoRef}
+          layoutId={morphId ? `${morphId}-media` : undefined}
+          layout={!!morphId}
+          transition={MORPH_TRANSITION}
+          src={src}
+          poster={poster}
+          muted
+          playsInline
+          preload="metadata"
+        />
+      </CropMask>
 
       {inProgress && <InProgressPill>In Progress</InProgressPill>}
 
@@ -91,17 +123,30 @@ export default function HoverCardVoir({
 
 /* ---------------- styles ---------------- */
 
-const Card = styled.div`
+const Card = styled(motion.div)`
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 24px;
-  background: transparent;
   cursor: none;
+
+  /* Plain (non-morph) usage stays exactly as before -- chrome only
+     appears when this card is the source of a homepage->case-study
+     morph, so it carries its own background/border/shadow once it
+     leaves the grid cell that used to provide them. */
+  border-radius: ${({ $morph }) => ($morph ? "clamp(18px, 2.5vw, 32px)" : "24px")};
+  background: ${({ $morph, theme }) => ($morph ? theme.body : "transparent")};
+  border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
+  box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};
 `;
 
-const Video = styled.video`
+const CropMask = styled.div`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+`;
+
+const Video = styled(motion.video)`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -118,11 +163,10 @@ position: absolute;
   background: transparent;
   border: 1px solid ${({ theme }) => theme.border};
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "General Sans", sans-serif;
   font-size: 0.85rem;
   border-radius: 20px;
   padding: 4px 10px 4px 7px;
-  font-family: "Space Grotesk", sans-serif;
   font-weight: 400;
   transition: opacity 0.25s ease;
 
@@ -154,7 +198,7 @@ const Title = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1.25;
   font-weight: 500;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "General Sans", sans-serif;
   letter-spacing: 0.01em;
 `;
 
