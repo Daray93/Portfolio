@@ -4,7 +4,6 @@ import {
   CaseStudyPage,
   CaseStudySection,
   CaseStudyHero,
-  CaseStudyMorphMedia,
 } from "../../components/case-study/Index";
 import styled from "styled-components";
 
@@ -249,14 +248,11 @@ export default function KroptCaseStudy() {
           { id: "challenges", label: "Challenges / Insights" },
           { id: "results", label: "Results" },
         ]}
-        morphId="morph-kropt"
       >
         <CaseStudyPage>
 
           {/* ---------- Overview ---------- */}
           <CaseStudySection id="overview" title="Overview">
-            <CaseStudyMorphMedia morphId="morph-kropt" video={kroptDemoVideo} />
-
             <CaseStudyHero
               title="Kropt"
               subtitle="Farm smarter and more sustainably"

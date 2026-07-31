@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styled, { ThemeProvider } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { lightTheme } from "../../styles/theme";
 import {
   FiMaximize,
@@ -19,7 +19,7 @@ import { SiLinkedin, SiStrava } from "react-icons/si";
 import GmailIcon from "./GmailIcon";
 import Button from "../shared/Button";
 import HoverCardCV from "./HoverCardCV";
-import HoverCardVoir from "./HoverCardVoir";
+import VideoHoverCard from "./VideoHoverCard";
 import HoverCard from "./HoverCard";
 import ScreenshotPanCard from "./ScreenshotPanCard";
 import ProtectedGate from "../shared/ProtectedGate";
@@ -28,16 +28,19 @@ import DuolingoAvatarVideoMp4 from "./assets/Duolingo-avatar.mp4";
 import DuolingoIcon from "./assets/Duolingo-icon.svg";
 import DuolingoStreak from "./assets/Duolingo-streak.svg";
 import NeuroloopVideo from "../../case-studies/neuroloop/assets/NeuroloopTeaser.mp4";
-import IBHFVideo from "../../case-studies/ibhf/assets/ibhf.mp4";
 import AvocadoJumpingJack from "../../case-studies/operation-avocado/AvocadoJumpingJack";
 import OrthoViveLogo from "../../case-studies/orthovive/assets/OrthoVive.png";
+import IbhfBee from "../../case-studies/ibhf/assets/irishBb.jpg";
+import AudanoteLogo from "../../case-studies/audanote/assets/Audanote-logo.svg";
+import AboutMeLogoSvg from "../../pages/about-me/my-logo.svg";
 
 // Kropt splash screen, smart-animating from its dark background into the
 // logo mark on hover (see ScreenshotPanCard's crossfade-pair handling).
-import kroptSplash1 from "../../case-studies/kropt/assets/kropt-splash-1.png";
-import kroptSplash2 from "../../case-studies/kropt/assets/kropt-splash-2.png";
+import kroptSplash1 from "../../case-studies/kropt/assets/Kropt-splash001.svg";
+import kroptSplash2 from "../../case-studies/kropt/assets/Kropt-splash002.svg";
 
 const KROPT_SCREENS = [[kroptSplash1, kroptSplash2]];
+const IBHF_SCREENS = [IbhfBee];
 
 // A curated handful from a much bigger dump -- picked for variety
 // (Ireland/Italy/Egypt, scenery + personality shots) rather than trying
@@ -90,7 +93,6 @@ const GridViewport = styled.div`
   max-width: 1040px;
 `;
 
-const MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
 
 const SplashGrid = styled.div`
   display: grid;
@@ -185,6 +187,18 @@ const GridSlot = styled.div`
      the item to its track size regardless of content. */
   min-width: 0;
   min-height: 0;
+  /* Dimmed-by-filter cells (see isFilteredOut in Splash()) fade out but
+     stay in the grid to hold their layout slot -- pointer-events: none
+     makes the card's own content (Link/onClick/etc.) inert; DimmedGuard
+     (CardSurface's child, see below) explicitly re-enables its own
+     pointer-events so it alone still catches hover/click. Opacity itself
+     is a plain inline style (not framer-motion's animate prop) set
+     alongside this, so this transition is what actually animates the
+     fade -- animate's opacity value was going stale on a live filter
+     change (client-side nav), only reading correctly after a full page
+     reload. */
+  transition: opacity 0.3s ease;
+  pointer-events: ${({ $dimmed }) => ($dimmed ? "none" : "auto")};
 
   @media (max-width: 560px) {
     grid-column: span ${({ $shape }) => MOBILE_SHAPE[$shape].col};
@@ -196,6 +210,26 @@ const GridSlot = styled.div`
 
 const MotionCell = motion(GridSlot);
 
+// Invisible desktop-only filler (see the "spacer-" entries in CELLS) --
+// absorbs a leftover grid slot at a category boundary so grid-auto-flow:
+// dense can't pull the NEXT category's cell into it. A separate styled
+// component rather than styled(MotionCell) -- wrapping an already
+// motion()-wrapped styled component in another styled() layer doesn't
+// reliably forward transient ($-prefixed) props down to GridSlot's own
+// interpolation, which crashed SHAPE_SPAN[$shape] on undefined. Spacers
+// are always a single 1x1 cell, so the span can just be hardcoded here
+// instead of routing through SHAPE_SPAN at all. Disappears below the
+// 4-column desktop breakpoint: the 2-col/900px and 3-col/560px layouts
+// pack differently and were never gappy at these spots to begin with.
+const GridSpacer = styled(motion.div)`
+  grid-column: span 1;
+  grid-row: span 1;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+`;
+
 // The actual visible card surface, nested inside GridSlot. Framer
 // never touches this element's transform, so a plain CSS hover works
 // reliably instead of being overridden by framer's layout projection.
@@ -205,9 +239,12 @@ const CardSurface = styled(Card)`
   justify-content: center;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 
+  /* Dimmed-by-filter cards skip the lift-on-hover -- it reads as an
+     interactive affordance, which these no longer are (see DimmedGuard
+     below). */
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: ${({ theme }) => theme.shadowLg};
+    transform: ${({ $dimmed }) => ($dimmed ? "none" : "translateY(-8px)")};
+    box-shadow: ${({ $dimmed, theme }) => ($dimmed ? theme.shadowSm : theme.shadowLg)};
   }
 `;
 
@@ -215,6 +252,21 @@ const CellLabel = styled.span`
   font-family: "General Sans", sans-serif;
   font-size: 0.85rem;
   color: ${({ theme }) => theme.textTertiary};
+`;
+
+// Sits on top of a dimmed cell's own content (Link/onClick/etc.) so it
+// alone catches hover/click -- absorbs clicks (no handler) and swaps in
+// the custom cursor's "disabled" state via data-cursor, without having
+// to individually gate every cell type's own interactive element.
+// Explicit pointer-events: auto so it stays interactive even though
+// GridSlot (its ancestor) sets pointer-events: none for the rest of
+// the card's now-inert content.
+const DimmedGuard = styled.span`
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: auto;
+  cursor: none;
 `;
 
 // ---------------- Hero content (cell 1) ----------------
@@ -404,7 +456,7 @@ const SpotifyEmbedFrame = styled.iframe`
 `;
 
 // Duolingo cell (13) -- a looping avatar clip instead of a plain icon,
-// same full-bleed-video treatment as HoverCardVoir/ScreenshotPanCard
+// same full-bleed-video treatment as VideoHoverCard/ScreenshotPanCard
 // above use for their preview cards, just without a morphId since this
 // doesn't go anywhere but out to Duolingo.
 const DuolingoCellInner = styled.a`
@@ -421,6 +473,41 @@ const DuolingoVideo = styled.video`
   object-fit: cover;
   display: block;
 `;
+
+// Mobile Safari/Chrome frequently ignore the plain `autoPlay` attribute
+// for a video that isn't yet in the viewport at load time -- explicitly
+// kicking off playback once it's actually visible (same IntersectionObserver
+// approach as VideoHoverCard's mobile path) makes it start reliably instead
+// of sitting on its poster frame until tapped.
+function DuolingoVideoPlayer({ src }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const tryPlay = () => {
+      video.play().catch(() => {
+        /* ignore autoplay errors */
+      });
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) tryPlay();
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(video);
+    tryPlay();
+
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <DuolingoVideo ref={videoRef} src={src} autoPlay loop muted playsInline preload="auto" />
+  );
+}
 
 // Real Duolingo mark (own rounded-square shape and green already baked
 // into the SVG) rather than the generic react-icons glyph, so the video
@@ -474,7 +561,7 @@ const DuolingoStreakCount = styled.span`
   color: #ff9600;
 `;
 
-const DUOLINGO_STREAK = 1;
+const DUOLINGO_STREAK = 3;
 
 // Same pill recipe as AvocadoOverlayTag below (theme.tagBg/tagText/border
 // + blur) rather than a one-off style, so the Strava/Duolingo captions
@@ -484,7 +571,7 @@ const DUOLINGO_STREAK = 1;
 // set their own `position`, so this resolves against CardSurface (the
 // whole cell), landing in that cell's actual bottom-left corner. The
 // pill's own blur+fill gives it enough contrast on its own, so unlike
-// HoverCardVoir/ScreenshotPanCard's Overlay it doesn't need a dark
+// VideoHoverCard/ScreenshotPanCard's Overlay it doesn't need a dark
 // gradient scrim behind it too.
 const CellPill = styled.span`
   position: absolute;
@@ -532,11 +619,13 @@ const LinkedInButton = styled(Button)`
 // ---------------- Operation Avocado (cell 6) ----------------
 
 // Carries its own chrome (rather than relying on the parent CardSurface)
-// since this is the element that morphs into the OperationAvocado case
-// study panel -- once it leaves the grid cell during the route change it
-// needs to look complete on its own. Background matches the homepage's
-// own (theme.body) so it reads as continuous through the grow.
-const MotionAvocadoCell = styled(motion.div)`
+// since this is the element that hands off into the OperationAvocado
+// overlay -- once it's replaced by that overlay it needs to look
+// complete on its own. Background matches the homepage's own (theme.body)
+// so it reads as continuous with the page behind it. No morph animation
+// (see openAvocado below) -- the overlay just appears immediately on
+// click rather than growing out of this cell.
+const AvocadoCell = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
@@ -547,12 +636,13 @@ const MotionAvocadoCell = styled(motion.div)`
   overflow: hidden;
 `;
 
-const CenteredLogoLink = styled(Link)`
+const CenteredLogoLink = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+  cursor: none;
 `;
 
 const ComingSoonPill = styled.span`
@@ -625,17 +715,79 @@ const AvocadoOverlayTag = styled.span`
   border: 1px solid ${({ theme }) => theme.border};
 `;
 
-// Quietly blurs a small corner of a video -- used to obscure a
-// watermark rather than crop/zoom it entirely out of frame.
-const WatermarkPatch = styled.span`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 22%;
-  height: 16%;
-  backdrop-filter: blur(6px);
-  pointer-events: none;
+// ---------------- About Me (cell 15) ----------------
+// Same composition as HoverCardCV (the CV cell): logo centred via an
+// absolute-fill wrap, text stacked bottom-left via absolute positioning
+// -- not flex alignment, so the text's position doesn't depend on (or
+// compete with) the centred logo's own size. Text stays light-weight
+// (Atmos-inspired thin type, not the bold headline treatment the rest of
+// the grid uses). Still shares layoutId="morph-about-me" with
+// AboutMe.jsx's own <Frame> so the cell grows straight into it -- that's
+// why this is a motion.div rather than a plain one, same as
+// EmailCellInner/BrandLinkCellInner in shape but needing the
+// layout/layoutId props those don't.
+
+const AboutMeCellInner = styled(motion.div)`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: none;
 `;
+
+const AboutMeLogoWrap = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const AboutMeLogo = styled.img`
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+
+  /* Same size (and breakpoint) as IconWrap's own svg in HoverCardCV --
+     this cell is the same trio footprint now, not the old 2-cell hero. */
+  @media (max-width: 560px) {
+    width: 34px;
+    height: 34px;
+  }
+`;
+
+const AboutMeTextStack = styled.div`
+  position: absolute;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+
+  /* Same call as HoverCardCV -- icon-only at the smallest mobile size
+     rather than the label colliding with the centred logo. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+`;
+
+const AboutMeHeader = styled.span`
+  font-family: "General Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  color: ${({ theme }) => theme.text};
+  letter-spacing: 0.01em;
+`;
+
+const AboutMeSubtext = styled.span`
+  font-family: "Manrope", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+  margin-top: 0.1rem;
+  color: ${({ theme }) => theme.textSecondary};
+`;
+
+const ABOUT_ME_MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
 
 // ---------------- About Me modal ----------------
 
@@ -762,6 +914,17 @@ const ModalActions = styled.div`
 //  2 trio  -- copy email
 //  3 trio  -- LinkedIn, opens new tab
 //  4 trio  -- CV / resume
+// 15 trio  -- About Me (scroll-driven flight-through story -- see
+//             AboutMe.jsx), same footprint as CV/LinkedIn/email now
+//             (swapped array positions with CV, cell 4, to sit third in
+//             the about row rather than trailing as an oversized hero).
+//             Grouped with the about cluster here, not "work" (where it
+//             originally landed as a placeholder before it had real
+//             content) since that's what it actually is; also
+//             kept full-opacity under the "life" filter (see
+//             FILTER_VISIBLE_IDS below), since several of its own
+//             chapters point straight at the life cells (Strava,
+//             Duolingo).
 //  5 single -- OrthoVive teaser (password-locked)
 //  6 tall   -- Operation Avocado (mobile web app, "coming soon")
 //  7 tall   -- Kropt (mobile app screenshot)
@@ -791,20 +954,46 @@ const LINKEDIN_URL = "https://www.linkedin.com/in/daraphillips01010/";
 const STRAVA_URL = "https://www.strava.com/athletes/21950453";
 const DUOLINGO_URL = "https://www.duolingo.com/profile/DaraPhilli1";
 
+// Which cells stay full-opacity under a given filter -- not simply
+// "same category", since dense grid-flow doesn't guarantee a category's
+// cells all land in the visually "active" front rows once reordered
+// (see orderedCells in Splash()). Same id set drives both desktop and
+// mobile, even though the two layouts don't share a literal "top row".
+// Filters not listed here still fall back to plain category matching.
+const FILTER_VISIBLE_IDS = {
+  life: [11, 12, 13, 14, 15],
+};
+
 const CELLS = [
   { id: 1, shape: "hero", category: "about" },
   { id: 2, shape: "trio", category: "about" },
   { id: 3, shape: "trio", category: "about" },
+  { id: 15, shape: "trio", category: "about" },
   { id: 4, shape: "trio", category: "about" },
-  { id: 5, shape: "single", category: "work" },
+  // About totals 6 grid-units (2+1+1+1+1) on the 4-column desktop grid --
+  // two short of a clean 2 rows. Without these, dense packing pulls the
+  // next two cells (OrthoVive, Kropt) up into that leftover space, right
+  // beside the about cluster. Desktop-only (see GridSpacer); the 2-col/
+  // 3-col layouts never had this gap.
+  { id: "spacer-about-1" },
+  { id: "spacer-about-2" },
+  // Reordered so the tall/tall/big trio (Avocado, Kropt, Neuroloop) leads
+  // -- those three alone tile a perfectly gapless 2x4 block (2+2+4=8), so
+  // leading with them keeps that block clean; the plain singles (OrthoVive,
+  // IBHF, Audanote) trail after instead of breaking it up.
   { id: 6, shape: "tall", category: "work" },
   { id: 7, shape: "tall", category: "work" },
   // Under "all" this is the flagship 2x2 feature. Under "work" specifically,
-  // the 5 work items tile perfectly into a gapless 4x2 block if this one
-  // shrinks to a single cell instead -- see the packing note in Splash().
+  // the 5 other work items tile perfectly into a gapless 4x2 block if this
+  // one shrinks to a single cell instead -- see the packing note in Splash().
   { id: 8, shape: "big", compactShape: "single", category: "work" },
+  { id: 5, shape: "single", category: "work" },
   { id: 9, shape: "single", category: "work" },
   { id: 10, shape: "single", category: "work" },
+  // Work totals 11 units -- one short of a clean 3 rows, same reasoning
+  // as spacer-about: without this, Strava (the first life cell) gets
+  // pulled up into the gap right beside the work cluster.
+  { id: "spacer-work" },
   { id: 11, shape: "trio", category: "life" },
   { id: 12, shape: "trioWide", category: "life" },
   { id: 13, shape: "trio", category: "life" },
@@ -819,6 +1008,26 @@ export default function Splash() {
   // regardless of which page you clicked the filter from.
   const [searchParams] = useSearchParams();
   const filter = searchParams.get("filter") || "all";
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Operation Avocado opens as a fixed overlay on top of this page (see
+  // OperationAvocadoOverlay) rather than a routed page swap -- stashing
+  // the current location as router state is what lets the background
+  // Routes keep rendering this page underneath instead of unmounting it,
+  // so scroll position/grid state survives the round trip. No morph
+  // animation -- the overlay just appears immediately, opaque and
+  // full-screen, on click.
+  const openAvocado = () => {
+    navigate("/operation-avocado", { state: { backgroundLocation: location } });
+  };
+
+  // The overlay's own box is opaque and covers the full viewport, so this
+  // cell is already fully hidden behind it regardless -- unmounting it
+  // here too is just avoiding the redundant render, not load-bearing for
+  // anything visual.
+  const avocadoOverlayOpen = location.pathname === "/operation-avocado";
 
   const [aboutOpen, setAboutOpen] = useState(false);
   const [travelExpanded, setTravelExpanded] = useState(false);
@@ -863,8 +1072,19 @@ export default function Splash() {
       <GridViewport>
         <SplashGrid>
           {orderedCells.map((cell) => {
+            // Purely a layout placeholder (see the "spacer-" entries in
+            // CELLS) -- no card, no filter/dim logic, nothing else in
+            // this file needs to know about it.
+            if (typeof cell.id === "string") {
+              return <GridSpacer key={cell.id} aria-hidden="true" />;
+            }
+
             const isAboutCell = cell.id === 1;
-            const filterOpacity = filter === "all" || cell.category === filter ? 1 : 0.35;
+            const visibleIds = FILTER_VISIBLE_IDS[filter];
+            const isVisible =
+              filter === "all" || (visibleIds ? visibleIds.includes(cell.id) : cell.category === filter);
+            const filterOpacity = isVisible ? 1 : 0.35;
+            const isFilteredOut = filterOpacity !== 1;
             // While the modal is open, the grid slot stays reserved (so
             // nothing else flows into it) but goes invisible -- the
             // visible card "becomes" the modal via the shared layoutId.
@@ -882,20 +1102,28 @@ export default function Splash() {
                 layout
                 layoutId={isAboutCell && !aboutOpen ? "about-card" : undefined}
                 $shape={effectiveShape}
-                style={isAboutCell ? { zIndex: 10 } : undefined}
+                $dimmed={isFilteredOut}
+                style={{
+                  ...(isAboutCell ? { zIndex: 10 } : null),
+                  opacity,
+                }}
                 transition={{
                   layout: { duration: 0.5, ease: "easeInOut" },
-                  opacity: { duration: 0.3 },
                 }}
-                animate={{ opacity }}
               >
-                {/* OrthoVive (cell 5) is a clinical case study -- it stays
-                    in light mode regardless of the site's own dark/light
-                    toggle, rather than flipping to a dark card chrome. The
+                {/* OrthoVive (cell 5) and Audanote (cell 10) stay in light
+                    mode regardless of the site's own dark/light toggle,
+                    rather than flipping to a dark card chrome -- OrthoVive
+                    for its clinical case study look, Audanote because
+                    HoverCard's category pill has fixed, non-themed colors
+                    that only read correctly against a light card. The
                     function form of `theme` passes the ambient theme
                     through unchanged for every other cell. */}
-                <ThemeProvider theme={(outer) => (cell.id === 5 ? lightTheme : outer)}>
-                <CardSurface style={cell.id === 12 ? { background: "#1F1F1F" } : undefined}>
+                <ThemeProvider theme={(outer) => (cell.id === 5 || cell.id === 10 ? lightTheme : outer)}>
+                <CardSurface
+                  $dimmed={isFilteredOut}
+                  style={cell.id === 12 ? { background: "#1F1F1F" } : undefined}
+                >
                   {isAboutCell ? (
                     !aboutOpen && (
                       <HeroInner
@@ -964,20 +1192,27 @@ export default function Splash() {
                       title="OrthoVive"
                       category="Med-Tech Case Study"
                       icon={OrthoViveLogo}
-                      morphId="morph-orthovive"
                       onClick={() => setPasswordTarget("orthovive")}
                     />
                   ) : cell.id === 6 ? (
-                    <MotionAvocadoCell
-                      data-cursor="view"
-                      layoutId="morph-avocado"
-                      layout
-                      transition={MORPH_TRANSITION}
-                    >
-                      <CenteredLogoLink to="/operation-avocado">
+                    <AnimatePresence>
+                      {!avocadoOverlayOpen && (
+                        <AvocadoCell key="avocado-cell" data-cursor="view">
+                      <CenteredLogoLink
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Open Operation Avocado"
+                        onClick={openAvocado}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openAvocado();
+                          }
+                        }}
+                      >
                         <AvocadoJumpingJack fill />
                       </CenteredLogoLink>
-                      <ComingSoonPill>Coming Soon</ComingSoonPill>
+                      <ComingSoonPill>In Progress</ComingSoonPill>
                       <AvocadoOverlay>
                         <AvocadoOverlayStack>
                           <AvocadoOverlayTitle>Operation Avocado</AvocadoOverlayTitle>
@@ -987,7 +1222,9 @@ export default function Splash() {
                       <HoverIconBadge aria-hidden="true">
                         <FiMaximize />
                       </HoverIconBadge>
-                    </MotionAvocadoCell>
+                        </AvocadoCell>
+                      )}
+                    </AnimatePresence>
                   ) : cell.id === 7 ? (
                     <>
                       <Link to="/kropt" data-cursor="view-light" style={{ height: "100%", display: "block" }}>
@@ -996,7 +1233,6 @@ export default function Splash() {
                           title="Kropt Mobile App"
                           tag="Ag-Tech Case Study"
                           tagColor="#497025"
-                          morphId="morph-kropt"
                         />
                       </Link>
                       <HoverIconBadge aria-hidden="true">
@@ -1006,19 +1242,14 @@ export default function Splash() {
                   ) : cell.id === 8 ? (
                     <>
                       <Link to="/neuroloop" data-cursor="view" style={{ display: "block", width: "100%", height: "100%" }}>
-                        <HoverCardVoir
+                        <VideoHoverCard
                           src={NeuroloopVideo}
                           title="Neuroloop"
                           tag="AI & VR Case Study"
                           crop="scale(1.18) translate(-3%, -3%)"
                           tagColor="#0c5562"
-                          morphId="morph-neuroloop"
                         />
                       </Link>
-                      {/* Source video has a jittery watermark in the bottom-right corner --
-                          the crop above zooms/shifts to push most of it out of frame, this
-                          blur patch quietly finishes the job on what's left. */}
-                      <WatermarkPatch aria-hidden="true" />
                       <HoverIconBadge aria-hidden="true">
                         <FiMaximize />
                       </HoverIconBadge>
@@ -1026,14 +1257,12 @@ export default function Splash() {
                   ) : cell.id === 9 ? (
                     <>
                       <Link to="/ibhf" data-cursor="view" style={{ height: "100%", display: "block" }}>
-                        <HoverCardVoir
-                          src={IBHFVideo}
-                          title="Irish Bee & Heritage Foundation"
-                          tag="Conservation - WP Site"
-                          tagColor="#706025"
-                          tagBackground="rgb(0, 0, 0)"
-                          crop="scale(.9) translateY(-7%)"
-                          morphId="morph-ibhf"
+                        <ScreenshotPanCard
+                          screens={IBHF_SCREENS}
+                          title="IBHF"
+                          tag="Conservation Case Study"
+                          tagColor="#92400E"
+                          focalPoint={0.6}
                         />
                       </Link>
                       <HoverIconBadge aria-hidden="true">
@@ -1043,6 +1272,8 @@ export default function Splash() {
                   ) : cell.id === 10 ? (
                     <HoverCard
                       title="Audanote"
+                      category="Health-Tech Case Study"
+                      icon={AudanoteLogo}
                       onClick={() => setPasswordTarget("audanote")}
                     />
                   ) : cell.id === 11 ? (
@@ -1054,7 +1285,7 @@ export default function Splash() {
                       $hoverColor={STRAVA_ORANGE}
                     >
                       <SiStrava />
-                      <CellPill>Wanna race?</CellPill>
+                      <CellPill>My Strava</CellPill>
                       <HoverIconBadge aria-hidden="true">
                         <FiExternalLink />
                       </HoverIconBadge>
@@ -1073,14 +1304,7 @@ export default function Splash() {
                       rel="noopener noreferrer"
                       aria-label="Open Duolingo in a new tab"
                     >
-                      <DuolingoVideo
-                        src={DuolingoAvatarVideoMp4}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                      />
+                      <DuolingoVideoPlayer src={DuolingoAvatarVideoMp4} />
                       <DuolingoIconBadge src={DuolingoIcon} alt="" aria-hidden="true" />
                       <DuolingoStreakBadge aria-hidden="true">
                         <DuolingoStreakIcon src={DuolingoStreak} alt="" />
@@ -1108,9 +1332,41 @@ export default function Splash() {
                         {travelExpanded ? <FiMinimize2 /> : <FiMaximize2 />}
                       </HoverIconBadge>
                     </>
+                  ) : cell.id === 15 ? (
+                    <>
+                      <Link
+                        to="/about-me"
+                        data-cursor="view"
+                        style={{ width: "100%", height: "100%", display: "block" }}
+                      >
+                        <AboutMeCellInner
+                          layoutId="morph-about-me"
+                          layout
+                          transition={ABOUT_ME_MORPH_TRANSITION}
+                        >
+                          <AboutMeLogoWrap aria-hidden="true">
+                            <AboutMeLogo src={AboutMeLogoSvg} alt="" />
+                          </AboutMeLogoWrap>
+                          <AboutMeTextStack>
+                            <AboutMeHeader>About me</AboutMeHeader>
+                            <AboutMeSubtext>Scroll driven animation</AboutMeSubtext>
+                          </AboutMeTextStack>
+                        </AboutMeCellInner>
+                      </Link>
+                      <HoverIconBadge aria-hidden="true">
+                        <FiMaximize />
+                      </HoverIconBadge>
+                    </>
                   ) : (
                     <CellLabel>{cell.id}</CellLabel>
                   )}
+                  {/* Sits on top of the card's own interactive content
+                      (Link/onClick/etc.) rather than trying to disable
+                      each cell type individually -- one overlay per
+                      dimmed cell blocks clicks and swaps in the
+                      "disabled" cursor uniformly regardless of what's
+                      underneath. */}
+                  {isFilteredOut && <DimmedGuard data-cursor="disabled" aria-hidden="true" />}
                 </CardSurface>
                 </ThemeProvider>
               </MotionCell>

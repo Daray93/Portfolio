@@ -160,13 +160,12 @@ export default function ProjectNameCaseStudy() {
           { id: "v2", label: "Refined Prototype" },
           { id: "outcomes", label: "Project Outcomes" },
         ]}
-        morphId="morph-orthovive"
       >
         <CaseStudyPage>
 
           {/* ---------- Brief ---------- */}
           <CaseStudySection id="brief">
-            <CaseStudyMorphMedia morphId="morph-orthovive" image={OrthoViveLogo} imageFit="contain" />
+            <CaseStudyMorphMedia image={OrthoViveLogo} imageFit="contain" />
 
             <CaseStudyHero
               title="ProjectName"

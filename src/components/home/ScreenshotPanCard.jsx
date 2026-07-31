@@ -20,7 +20,7 @@ const MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
  * `direction`: "vertical" (default) or "horizontal".
  *
  * Optional `morphId`: shares a layoutId with a CaseStudyMorphMedia on the
- * linked case study page, same as HoverCardVoir (see Splash.jsx).
+ * linked case study page, same as VideoHoverCard (see Splash.jsx).
  */
 export default function ScreenshotPanCard({
   screens,
@@ -30,11 +30,18 @@ export default function ScreenshotPanCard({
   tagColor = "#F59E0B",
   morphId,
   panDuration = 18,
+  // Fraction (0-1) of the computed pan distance to sit at when not
+  // hovered, so the strip can rest partway through instead of always
+  // starting flush at its top/left edge -- e.g. a portrait photo with
+  // dead space above the subject can rest already panned past it.
+  // Hovering still pans the rest of the way to the strip's far edge.
+  focalPoint = 0,
 }) {
   const frameRef = useRef(null);
   const panRef = useRef(null);
   const [panDistance, setPanDistance] = useState(0);
   const horizontal = direction === "horizontal";
+  const restOffset = panDistance * focalPoint;
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -64,6 +71,7 @@ export default function ScreenshotPanCard({
         ref={panRef}
         $horizontal={horizontal}
         $distance={panDistance}
+        $restOffset={restOffset}
         $duration={panDuration}
       >
         {screens.map((entry) =>
@@ -101,7 +109,7 @@ const Frame = styled(motion.div)`
 
   /* Plain (non-morph) usage stays a transparent, simply-rounded box.
      Chrome only appears when this card is the source of a homepage->
-     case-study morph -- see HoverCardVoir for the same convention. */
+     case-study morph -- see VideoHoverCard for the same convention. */
   border-radius: ${({ $morph }) => ($morph ? "clamp(18px, 2.5vw, 32px)" : "24px")};
   background: ${({ $morph, theme }) => ($morph ? theme.body : "transparent")};
   border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
@@ -114,7 +122,8 @@ const Pan = styled.div`
   align-items: ${({ $horizontal }) => ($horizontal ? "stretch" : "flex-start")};
   width: ${({ $horizontal }) => ($horizontal ? "max-content" : "100%")};
   height: ${({ $horizontal }) => ($horizontal ? "100%" : "auto")};
-  transform: translate(0, 0);
+  transform: ${({ $horizontal, $restOffset }) =>
+    $horizontal ? `translateX(-${$restOffset}px)` : `translateY(-${$restOffset}px)`};
   /* Quick reset by default -- the slow, cinematic pan only applies while
      actively hovered (below). Sharing one transition duration for both
      directions meant a brief hover left the strip creeping back to start

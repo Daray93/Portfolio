@@ -316,13 +316,12 @@ export default function NeuroloopCaseStudy() {
           { id: "design", label: "The Design" },
           { id: "outcomes", label: "Project Outcomes" },
         ]}
-        morphId="morph-neuroloop"
       >
         <CaseStudyPage>
 
           {/* ---------- 01 Solution ---------- */}
           <CaseStudySection id="solution">
-            <CaseStudyMorphMedia morphId="morph-neuroloop" video={neuroloopTeaser} />
+            <CaseStudyMorphMedia video={neuroloopTeaser} />
 
             <CaseStudyHero
               title="Neuroloop"

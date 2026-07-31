@@ -11,10 +11,10 @@ import ibhfVideo from "./assets/ibhf.mp4";
 
 export default function IbhfCaseStudy() {
   return (
-    <CaseStudyLayout sections={[{ id: "overview", label: "Overview" }]} morphId="morph-ibhf">
+    <CaseStudyLayout sections={[{ id: "overview", label: "Overview" }]}>
       <CaseStudyPage>
         <CaseStudySection id="overview">
-          <CaseStudyMorphMedia morphId="morph-ibhf" video={ibhfVideo} />
+          <CaseStudyMorphMedia video={ibhfVideo} />
 
           <CaseStudyHero
             title="Irish Bee & Heritage Foundation"

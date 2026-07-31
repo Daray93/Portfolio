@@ -155,7 +155,10 @@ const Category = styled.span`
   letter-spacing: 0.05em;
   text-transform: uppercase;
 
-  background: ${({ $bg }) => $bg || "#bebebe2b"};
+  /* Same light pill background as ScreenshotPanCard/VideoHoverCard's
+     tags, so every case-study card reads as one consistent pill style
+     rather than three near-but-not-quite-matching tones. */
+  background: ${({ $bg }) => $bg || "rgba(235, 235, 230, 0.85)"};
   color: ${({ $color }) => $color || "#000"};
   border: 1px solid ${({ $color }) => ($color ? `${$color}55` : "#00000022")};
 `;

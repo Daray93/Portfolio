@@ -170,6 +170,11 @@ export default function Navbar() {
   const activeFilter = location.pathname === "/" ? searchParams.get("filter") || "all" : "all";
 
   const handleFilterChange = (id) => {
+    // Picking a filter reorders the grid, which the user might be
+    // scrolled well past -- jump back to the top, where the
+    // newly-matching cells now start, so the reorg is visible.
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     if (location.pathname !== "/") {
       navigate(id === "all" ? "/" : `/?filter=${id}`);
       return;

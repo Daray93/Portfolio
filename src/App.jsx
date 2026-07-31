@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { StyleSheetManager } from "styled-components";
 import styled from "styled-components";
@@ -21,6 +21,8 @@ const Neuroloop = lazy(() => import("./case-studies/neuroloop/Neuroloop"));
 const OrthoViveCaseStudy = lazy(() => import("./case-studies/orthovive/OrthoVive"));
 const IbhfCaseStudy = lazy(() => import("./case-studies/ibhf/Ibhf"));
 const OperationAvocadoCaseStudy = lazy(() => import("./case-studies/operation-avocado/OperationAvocado"));
+const OperationAvocadoOverlay = lazy(() => import("./case-studies/operation-avocado/OperationAvocadoOverlay"));
+const AboutMe = lazy(() => import("./pages/about-me/AboutMe"));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -56,7 +58,31 @@ const PageTransition = styled(motion.div)`
   width: 100%;
 `;
 
-function AnimatedPage({ children }) {
+// `noFade`: an ancestor's opacity animates the *rendered* (composited)
+// opacity of everything inside it, including a descendant motion element
+// that's independently running its own layoutId scale animation -- so
+// this page-level fade was dragging a homepage cell's opacity down to 0
+// mid-flight even though its own shared-element projection was trying to
+// keep it visually continuous. That read as the cell's content
+// disappearing rather than physically growing. Routes that arrive/leave
+// via a morphId (Home and the case studies) skip the fade entirely and
+// let the layoutId scale be the only thing driving the transition; the
+// exit animation is kept (just non-visual) purely so AnimatePresence
+// still holds the outgoing page mounted for the scale to finish.
+function AnimatedPage({ children, noFade = false }) {
+  if (noFade) {
+    return (
+      <PageTransition
+        initial={false}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      >
+        {children}
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition
       initial={{ opacity: 0 }}
@@ -77,25 +103,38 @@ const RouteFallback = styled.div`
   background: ${({ theme }) => theme.body};
 `;
 
-const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado"];
+const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/about-me"];
 const shouldHideChrome = (pathname) =>
   CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Operation Avocado opens as a fixed overlay on top of whatever page it
+  // was launched from (see Splash.jsx's openAvocado / OperationAvocadoOverlay)
+  // rather than a routed page swap -- `backgroundLocation` is the page that
+  // was showing when it was opened, stashed in router state. As long as
+  // it's set, the *primary* Routes below keeps rendering that page (so it
+  // never unmounts, and the cell being expanded never disappears); the
+  // overlay is a second, independent layer on top of it.
+  const backgroundLocation = location.state?.backgroundLocation;
+  const routedLocation = backgroundLocation || location;
 
   // Navbar/Footer take up real flex space in AppWrapper, so toggling them
   // the instant the route changes would yank that space away mid-fade,
   // right as a project cell is morphing into its case study. Delaying the
   // flip to match AnimatedPage's fade duration keeps chrome stable through
-  // the transition instead of jump-cutting under it.
-  const [hideChrome, setHideChrome] = React.useState(() => shouldHideChrome(location.pathname));
+  // the transition instead of jump-cutting under it. Driven by
+  // routedLocation rather than location so the overlay (which manages its
+  // own chrome) doesn't affect Home's Navbar/Footer underneath it.
+  const [hideChrome, setHideChrome] = React.useState(() => shouldHideChrome(routedLocation.pathname));
 
   React.useEffect(() => {
-    const next = shouldHideChrome(location.pathname);
+    const next = shouldHideChrome(routedLocation.pathname);
     const t = setTimeout(() => setHideChrome(next), next ? 350 : 0);
     return () => clearTimeout(t);
-  }, [location.pathname]);
+  }, [routedLocation.pathname]);
 
   return (
     <StyleSheetManager shouldForwardProp={(prop) => prop !== "theme"}>
@@ -109,12 +148,12 @@ export default function App() {
 
           <Main>
             <AnimatePresence mode="popLayout" initial={false}>
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
+              <Routes location={routedLocation} key={routedLocation.pathname}>
+                <Route path="/" element={<AnimatedPage noFade><Home /></AnimatedPage>} />
                 <Route
                   path="/orthovive"
                   element={
-                    <AnimatedPage>
+                    <AnimatedPage noFade>
                       <Suspense fallback={<RouteFallback />}>
                         <OrthoViveCaseStudy />
                       </Suspense>
@@ -124,7 +163,7 @@ export default function App() {
                 <Route
                   path="/kropt"
                   element={
-                    <AnimatedPage>
+                    <AnimatedPage noFade>
                       <Suspense fallback={<RouteFallback />}>
                         <Kropt />
                       </Suspense>
@@ -134,7 +173,7 @@ export default function App() {
                 <Route
                   path="/neuroloop"
                   element={
-                    <AnimatedPage>
+                    <AnimatedPage noFade>
                       <Suspense fallback={<RouteFallback />}>
                         <Neuroloop />
                       </Suspense>
@@ -144,7 +183,7 @@ export default function App() {
                 <Route
                   path="/ibhf"
                   element={
-                    <AnimatedPage>
+                    <AnimatedPage noFade>
                       <Suspense fallback={<RouteFallback />}>
                         <IbhfCaseStudy />
                       </Suspense>
@@ -154,9 +193,19 @@ export default function App() {
                 <Route
                   path="/operation-avocado"
                   element={
-                    <AnimatedPage>
+                    <AnimatedPage noFade>
                       <Suspense fallback={<RouteFallback />}>
                         <OperationAvocadoCaseStudy />
+                      </Suspense>
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/about-me"
+                  element={
+                    <AnimatedPage noFade>
+                      <Suspense fallback={<RouteFallback />}>
+                        <AboutMe />
                       </Suspense>
                     </AnimatedPage>
                   }
@@ -166,6 +215,14 @@ export default function App() {
           </Main>
 
           {!hideChrome && <Footer />}
+
+          <AnimatePresence>
+            {backgroundLocation && location.pathname === "/operation-avocado" && (
+              <Suspense fallback={null} key="avocado-overlay">
+                <OperationAvocadoOverlay onClose={() => navigate("/?filter=work")} />
+              </Suspense>
+            )}
+          </AnimatePresence>
         </AppWrapper>
       </ThemeModeProvider>
     </StyleSheetManager>

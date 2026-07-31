@@ -1,34 +1,15 @@
 import React from "react";
-import {
-  CaseStudyLayout,
-  CaseStudyPage,
-  CaseStudySection,
-  CaseStudyHero,
-  CaseStudyMorphMedia,
-} from "../../components/case-study/Index";
-import OtherProjects from "../../components/shared/OtherProjects";
-import AvocadoLogo from "./assets/Mobile-Logo-OA.png";
-import AvocadoJumpingJack from "./AvocadoJumpingJack";
+import { CaseStudyLayoutFree } from "../../components/case-study/Index";
+import OperationAvocadoContent from "./OperationAvocadoContent";
 
+// Plain routed version -- used for a cold load / direct link / refresh
+// on /operation-avocado, where there's no homepage cell to expand from.
+// The animated, expands-from-the-grid version is OperationAvocadoOverlay,
+// rendered by App.jsx on top of Home when the cell itself is clicked.
 export default function OperationAvocadoCaseStudy() {
   return (
-    <CaseStudyLayout sections={[{ id: "overview", label: "Overview" }]} morphId="morph-avocado">
-      <CaseStudyPage>
-        <CaseStudySection id="overview">
-          <CaseStudyMorphMedia morphId="morph-avocado" image={AvocadoLogo} imageFit="contain" />
-
-          <AvocadoJumpingJack />
-
-          <CaseStudyHero
-            title="Operation Avocado"
-            subtitle="Case study coming soon"
-          >
-            <p>Full write-up in progress — check back soon.</p>
-          </CaseStudyHero>
-        </CaseStudySection>
-      </CaseStudyPage>
-
-      <OtherProjects currentProjectId="operation-avocado" />
-    </CaseStudyLayout>
+    <CaseStudyLayoutFree>
+      <OperationAvocadoContent />
+    </CaseStudyLayoutFree>
   );
 }

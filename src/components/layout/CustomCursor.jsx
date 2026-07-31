@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-import { FiLock, FiEye } from "react-icons/fi";
+import { FiLock, FiEye, FiSlash } from "react-icons/fi";
 import LoaderIcon from "../icons/ComingSoon";
 import ZoomIcon from "../icons/ZoomIcon";
 
@@ -29,7 +29,13 @@ const CursorWrapper = styled.div`
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 9999;
+  /* Must beat every overlay in the app, including ProtectedGate's
+     PasswordOverlay (z-index: 9999) -- CustomCursor mounts near the top
+     of App.jsx, so at an equal z-index a later-mounted overlay wins the
+     stacking tie and paints over it, hiding the cursor entirely while
+     the password modal for locked projects (OrthoVive/Audanote) is
+     open. */
+  z-index: 99999;
   transform: translate3d(0, 0, 0);
   will-change: transform;
 `;
@@ -83,13 +89,6 @@ const Pill = styled.div`
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     `}
 
-  ${({ $variant, theme }) =>
-    $variant === "locked" &&
-    css`
-      background: ${theme.buttonPrimaryBg};
-      color: ${theme.body};
-    `}
-
   /* Fixed light styling (not theme-derived) for the Kropt cell, whose
      preview art is dark -- stays a light pill in both site themes rather
      than flipping to a dark-on-dark pill when the site is in dark mode. */
@@ -98,6 +97,16 @@ const Pill = styled.div`
     css`
       background: rgba(245, 245, 242, 0.92);
       color: #17171a;
+    `}
+
+  /* Fixed dark (not theme-derived) -- stays a dark pill with light text
+     in both site themes instead of inverting to a light pill in dark
+     mode. */
+  ${({ $variant }) =>
+    $variant === "locked" &&
+    css`
+      background: #17171a;
+      color: #f4f4f4;
     `}
 `;
 
@@ -132,6 +141,22 @@ const ZoomCursor = styled.div`
   border: 1px solid ${({ theme }) => theme.accentSoft};
   display: grid;
   place-items: center;
+  transform: scale(${({ $click }) => ($click ? 0.9 : 1)});
+  transition: transform 0.1s ease;
+  animation: ${fadeIn} 0.15s ease both;
+`;
+
+/* ---------------- Disabled Cursor (dimmed/filtered-out cells) ---------------- */
+
+const DisabledCursor = styled.div`
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(120, 120, 120, 0.4);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  color: #fff;
   transform: scale(${({ $click }) => ($click ? 0.9 : 1)});
   transition: transform 0.1s ease;
   animation: ${fadeIn} 0.15s ease both;
@@ -294,6 +319,12 @@ const CustomCursor = () => {
             </IconWrap>
             Locked
           </Pill>
+        )}
+
+        {mode === "disabled" && (
+          <DisabledCursor $click={click}>
+            <FiSlash size={16} />
+          </DisabledCursor>
         )}
       </CursorInner>
     </CursorWrapper>

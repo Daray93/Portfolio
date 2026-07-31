@@ -43,7 +43,7 @@ export default function HoverCardCV({ title, onOpen }) {
 // the grid cell's chrome (clamp(18px, 2.5vw, 32px) radius, border,
 // shadow). Duplicating it here at a fixed 30px produced two concentric
 // borders at mismatched radii, most visible at the smaller mobile cell
-// size. Unlike HoverCard/HoverCardVoir/ScreenshotPanCard, this one never
+// size. Unlike HoverCard/VideoHoverCard/ScreenshotPanCard, this one never
 // morphs out of the grid, so it never needs to look complete standalone.
 const Card = styled.div`
   position: relative;
