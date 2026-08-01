@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
+import { CaseStudySection, CaseStudyHero } from "../../components/case-study/Index";
 import OtherProjects from "../../components/shared/OtherProjects";
 import AvocadoJumpingJack from "./AvocadoJumpingJack";
 
@@ -18,27 +19,9 @@ import oaProgress from "./assets/oa-progress.png";
 import oaProfile from "./assets/oa-profile.png";
 
 /* ---------------- shared bits ---------------- */
-
-const Section = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 3rem 0;
-  border-bottom: 1px solid ${({ theme }) => theme.border};
-
-  &:last-of-type {
-    border-bottom: none;
-  }
-`;
-
-const Eyebrow = styled.span`
-  font-family: "General Sans", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: ${({ theme }) => theme.textSecondary};
-`;
+// Same local-styled-component convention every other case study file
+// uses (see Kropt.jsx) rather than a shared import -- these are just
+// per-page content formatting, not structural chrome.
 
 const Paragraph = styled.p`
   font-size: 1.05rem;
@@ -151,48 +134,38 @@ const ModalImage = styled.img`
   border-radius: ${({ theme }) => theme.radius.lg};
 `;
 
-/* ---------------- hero ---------------- */
+/* ---------------- "My Role" -- same convention as Kropt's RoleContainer/RoleHeading ---------------- */
 
-const Hero = styled.header`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 2rem 0 1rem;
-  text-align: center;
+const RoleContainer = styled.div`
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin: ${({ theme }) => `${theme.space[4]} 0 0 0`};
+  color: ${({ theme }) => theme.text};
 `;
+
+const RoleHeading = styled.h3`
+  margin: 0 0 ${({ theme }) => theme.space[3]} 0;
+  font-size: 1.1rem;
+  color: ${({ theme }) => theme.text};
+`;
+
+/* ---------------- hero media ---------------- */
 
 const fadeIn = keyframes`
   from { opacity: 0; }
   to { opacity: 1; }
 `;
 
-// Fixed size rather than growing from the homepage cell's own dimensions
-// -- it just fades in once the overlay (or plain page) around it has
-// somewhere to put it, matching how mchiu.co.uk's own hero media behaves
-// (a static-sized element that fades in, while the *container* is what
-// does the geometric expand).
+// Fixed size rather than growing from anywhere -- it just fades in, same
+// as Kropt/Neuroloop's own hero media, now that there's no homepage->page
+// morph to grow out of (see Splash.jsx).
 const HeroMedia = styled.div`
   width: min(320px, 46vw);
   aspect-ratio: 1 / 1;
+  margin: 0 auto;
   border-radius: clamp(18px, 2.5vw, 32px);
   overflow: hidden;
   animation: ${fadeIn} 0.3s ease both;
-`;
-
-const HeroTitle = styled.h1`
-  margin: 0;
-  font-size: clamp(1.9rem, 4vw, 2.6rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: ${({ theme }) => theme.text};
-`;
-
-const HeroSubtitle = styled.p`
-  margin: 0;
-  max-width: 34rem;
-  font-size: 1.1rem;
-  color: ${({ theme }) => theme.textSecondary};
 `;
 
 export default function OperationAvocadoContent() {
@@ -221,59 +194,56 @@ export default function OperationAvocadoContent() {
 
   return (
     <>
-      <Hero>
-        <HeroMedia>
-          <AvocadoJumpingJack fill />
-        </HeroMedia>
-        <HeroTitle>Operation Avocado</HeroTitle>
-        <HeroSubtitle>A workout tracker without the paywall</HeroSubtitle>
-        <PillRow style={{ justifyContent: "center" }}>
-          <Pill>2026</Pill>
-          <Pill>Product Design</Pill>
-          <Pill>Full-Stack</Pill>
-          <Pill>React / TypeScript</Pill>
-          <Pill>Firebase</Pill>
-          <Pill>AI-Assisted Build</Pill>
-        </PillRow>
-      </Hero>
+      {/* ---------- Overview ---------- */}
+      <CaseStudySection id="overview" title="Overview" tldrVisible>
+        <CaseStudyHero title="Operation Avocado" subtitle="A workout tracker without the paywall">
+          <PillRow>
+            <Pill>2026</Pill>
+            <Pill>Product Design</Pill>
+            <Pill>Full-Stack</Pill>
+            <Pill>React / TypeScript</Pill>
+            <Pill>Firebase</Pill>
+            <Pill>AI-Assisted Build</Pill>
+          </PillRow>
 
-      <Section>
-        <Eyebrow>Overview</Eyebrow>
-        <Paragraph>
-          Operation Avocado is a mobile-first workout tracker built for an audience
-          of two: me and my girlfriend. Every workout app worth using hides the
-          useful parts — a real custom workout builder, actual progress history,
-          more than a token exercise library — behind a subscription. So I designed
-          and built our own. No premium tier, no "unlock more workouts" wall, no
-          ads for protein powder neither of us asked for.
-        </Paragraph>
-        <Shot>
-          <ShotImg
-            src={oaLogin}
-            alt="Operation Avocado login screen"
-            onClick={() => openModal(oaLogin)}
-          />
-          <ShotCaption>
-            "Less desserts, more operation-avocado" — the product's voice starts
-            on screen one.
-          </ShotCaption>
-        </Shot>
-      </Section>
+          <HeroMedia>
+            <AvocadoJumpingJack fill />
+          </HeroMedia>
 
-      <Section>
-        <Eyebrow>My Role</Eyebrow>
-        <Paragraph>
+          <Paragraph>
+            Operation Avocado is a mobile-first workout tracker built for an audience
+            of two: me and my girlfriend. Every workout app worth using hides the
+            useful parts — a real custom workout builder, actual progress history,
+            more than a token exercise library — behind a subscription. So I designed
+            and built our own. No premium tier, no "unlock more workouts" wall, no
+            ads for protein powder neither of us asked for.
+          </Paragraph>
+          <Shot>
+            <ShotImg
+              src={oaLogin}
+              alt="Operation Avocado login screen"
+              onClick={() => openModal(oaLogin)}
+            />
+            <ShotCaption>
+              "Less desserts, more operation-avocado" — the product's voice starts
+              on screen one.
+            </ShotCaption>
+          </Shot>
+        </CaseStudyHero>
+
+        <RoleContainer>
+          <RoleHeading>My Role</RoleHeading>
           I designed the product end to end and drove the build using Claude Code
           as an implementation partner — I set the architecture and direction up
           front (a project spec covering routing, state layering, the
           services/hooks/features split, and design tokens), then largely let it
           run and steered with prompts rather than hand-writing every file.
           Thirteen commits, three weeks, one live app.
-        </Paragraph>
-      </Section>
+        </RoleContainer>
+      </CaseStudySection>
 
-      <Section>
-        <Eyebrow>The User</Eyebrow>
+      {/* ---------- The User ---------- */}
+      <CaseStudySection id="user" title="The User">
         <Paragraph>
           There's no persona deck here — the two users are me and my girlfriend,
           and the interesting design problem was that we don't want the same
@@ -296,10 +266,10 @@ export default function OperationAvocadoContent() {
             generic starter program.
           </ShotCaption>
         </Shot>
-      </Section>
+      </CaseStudySection>
 
-      <Section>
-        <Eyebrow>Vision</Eyebrow>
+      {/* ---------- Vision ---------- */}
+      <CaseStudySection id="vision" title="Vision">
         <Paragraph>
           The reference point for the core workout mechanic was the classic Seven
           Minute Workout — a tight, timed circuit — which I adapted into a proper
@@ -319,10 +289,10 @@ export default function OperationAvocadoContent() {
           Design principles: one accent colour, generous touch targets, and
           feedback (sound, vibration, streaks) that nudges without nagging.
         </Callout>
-      </Section>
+      </CaseStudySection>
 
-      <Section>
-        <Eyebrow>Process</Eyebrow>
+      {/* ---------- Process ---------- */}
+      <CaseStudySection id="process" title="Process">
         <Paragraph>
           The onboarding is one-pass — goals, injuries, schedule, asked once,
           never repeated — and I leaned on a couple of behavioural-design touches:
@@ -440,10 +410,10 @@ export default function OperationAvocadoContent() {
           paid Firebase Cloud Function — a small decision, but one that mirrors the
           whole reason the app exists: don't pay for what you don't have to.
         </Paragraph>
-      </Section>
+      </CaseStudySection>
 
-      <Section>
-        <Eyebrow>Challenges / Insights</Eyebrow>
+      {/* ---------- Challenges / Insights ---------- */}
+      <CaseStudySection id="challenges" title="Challenges / Insights">
         <Grid3>
           <Card>
             <h4>iOS is difficult about this</h4>
@@ -471,10 +441,10 @@ export default function OperationAvocadoContent() {
             </p>
           </Card>
         </Grid3>
-      </Section>
+      </CaseStudySection>
 
-      <Section>
-        <Eyebrow>Results</Eyebrow>
+      {/* ---------- Results ---------- */}
+      <CaseStudySection id="results" title="Results">
         <Paragraph>
           Operation Avocado is live today, and it's what my girlfriend and I
           actually use to build and run our own workouts. It's not a highlight
@@ -503,7 +473,7 @@ export default function OperationAvocadoContent() {
             <ShotCaption>Training level adjusts the workouts immediately, no re-onboarding.</ShotCaption>
           </Shot>
         </Grid2>
-      </Section>
+      </CaseStudySection>
 
       <OtherProjects currentProjectId="operation-avocado" />
 

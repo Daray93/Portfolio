@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { StyleSheetManager } from "styled-components";
 import styled from "styled-components";
@@ -12,6 +12,10 @@ import Footer from "./components/layout/Footer";
 import CustomCursor from "./components/layout/CustomCursor";
 
 import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
+
+import { logEvent } from "firebase/analytics";
+import { analyticsReady } from "./firebase";
 
 // Case studies are lazy -- each one pulls in its own images/video on top
 // of its own JS, so landing on "/" previously shipped all five case
@@ -21,7 +25,7 @@ const Neuroloop = lazy(() => import("./case-studies/neuroloop/Neuroloop"));
 const OrthoViveCaseStudy = lazy(() => import("./case-studies/orthovive/OrthoVive"));
 const IbhfCaseStudy = lazy(() => import("./case-studies/ibhf/Ibhf"));
 const OperationAvocadoCaseStudy = lazy(() => import("./case-studies/operation-avocado/OperationAvocado"));
-const OperationAvocadoOverlay = lazy(() => import("./case-studies/operation-avocado/OperationAvocadoOverlay"));
+const AudanoteCaseStudy = lazy(() => import("./case-studies/audanote/Audanote"));
 const AboutMe = lazy(() => import("./pages/about-me/AboutMe"));
 
 const AppWrapper = styled.div`
@@ -46,6 +50,21 @@ function ScrollToTopOnRouteChange() {
     // element before its "from" rect is captured, breaking the morph.
     const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
     return () => cancelAnimationFrame(raf);
+  }, [pathname]);
+  return null;
+}
+
+// Firebase Analytics only auto-logs a page_view once, off whatever URL
+// was loaded at init -- client-side route changes never touch the
+// network, so without this every case study visit after the first would
+// be invisible. analyticsReady resolves to null when unsupported (private
+// browsing, tracking blockers) rather than throwing.
+function AnalyticsPageview() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    analyticsReady.then((analytics) => {
+      if (analytics) logEvent(analytics, "page_view", { page_path: pathname });
+    });
   }, [pathname]);
   return null;
 }
@@ -103,38 +122,25 @@ const RouteFallback = styled.div`
   background: ${({ theme }) => theme.body};
 `;
 
-const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/about-me"];
+const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/audanote", "/about-me"];
 const shouldHideChrome = (pathname) =>
   CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
 export default function App() {
   const location = useLocation();
-  const navigate = useNavigate();
-
-  // Operation Avocado opens as a fixed overlay on top of whatever page it
-  // was launched from (see Splash.jsx's openAvocado / OperationAvocadoOverlay)
-  // rather than a routed page swap -- `backgroundLocation` is the page that
-  // was showing when it was opened, stashed in router state. As long as
-  // it's set, the *primary* Routes below keeps rendering that page (so it
-  // never unmounts, and the cell being expanded never disappears); the
-  // overlay is a second, independent layer on top of it.
-  const backgroundLocation = location.state?.backgroundLocation;
-  const routedLocation = backgroundLocation || location;
 
   // Navbar/Footer take up real flex space in AppWrapper, so toggling them
   // the instant the route changes would yank that space away mid-fade,
-  // right as a project cell is morphing into its case study. Delaying the
-  // flip to match AnimatedPage's fade duration keeps chrome stable through
-  // the transition instead of jump-cutting under it. Driven by
-  // routedLocation rather than location so the overlay (which manages its
-  // own chrome) doesn't affect Home's Navbar/Footer underneath it.
-  const [hideChrome, setHideChrome] = React.useState(() => shouldHideChrome(routedLocation.pathname));
+  // right as a project cell is transitioning into its case study. Delaying
+  // the flip to match AnimatedPage's fade duration keeps chrome stable
+  // through the transition instead of jump-cutting under it.
+  const [hideChrome, setHideChrome] = React.useState(() => shouldHideChrome(location.pathname));
 
   React.useEffect(() => {
-    const next = shouldHideChrome(routedLocation.pathname);
+    const next = shouldHideChrome(location.pathname);
     const t = setTimeout(() => setHideChrome(next), next ? 350 : 0);
     return () => clearTimeout(t);
-  }, [routedLocation.pathname]);
+  }, [location.pathname]);
 
   return (
     <StyleSheetManager shouldForwardProp={(prop) => prop !== "theme"}>
@@ -142,13 +148,14 @@ export default function App() {
         <GlobalStyle />
         <CustomCursor />
         <ScrollToTopOnRouteChange />
+        <AnalyticsPageview />
 
         <AppWrapper>
           {!hideChrome && <Navbar />}
 
           <Main>
             <AnimatePresence mode="popLayout" initial={false}>
-              <Routes location={routedLocation} key={routedLocation.pathname}>
+              <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<AnimatedPage noFade><Home /></AnimatedPage>} />
                 <Route
                   path="/orthovive"
@@ -201,6 +208,16 @@ export default function App() {
                   }
                 />
                 <Route
+                  path="/audanote"
+                  element={
+                    <AnimatedPage noFade>
+                      <Suspense fallback={<RouteFallback />}>
+                        <AudanoteCaseStudy />
+                      </Suspense>
+                    </AnimatedPage>
+                  }
+                />
+                <Route
                   path="/about-me"
                   element={
                     <AnimatedPage noFade>
@@ -210,19 +227,12 @@ export default function App() {
                     </AnimatedPage>
                   }
                 />
+                <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
               </Routes>
             </AnimatePresence>
           </Main>
 
           {!hideChrome && <Footer />}
-
-          <AnimatePresence>
-            {backgroundLocation && location.pathname === "/operation-avocado" && (
-              <Suspense fallback={null} key="avocado-overlay">
-                <OperationAvocadoOverlay onClose={() => navigate("/?filter=work")} />
-              </Suspense>
-            )}
-          </AnimatePresence>
         </AppWrapper>
       </ThemeModeProvider>
     </StyleSheetManager>

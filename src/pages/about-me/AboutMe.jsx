@@ -1,6 +1,6 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FiX, FiVolume2, FiVolumeX } from "react-icons/fi";
 import CaseStudyFab from "../../components/case-study/CaseStudyFab";
@@ -23,9 +23,14 @@ const BLACK = "#0a0a0a";
 const VIOLET = "#a56eff";
 const AMBER = "#ff9a5c";
 
+// How long the exit cover takes to fade fully opaque before the scroll
+// reset + navigate fire underneath it -- see goHome below.
+const EXIT_FADE_SECONDS = 0.32;
+
 export default function AboutMe() {
   const navigate = useNavigate();
   const { enabled: soundOn, toggle: toggleSound } = useAmbientSound();
+  const [exiting, setExiting] = useState(false);
 
   // The flight itself gets its own dedicated, generously tall scroll
   // region (FlightSpacer) so its pace is set purely by that region's
@@ -77,10 +82,24 @@ export default function AboutMe() {
   // Resetting scroll first makes Frame's captured rect a normal,
   // on-screen, viewport-sized box again, same as if the visitor had
   // simply clicked the close button from the top of the page.
+  //
+  // window.scrollTo(0, 0) on a 2200vh page is an instant jump, not a
+  // scroll -- with nothing covering the screen first, that read as the
+  // whole flight rewinding in a visible flash right before the route
+  // change. Fading ExitCover in and doing the reset+navigate underneath
+  // it (see the effect below) hides that jump entirely instead.
   const goHome = useCallback(() => {
-    window.scrollTo(0, 0);
-    navigate("/");
-  }, [navigate]);
+    setExiting(true);
+  }, []);
+
+  useEffect(() => {
+    if (!exiting) return undefined;
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+      navigate("/");
+    }, EXIT_FADE_SECONDS * 1000);
+    return () => clearTimeout(timer);
+  }, [exiting, navigate]);
 
   // Inverts the same "start start" / "end end" mapping useScroll above
   // uses to produce flightProgress -- t=0 is scrollY sitting at
@@ -171,6 +190,16 @@ export default function AboutMe() {
       </Frame>
 
       <CaseStudyFab />
+
+      <AnimatePresence>
+        {exiting && (
+          <ExitCover
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: EXIT_FADE_SECONDS, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -336,6 +365,17 @@ const FixedIconButton = styled.button`
 
 const CloseButton = styled(FixedIconButton)`
   right: clamp(1rem, 2.5vw, 1.5rem);
+`;
+
+// Covers the whole screen (above the close/sound buttons and the
+// progress track) while goHome's scroll reset + navigate fire underneath
+// it -- see the comment on goHome above.
+const ExitCover = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: ${PAPER};
+  pointer-events: none;
 `;
 
 const SoundButton = styled(FixedIconButton)`

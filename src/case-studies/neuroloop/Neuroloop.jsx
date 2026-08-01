@@ -320,7 +320,7 @@ export default function NeuroloopCaseStudy() {
         <CaseStudyPage>
 
           {/* ---------- 01 Solution ---------- */}
-          <CaseStudySection id="solution">
+          <CaseStudySection id="solution" tldrVisible>
             <CaseStudyMorphMedia video={neuroloopTeaser} />
 
             <CaseStudyHero

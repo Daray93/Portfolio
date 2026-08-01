@@ -7,14 +7,14 @@ import {
   CaseStudyMorphMedia,
 } from "../../components/case-study/Index";
 import OtherProjects from "../../components/shared/OtherProjects";
-import ibhfVideo from "./assets/ibhf.mp4";
+import ibhfHero from "./assets/IBHF-HERO.png";
 
 export default function IbhfCaseStudy() {
   return (
     <CaseStudyLayout sections={[{ id: "overview", label: "Overview" }]}>
       <CaseStudyPage>
-        <CaseStudySection id="overview">
-          <CaseStudyMorphMedia video={ibhfVideo} />
+        <CaseStudySection id="overview" tldrVisible>
+          <CaseStudyMorphMedia image={ibhfHero} imageFit="cover" />
 
           <CaseStudyHero
             title="Irish Bee & Heritage Foundation"

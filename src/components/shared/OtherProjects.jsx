@@ -9,6 +9,9 @@ import NeuroloopVideo from "../../case-studies/neuroloop/assets/NeuroloopTeaser.
 import kroptSplash1 from "../../case-studies/kropt/assets/Kropt-splash001.svg";
 import kroptSplash2 from "../../case-studies/kropt/assets/Kropt-splash002.svg";
 import IbhfBee from "../../case-studies/ibhf/assets/irishBb.jpg";
+import OrthoViveLogo from "../../case-studies/orthovive/assets/OrthoVive.png";
+import AvocadoLogo from "../../case-studies/operation-avocado/assets/Mobile-Logo-OA.png";
+import AudanoteLogo from "../../case-studies/audanote/assets/Audanote-logo.svg";
 
 // ---------------- Styled ----------------
 const Wrapper = styled(motion.section)`
@@ -48,6 +51,64 @@ const CardLink = styled(Link)`
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   aspect-ratio: 1 / 0.9;
+`;
+
+// Minimal stand-in for HoverCard (see components/home/HoverCard.jsx) --
+// used for projects whose homepage cell is icon-only rather than a video/
+// screenshot preview (OrthoVive's password-gated cell, Avocado's mascot
+// tile). Doesn't reuse HoverCard directly since that component bakes in
+// its own lock cursor/badge, which is only correct for the gated ones.
+const IconCard = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ theme }) => theme.cardBackground};
+`;
+
+const IconMedia = styled.img`
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+`;
+
+const IconOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+  pointer-events: none;
+`;
+
+const IconLeftStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+`;
+
+const IconTitle = styled.span`
+  color: ${({ theme }) => theme.text};
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: "General Sans", sans-serif;
+  letter-spacing: 0.01em;
+`;
+
+const IconTag = styled.span`
+  width: fit-content;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  backdrop-filter: blur(24px);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: ${({ $bg }) => $bg || "rgba(235, 235, 230, 0.85)"};
+  color: ${({ $color }) => $color || "#000"};
+  border: 1px solid ${({ $color }) => ($color ? `${$color}55` : "#00000022")};
 `;
 
 // ---------------- Motion ----------------
@@ -96,10 +157,38 @@ const PROJECTS = [
     title: "IBHF",
     screens: IBHF_SCREENS,
     focalPoint: 0.6,
+    sway: true,
     tag: "Conservation Case Study",
     tagColor: "#92400E",
     cursor: "view",
     path: "/ibhf",
+  },
+  {
+    id: "orthovive",
+    type: "icon",
+    title: "OrthoVive",
+    icon: OrthoViveLogo,
+    tag: "Med-Tech Case Study",
+    cursor: "locked",
+    path: "/orthovive",
+  },
+  {
+    id: "operation-avocado",
+    type: "icon",
+    title: "Operation Avocado",
+    icon: AvocadoLogo,
+    tag: "Mobile Web App",
+    cursor: "view",
+    path: "/operation-avocado",
+  },
+  {
+    id: "audanote",
+    type: "icon",
+    title: "Audanote",
+    icon: AudanoteLogo,
+    tag: "Health-Tech Case Study",
+    cursor: "locked",
+    path: "/audanote",
   },
 ];
 
@@ -132,6 +221,20 @@ export default function OtherProjects({ currentProjectId }) {
                 crop={project.crop}
                 tagColor={project.tagColor}
               />
+            ) : project.type === "icon" ? (
+              <IconCard>
+                {project.icon && <IconMedia src={project.icon} alt="" />}
+                {(project.title || project.tag) && (
+                  <IconOverlay>
+                    <IconLeftStack>
+                      {project.title && <IconTitle>{project.title}</IconTitle>}
+                      {project.tag && (
+                        <IconTag $color={project.tagColor}>{project.tag}</IconTag>
+                      )}
+                    </IconLeftStack>
+                  </IconOverlay>
+                )}
+              </IconCard>
             ) : (
               <ScreenshotPanCard
                 screens={project.screens}
@@ -139,6 +242,7 @@ export default function OtherProjects({ currentProjectId }) {
                 tag={project.tag}
                 tagColor={project.tagColor}
                 focalPoint={project.focalPoint}
+                sway={project.sway}
               />
             )}
           </CardLink>

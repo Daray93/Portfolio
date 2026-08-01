@@ -252,7 +252,7 @@ export default function KroptCaseStudy() {
         <CaseStudyPage>
 
           {/* ---------- Overview ---------- */}
-          <CaseStudySection id="overview" title="Overview">
+          <CaseStudySection id="overview" title="Overview" tldrVisible>
             <CaseStudyHero
               title="Kropt"
               subtitle="Farm smarter and more sustainably"

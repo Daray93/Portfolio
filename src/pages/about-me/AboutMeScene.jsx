@@ -274,15 +274,18 @@ const SKY_PALETTES = [
     sun: 1.22,
   },
 
-  // Sunset
+  // Sunset -- lands under the second-last chapter ("I'm ready to join my
+  // first product team"), swapped from the original orange sunset to a
+  // clean white/green so that beat reads as a distinct, fresh moment
+  // rather than continuing the warm dusk ramp either side of it.
   {
     stop: 0.82,
-    zenith: 0x111f40,
-    mid: 0x3d3557,
-    horizon: 0x87391e,
-    glow: 0xff6f3c,
-    hemi: 0.8,
-    sun: 1.3,
+    zenith: 0xdff2e2,
+    mid: 0xa8d9a4,
+    horizon: 0x5fa568,
+    glow: 0xf3fff2,
+    hemi: 1.0,
+    sun: 1.1,
   },
 
   // Dusk Settle -- sunset's embers cooling into purple, a step down from
@@ -297,15 +300,18 @@ const SKY_PALETTES = [
     sun: 0.85,
   },
 
-  // Blue Hour
+  // Blue Hour -- the flight's final beat, landing on the last chapter's
+  // call to action. Swapped from a dark, near-night navy to a bright
+  // light-blue/pink pastel so the journey ends on an open, hopeful note
+  // instead of fading toward black.
   {
     stop: 1.0,
-    zenith: 0x070d20,
-    mid: 0x1c2843,
-    horizon: 0x342d3e,
-    glow: 0x915a4d,
-    hemi: 0.65,
-    sun: 0.55,
+    zenith: 0xaee0f0,
+    mid: 0xd8b8d8,
+    horizon: 0xf7b8c8,
+    glow: 0xfff0e8,
+    hemi: 1.0,
+    sun: 1.0,
   },
 ];
 

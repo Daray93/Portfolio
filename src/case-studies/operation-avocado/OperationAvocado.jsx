@@ -1,15 +1,30 @@
 import React from "react";
-import { CaseStudyLayoutFree } from "../../components/case-study/Index";
+import { CaseStudyLayout, CaseStudyPage } from "../../components/case-study/Index";
 import OperationAvocadoContent from "./OperationAvocadoContent";
 
-// Plain routed version -- used for a cold load / direct link / refresh
-// on /operation-avocado, where there's no homepage cell to expand from.
-// The animated, expands-from-the-grid version is OperationAvocadoOverlay,
-// rendered by App.jsx on top of Home when the cell itself is clicked.
+// Same shell every other case study uses (see Kropt.jsx) -- previously
+// this only ran as a bare-bones fallback (CaseStudyLayoutFree) for a cold
+// load on /operation-avocado, with the "real" version being an animated
+// overlay grown out of the homepage grid cell (OperationAvocadoOverlay,
+// now removed). That overlay traded structure (PillNav, section cards)
+// for a from-the-grid grow animation; now that homepage->page morphs are
+// gone everywhere else too, there was no reason left for this one to be
+// the odd one out.
 export default function OperationAvocadoCaseStudy() {
   return (
-    <CaseStudyLayoutFree>
-      <OperationAvocadoContent />
-    </CaseStudyLayoutFree>
+    <CaseStudyLayout
+      sections={[
+        { id: "overview", label: "Overview" },
+        { id: "user", label: "The User" },
+        { id: "vision", label: "Vision" },
+        { id: "process", label: "Process" },
+        { id: "challenges", label: "Challenges / Insights" },
+        { id: "results", label: "Results" },
+      ]}
+    >
+      <CaseStudyPage>
+        <OperationAvocadoContent />
+      </CaseStudyPage>
+    </CaseStudyLayout>
   );
 }

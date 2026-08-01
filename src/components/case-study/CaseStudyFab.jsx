@@ -95,9 +95,9 @@ const HomeIconImg = styled.img`
 
 // `homeFilter`: which homepage filter tab to land on when the mobile Home
 // button is tapped -- pass "work" from a project's own layout (see
-// CaseStudyLayout/CaseStudyLayoutFree/OperationAvocadoOverlay) so closing
-// a project defaults the grid back to Work instead of All. Left unset for
-// non-project usage (see AboutMe.jsx), which has no equivalent default.
+// CaseStudyLayout) so closing a project defaults the grid back to Work
+// instead of All. Left unset for non-project usage (see AboutMe.jsx),
+// which has no equivalent default.
 export default function CaseStudyFab({ homeFilter }) {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);

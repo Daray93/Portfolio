@@ -16,17 +16,8 @@ import styled from "styled-components";
 // Assets
 import OrthoViveLogo from "./assets/OrthoVive.png";
 import BriefPhoto from "./assets/OrthoVive-Brief.png";
-import PrototypeV1_1 from "./assets/OrthoVive-Brief.png";
-import PrototypeV1_2 from "./assets/OrthoVive-Brief.png";
-import StakeholderNotes from "./assets/OrthoVive-Brief.png";
-import PrototypeV2_1 from "./assets/OrthoVive-Brief.png";
-import PrototypeV2_2 from "./assets/OrthoVive-Brief.png";
-import demoVideo from "../../components/home/assets/ResumeVideo.mp4";
 
-import { FiClock, FiTrendingUp, FiAlertCircle, FiFileText } from "react-icons/fi";
-import { GiBrain } from "react-icons/gi";
-
-import ResultsCarousel from "../../components/shared/ResultsCarousel";
+import { FiClock, FiTrendingUp, FiAlertCircle } from "react-icons/fi";
 
 /* ---------- Shared styles ---------- */
 
@@ -93,33 +84,47 @@ const Pill = styled.span`
   font-size: 0.8rem;
 `;
 
-const MediaCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  background: ${({ theme }) => theme.cardInset};
-  border-radius: ${({ theme }) => theme.radius.xl};
-  padding: 1.5rem;
-`;
-
 const IconRow = styled.div`
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
 `;
 
-const SolutionContainer = styled.div`
+// Stands in for real screenshots (prototype frames, feedback notes) until
+// those exist -- clearly labelled rather than reusing OrthoVive-Brief.png
+// (the one real asset so far) across every slot, which just looked
+// broken instead of obviously "placeholder" (see Audanote.jsx, same
+// convention).
+const MediaPlaceholder = styled.div`
+  width: 100%;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed ${({ theme }) => theme.border};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: ${({ theme }) => theme.cardInset};
+  font-size: 0.85rem;
+  font-style: italic;
+  color: ${({ theme }) => theme.textSecondary};
+`;
+
+const MediaRow = styled.div`
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap;
+
+  ${MediaPlaceholder} {
+    flex: 1;
+    min-width: 240px;
+  }
 `;
 
-const VideoWrapper = styled.div`
-  flex: 1;
-`;
+/* ---------- OrthoVive Case Study ---------- */
 
-/* ---------- ProjectName Case Study ---------- */
-
-export default function ProjectNameCaseStudy() {
+export default function OrthoViveCaseStudy() {
   const { isUnlocked, loading } = useProtectedAccess();
   const [modalSrc, setModalSrc] = useState(null);
   const lastActiveRef = useRef(null);
@@ -164,11 +169,11 @@ export default function ProjectNameCaseStudy() {
         <CaseStudyPage>
 
           {/* ---------- Brief ---------- */}
-          <CaseStudySection id="brief">
+          <CaseStudySection id="brief" tldrVisible>
             <CaseStudyMorphMedia image={OrthoViveLogo} imageFit="contain" />
 
             <CaseStudyHero
-              title="ProjectName"
+              title="OrthoVive"
               subtitle="From brief to working prototype with Claude + Figma"
             >
               <Paragraph>
@@ -189,16 +194,6 @@ export default function ProjectNameCaseStudy() {
                 alt="Original project brief"
                 onClick={() => openModal(BriefPhoto)}
               />
-
-              <div style={{ display: "flex", gap: "1rem", marginTop: "2rem", flexWrap: "wrap" }}>
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  View Live Prototype <GiBrain size={20} />
-                </a>
-
-                <a href="/ProjectNameReport.pdf" target="_blank" rel="noopener noreferrer">
-                  View Project Report <FiFileText size={20} />
-                </a>
-              </div>
             </CaseStudyHero>
 
             <Paragraph style={{ marginTop: "2rem" }}>
@@ -216,13 +211,10 @@ export default function ProjectNameCaseStudy() {
               test the core concept.
             </Paragraph>
 
-            <IconRow>
-              {[PrototypeV1_1, PrototypeV1_2].map((img, i) => (
-                <MediaCard key={i} onClick={() => openModal(img)}>
-                  <Image src={img} alt={`First prototype ${i + 1}`} />
-                </MediaCard>
-              ))}
-            </IconRow>
+            <MediaRow>
+              <MediaPlaceholder>First prototype screen — add real capture</MediaPlaceholder>
+              <MediaPlaceholder>First prototype screen — add real capture</MediaPlaceholder>
+            </MediaRow>
 
             <Callout>
               Goal of this version: validate the core flow and get early feedback
@@ -244,11 +236,7 @@ export default function ProjectNameCaseStudy() {
               <div><FiAlertCircle /> Area flagged for revision</div>
             </IconRow>
 
-            <Image
-              src={StakeholderNotes}
-              alt="Notes from stakeholder feedback session"
-              onClick={() => openModal(StakeholderNotes)}
-            />
+            <MediaPlaceholder>Stakeholder feedback notes — add real capture</MediaPlaceholder>
 
             <Callout>
               Key insight: [summary of the main takeaway from the stakeholder conversation].
@@ -262,14 +250,10 @@ export default function ProjectNameCaseStudy() {
               concerns raised and better align with the stakeholder's priorities.
             </Paragraph>
 
-            <ResultsCarousel
-              items={[
-                { type: "video", src: demoVideo },
-              ]}
-              images={[PrototypeV2_1, PrototypeV2_2]}
-              openModal={openModal}
-              stackVideosOnMobile={true}
-            />
+            <MediaRow>
+              <MediaPlaceholder>Refined prototype screen — add real capture</MediaPlaceholder>
+              <MediaPlaceholder>Refined prototype screen — add real capture</MediaPlaceholder>
+            </MediaRow>
           </CaseStudySection>
 
           {/* ---------- Outcomes ---------- */}
@@ -283,7 +267,7 @@ export default function ProjectNameCaseStudy() {
 
         </CaseStudyPage>
 
-        <OtherProjects currentProjectId="projectname" />
+        <OtherProjects currentProjectId="orthovive" />
       </CaseStudyLayout>
 
       {/* ---------- Modal ---------- */}

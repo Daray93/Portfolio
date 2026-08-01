@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { isSupported, getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -17,3 +18,12 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+
+// Resolves to a real Analytics instance or null -- isSupported() is async
+// (it checks things like IndexedDB/cookie availability, which can fail in
+// private browsing or with tracking blockers) rather than throwing and
+// taking the rest of the app down with it if analytics just isn't
+// available for this visitor.
+export const analyticsReady = isSupported().then((supported) =>
+  supported ? getAnalytics(app) : null
+);

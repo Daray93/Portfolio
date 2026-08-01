@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styled, { ThemeProvider } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { lightTheme } from "../../styles/theme";
 import {
   FiMaximize,
@@ -52,8 +52,13 @@ import travelPyramids from "./assets/Travel-Photos/Giza-Pyramids.jpg";
 import travelParade from "./assets/Travel-Photos/Limerick-Shamrock-Parade.jpg";
 import travelRingFort from "./assets/Travel-Photos/Kerry-Ring-Fort.jpg";
 import travelAranCave from "./assets/Travel-Photos/Aran-Islands-Cave-Window.jpg";
-import travelDingle from "./assets/Travel-Photos/Dingle-Peninsula-Coast.jpg";
+import travelHazy from "./assets/Travel-Photos/Hazy-Mountain-Range.jpg";
 import travelRaceMedal from "./assets/Travel-Photos/Race-Medal.jpg";
+import travelUnite from "./assets/Travel-Photos/Unite-2024-Conference-Badge.jpg"
+import travelCanal from "./assets/Travel-Photos/France-Canal-Path.jpg"
+import travelCat from "./assets/Travel-Photos/Cat-Closeup.jpg"
+import travelHighway from "./assets/Travel-Photos/Highway-Sunset-Drive.jpg"
+import travelYurt from "./assets/Travel-Photos/Yurt-Ceiling.jpg"
 
 const TRAVEL_SCREENS = [
   travelSkydive,
@@ -62,8 +67,14 @@ const TRAVEL_SCREENS = [
   travelParade,
   travelRingFort,
   travelAranCave,
-  travelDingle,
+  travelHazy,
   travelRaceMedal,
+  travelUnite,
+  travelCanal,
+  travelYurt,
+  travelHighway,
+  travelCat,
+
 ];
 
 // ---------------- Layout ----------------
@@ -618,13 +629,14 @@ const LinkedInButton = styled(Button)`
 
 // ---------------- Operation Avocado (cell 6) ----------------
 
-// Carries its own chrome (rather than relying on the parent CardSurface)
-// since this is the element that hands off into the OperationAvocado
-// overlay -- once it's replaced by that overlay it needs to look
-// complete on its own. Background matches the homepage's own (theme.body)
-// so it reads as continuous with the page behind it. No morph animation
-// (see openAvocado below) -- the overlay just appears immediately on
-// click rather than growing out of this cell.
+// Now a normal routed case study (see OperationAvocado.jsx /
+// CaseStudyLayout), same shape as Kropt/Neuroloop/OrthoVive/IBHF -- was
+// previously a fixed overlay grown on top of this page via a shared
+// layoutId, which is why this carries its own border/background/shadow
+// rather than relying on the parent CardSurface (so it looked complete
+// once "detached" mid-morph). Kept as-is even though nothing detaches it
+// anymore; it doesn't hurt anything sitting inside CardSurface's own
+// chrome, and every other project cell type does the same.
 const AvocadoCell = styled.div`
   position: relative;
   width: 100%;
@@ -931,9 +943,7 @@ const ModalActions = styled.div`
 //  8 big    -- Neuroloop (flagship case study -- shrinks to a single
 //              cell under the "work" filter; see compactShape below)
 //  9 single -- IBHF (conservation WP site)
-// 10 single -- Audanote (password-locked, same as OrthoVive -- no
-//              /audanote route yet, so a successful unlock has nowhere
-//              real to land until that page exists)
+// 10 single -- Audanote (password-locked, same as OrthoVive)
 // 11 trio  -- Strava, opens new tab
 // 12 trio  -- Spotify, opens new tab
 // 13 trio  -- Duolingo, opens new tab
@@ -1009,25 +1019,12 @@ export default function Splash() {
   const [searchParams] = useSearchParams();
   const filter = searchParams.get("filter") || "all";
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Operation Avocado opens as a fixed overlay on top of this page (see
-  // OperationAvocadoOverlay) rather than a routed page swap -- stashing
-  // the current location as router state is what lets the background
-  // Routes keep rendering this page underneath instead of unmounting it,
-  // so scroll position/grid state survives the round trip. No morph
-  // animation -- the overlay just appears immediately, opaque and
-  // full-screen, on click.
-  const openAvocado = () => {
-    navigate("/operation-avocado", { state: { backgroundLocation: location } });
-  };
-
-  // The overlay's own box is opaque and covers the full viewport, so this
-  // cell is already fully hidden behind it regardless -- unmounting it
-  // here too is just avoiding the redundant render, not load-bearing for
-  // anything visual.
-  const avocadoOverlayOpen = location.pathname === "/operation-avocado";
+  // Operation Avocado now opens as a normal routed page (see
+  // OperationAvocado.jsx / CaseStudyLayout) -- same as every other case
+  // study, rather than a fixed overlay grown on top of this page. It used
+  // to stash the current location as router state so a background
+  // Routes render could keep this page mounted underneath it; that's
+  // gone now that there's no overlay to keep it mounted for.
 
   const [aboutOpen, setAboutOpen] = useState(false);
   const [travelExpanded, setTravelExpanded] = useState(false);
@@ -1195,39 +1192,36 @@ export default function Splash() {
                       onClick={() => setPasswordTarget("orthovive")}
                     />
                   ) : cell.id === 6 ? (
-                    <AnimatePresence>
-                      {!avocadoOverlayOpen && (
-                        <AvocadoCell key="avocado-cell" data-cursor="view">
-                      <CenteredLogoLink
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Open Operation Avocado"
-                        onClick={openAvocado}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            openAvocado();
-                          }
-                        }}
+                    <>
+                      <Link
+                        to="/operation-avocado"
+                        data-cursor="view"
+                        style={{ width: "100%", height: "100%", display: "block" }}
                       >
-                        <AvocadoJumpingJack fill />
-                      </CenteredLogoLink>
-                      <ComingSoonPill>In Progress</ComingSoonPill>
-                      <AvocadoOverlay>
-                        <AvocadoOverlayStack>
-                          <AvocadoOverlayTitle>Operation Avocado</AvocadoOverlayTitle>
-                          <AvocadoOverlayTag>Mobile Web App</AvocadoOverlayTag>
-                        </AvocadoOverlayStack>
-                      </AvocadoOverlay>
+                        <AvocadoCell>
+                          <CenteredLogoLink>
+                            <AvocadoJumpingJack fill />
+                          </CenteredLogoLink>
+                          <ComingSoonPill>In Progress</ComingSoonPill>
+                          <AvocadoOverlay>
+                            <AvocadoOverlayStack>
+                              <AvocadoOverlayTitle>Operation Avocado</AvocadoOverlayTitle>
+                              <AvocadoOverlayTag>Mobile Web App</AvocadoOverlayTag>
+                            </AvocadoOverlayStack>
+                          </AvocadoOverlay>
+                        </AvocadoCell>
+                      </Link>
                       <HoverIconBadge aria-hidden="true">
                         <FiMaximize />
                       </HoverIconBadge>
-                        </AvocadoCell>
-                      )}
-                    </AnimatePresence>
+                    </>
                   ) : cell.id === 7 ? (
                     <>
-                      <Link to="/kropt" data-cursor="view-light" style={{ height: "100%", display: "block" }}>
+                      <Link
+                        to="/kropt"
+                        data-cursor="view-light"
+                        style={{ width: "100%", height: "100%", display: "block" }}
+                      >
                         <ScreenshotPanCard
                           screens={KROPT_SCREENS}
                           title="Kropt Mobile App"
@@ -1256,13 +1250,18 @@ export default function Splash() {
                     </>
                   ) : cell.id === 9 ? (
                     <>
-                      <Link to="/ibhf" data-cursor="view" style={{ height: "100%", display: "block" }}>
+                      <Link
+                        to="/ibhf"
+                        data-cursor="view"
+                        style={{ width: "100%", height: "100%", display: "block" }}
+                      >
                         <ScreenshotPanCard
                           screens={IBHF_SCREENS}
                           title="IBHF"
                           tag="Conservation Case Study"
                           tagColor="#92400E"
                           focalPoint={0.6}
+                          sway
                         />
                       </Link>
                       <HoverIconBadge aria-hidden="true">

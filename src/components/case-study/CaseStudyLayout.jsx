@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FiMinimize2 } from "react-icons/fi";
 import PillNav from "../shared/PillNav";
 import CaseStudyFab from "./CaseStudyFab";
+import { CaseStudyViewContext } from "./CaseStudyViewContext";
 
 const Shell = styled.div`
   width: 100%;
@@ -41,17 +42,33 @@ const Content = styled.main`
   min-width: 0;
 `;
 
+// PillNav's own mobile styling (see PillNav.jsx, @media max-width: 560px)
+// makes its pills width: 100% / flex: 1 -- that only does anything useful
+// if ITS OWN parent actually has a real width to fill. Above 560px this
+// stays shrink-wrapped and centred (the desktop look); at/below it, swap
+// to a left/right-anchored box so there's an actual width for the pills
+// to stretch into, instead of a centred, content-sized nothing.
 const NavWrapper = styled.div`
   position: fixed;
   top: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
+
+  @media (max-width: 560px) {
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    top: 1rem;
+  }
 `;
 
 // Collapses the panel back to the homepage -- client-side navigation
 // (not a hard reload), defaulting the grid to the Work filter (see
-// CaseStudyFab's homeFilter for the mobile equivalent).
+// CaseStudyFab's homeFilter for the mobile equivalent). Hidden below the
+// same breakpoint CaseStudyFab's mobile bar appears at (900px) -- with
+// that bar already giving mobile a "Home" affordance, this one was just
+// redundant chrome competing with the nav pills for the same corner.
 const CollapseButton = styled.button`
   position: fixed;
   top: clamp(1rem, 2.5vw, 1.5rem);
@@ -78,6 +95,10 @@ const CollapseButton = styled.button`
     width: 16px;
     height: 16px;
   }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const scrollToSection = (id) => {
@@ -88,6 +109,7 @@ const scrollToSection = (id) => {
 
 export default function CaseStudyLayout({ sections, children }) {
   const [activeId, setActiveId] = useState(sections?.[0]?.id ?? null);
+  const [view, setView] = useState("detailed");
   const navigate = useNavigate();
 
   const handleChange = (id) => {
@@ -96,29 +118,32 @@ export default function CaseStudyLayout({ sections, children }) {
   };
 
   return (
-    <Shell>
-      <NavWrapper>
-        <PillNav
-          options={sections.map((s) => ({ id: s.id, label: s.label }))}
-          activeId={activeId}
-          onChange={handleChange}
-          groupId="case-study-nav"
-        />
-      </NavWrapper>
+    <CaseStudyViewContext.Provider value={{ view, setView }}>
+      <Shell>
+        <NavWrapper>
+          <PillNav
+            options={sections.map((s) => ({ id: s.id, label: s.label }))}
+            activeId={activeId}
+            onChange={handleChange}
+            groupId="case-study-nav"
+            scrollable
+          />
+        </NavWrapper>
 
-      <CollapseButton
-        type="button"
-        aria-label="Back to home"
-        onClick={() => navigate("/?filter=work")}
-      >
-        <FiMinimize2 />
-      </CollapseButton>
+        <CollapseButton
+          type="button"
+          aria-label="Back to home"
+          onClick={() => navigate("/?filter=work")}
+        >
+          <FiMinimize2 />
+        </CollapseButton>
 
-      <Frame>
-        <Content>{children}</Content>
-      </Frame>
+        <Frame>
+          <Content>{children}</Content>
+        </Frame>
 
-      <CaseStudyFab homeFilter="work" />
-    </Shell>
+        <CaseStudyFab homeFilter="work" />
+      </Shell>
+    </CaseStudyViewContext.Provider>
   );
 }

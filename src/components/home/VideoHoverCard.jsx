@@ -129,8 +129,12 @@ const Card = styled(motion.div)`
   /* Plain (non-morph) usage stays exactly as before -- chrome only
      appears when this card is the source of a homepage->case-study
      morph, so it carries its own background/border/shadow once it
-     leaves the grid cell that used to provide them. */
-  border-radius: ${({ $morph }) => ($morph ? "clamp(18px, 2.5vw, 32px)" : "24px")};
+     leaves the grid cell that used to provide them. Radius always
+     matches the outer grid Card's own clamp (see Splash.jsx) regardless
+     of morph state -- a fixed value here (24px) drifted from that
+     responsive one at small viewports, so the video's own rounded corner
+     no longer lined up with the card clipping it on mobile. */
+  border-radius: clamp(18px, 2.5vw, 32px);
   background: ${({ $morph, theme }) => ($morph ? theme.body : "transparent")};
   border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
   box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};

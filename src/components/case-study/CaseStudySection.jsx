@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useCaseStudyView } from "./CaseStudyViewContext";
 
 const Row = styled.section`
   display: flex;
@@ -84,13 +85,31 @@ const Full = styled.div`
   width: 100%;
 `;
 
+const TldrPlaceholder = styled.p`
+  margin: 0;
+  font-style: italic;
+  color: ${({ theme }) => theme.textSecondary};
+`;
+
 export default function CaseStudySection({
   id,
   title,
   children,
   full,
+  tldrVisible = false,
+  tldr,
   ...props
 }) {
+  const { view } = useCaseStudyView();
+
+  // TL;DR mode shortens every section rather than removing it -- the
+  // overview/hero section (tldrVisible) is exempt since it's already
+  // the short version of the page. Everything else swaps its full body
+  // for a condensed one-liner: a real `tldr` prop when a section has
+  // been given one, otherwise a placeholder standing in for copy that
+  // hasn't been written yet.
+  const isShortened = view === "tldr" && !tldrVisible;
+
   return (
     <Row id={id} {...props}>
       {title && (
@@ -102,8 +121,19 @@ export default function CaseStudySection({
           <Separator />
         </TitleWrapper>
       )}
-      <Body>{children}</Body>
-      {full && <Full>{full}</Full>}
+      <Body>
+        {isShortened ? (
+          <TldrPlaceholder>
+            {tldr ||
+              (title
+                ? `TL;DR placeholder — a shortened summary of "${title}" goes here.`
+                : "TL;DR placeholder — a shortened summary goes here.")}
+          </TldrPlaceholder>
+        ) : (
+          children
+        )}
+      </Body>
+      {!isShortened && full && <Full>{full}</Full>}
     </Row>
   );
 }
