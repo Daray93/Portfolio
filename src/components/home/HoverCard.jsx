@@ -8,7 +8,15 @@ export default function PasswordCard({ title, category, icon, morphId, onClick }
   return (
     <Card
       onClick={onClick}
-      data-cursor="locked"
+      role="button"
+      tabIndex={0}
+      aria-label={title ? `${title} -- password protected` : "Password protected"}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(e);
+        }
+      }}
       $morph={!!morphId}
       layoutId={morphId}
       layout={!!morphId}
@@ -49,7 +57,7 @@ const Card = styled(motion.div)`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  cursor: none;
+  cursor: pointer;
 
   /* Plain (non-morph, e.g. Audanote) usage stays exactly as before --
      chrome only changes when this card is the source of a homepage->
@@ -61,7 +69,7 @@ const Card = styled(motion.div)`
      Radius always matches CardSurface's own clamp (rather than a fixed
      24px for the non-morph case) so it stays correct at every
      breakpoint instead of only happening to line up at some sizes. */
-  border-radius: clamp(18px, 2.5vw, 32px);
+  border-radius: ${({ theme }) => theme.radius.xxl};
   background: ${({ theme }) => theme.cardBackground};
   border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
   box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};
@@ -129,6 +137,12 @@ const Overlay = styled.div`
   ${Card}:hover & {
     opacity: 1;
   }
+
+  /* Title/category move to their own plain-text row below the icon at
+     this width instead (see Splash.jsx's MobileCaptionLink/Button). */
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 
 const LeftStack = styled.div`
@@ -141,7 +155,7 @@ const Title = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
   font-weight: 500;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   letter-spacing: 0.01em;
 `;
 

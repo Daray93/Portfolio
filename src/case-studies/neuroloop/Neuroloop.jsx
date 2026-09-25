@@ -4,13 +4,11 @@ import {
   CaseStudyPage,
   CaseStudySection,
   CaseStudyHero,
-  CaseStudyMorphMedia,
 } from "../../components/case-study/Index";
 import OtherProjects from "../../components/shared/OtherProjects";
 import styled from "styled-components";
 
 // Assets
-import neuroloopTeaser from "./assets/NeuroloopTeaser.mp4";
 import Survey1 from "./assets/Survey1.png";
 import Survey2 from "./assets/Survey2.png";
 import Survey3 from "./assets/Survey3.png";
@@ -21,6 +19,7 @@ import vrAppArchitecture from "./assets/VrAppArchitecture.png";
 import soundDesign from "./assets/SoundDesign.png";
 import hook from "./assets/NeuroloopVRDemo.mp4";
 import WebAppDemo from "./assets/NeuroloopWebAppDemo.mp4";
+import FinalYearProjectReport from "./assets/FinalYearProjectReport.pdf";
 import { FiClock, FiTrendingUp, FiAlertCircle } from "react-icons/fi";
 import ResultsCarousel from "../../components/shared/ResultsCarousel";
 import { FiFileText } from "react-icons/fi";
@@ -47,7 +46,7 @@ const Image = styled.img`
   height: auto;
   border-radius: ${({ theme }) => theme.radius.md};
   object-fit: cover;
-  cursor: none;
+  cursor: pointer;
 `;
 
 const Video = styled.video`
@@ -92,7 +91,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 2rem;
   color: white;
-  cursor: none;
+  cursor: pointer;
 `;
 
 /* ---------- Role / Pills ---------- */
@@ -245,9 +244,9 @@ const CTAButton = styled.a`
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.radius.btn};
   border: 1px solid ${({ theme }) => theme.buttonPrimaryBg};
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 500;
   font-size: 1rem;
   color: ${({ theme }) => theme.buttonPrimaryText};
@@ -310,19 +309,17 @@ export default function NeuroloopCaseStudy() {
     <>
       <CaseStudyLayout
         sections={[
-          { id: "solution", label: "What I Did" },
-          { id: "problem", label: "The Problem" },
-          { id: "research", label: "How I Researched" },
-          { id: "design", label: "The Design" },
-          { id: "outcomes", label: "Project Outcomes" },
+          { id: "overview", label: "Overview" },
+          { id: "problem", label: "Problem" },
+          { id: "goal", label: "Goal" },
+          { id: "process", label: "Process" },
+          { id: "outcomes", label: "Outcomes" },
         ]}
       >
         <CaseStudyPage>
 
-          {/* ---------- 01 Solution ---------- */}
-          <CaseStudySection id="solution" tldrVisible>
-            <CaseStudyMorphMedia video={neuroloopTeaser} />
-
+          {/* ---------- 01 Overview ---------- */}
+          <CaseStudySection id="overview" title="Overview" tldrVisible>
             <CaseStudyHero
               title="Neuroloop"
               subtitle="Learn how social media shapes your brain"
@@ -332,7 +329,6 @@ export default function NeuroloopCaseStudy() {
                 designed to help students grasp how social media affects attention, emotion, and behaviour.
               </Paragraph>
 
-              {/* Recommended: add a visual showing VR headset interaction or overview diagram */}
               <PillRow>
                 <Pill>2025</Pill>
                 <Pill>Educational Tech</Pill>
@@ -346,8 +342,8 @@ export default function NeuroloopCaseStudy() {
                 <Pill>Unity</Pill>
               </PillRow>
 
-              
-                
+
+
               <ResultsCarousel
               items={[
                 { type: "video", src: hook },
@@ -355,8 +351,9 @@ export default function NeuroloopCaseStudy() {
               ]}
               openModal={openModal}
               stackVideosOnMobile={true}
+              fullWidthSlides={true}
             />
-              
+
               <ButtonWrapper>
               <CTAButton
                 href="https://neuroloop-13690.web.app/"
@@ -368,7 +365,7 @@ export default function NeuroloopCaseStudy() {
               </CTAButton>
 
               <CTAButtonSecondary
-                href="/NeuroloopReport.pdf"
+                href={FinalYearProjectReport}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -393,11 +390,18 @@ export default function NeuroloopCaseStudy() {
           </CaseStudySection>
 
           {/* ---------- 02 Problem ---------- */}
-          <CaseStudySection id="problem" title="Problem">
+          <CaseStudySection
+            id="problem"
+            title="Problem"
+            tldr="Students spend hours a day on social media with almost no formal education about what it's doing to their attention and mood -- most can't make an informed choice about their own habits, only an unconscious one."
+          >
             <Paragraph>
-              Students spend hours on social media, yet there’s very little formal education about its effects on the brain. 
-              Many are unaware of how scrolling shapes attention, emotion, and reflection. 
-              These three key metrics highlight the scale of the issue:
+              Students spend hours on social media, yet there's very little formal
+              education about its effects on the brain. Most have no idea how
+              scrolling reshapes their own attention, emotion, and ability to
+              reflect — which means they can't make an informed choice about their
+              own habits, only an unconscious one. Three numbers make the scale of
+              that gap concrete:
             </Paragraph>
 
             <UserGrid>
@@ -421,10 +425,49 @@ export default function NeuroloopCaseStudy() {
             </UserGrid>
           </CaseStudySection>
 
-          {/* ---------- 03 Research ---------- */}
-          <CaseStudySection id="research" title="Research">
+          {/* ---------- 03 Goal ---------- */}
+          <CaseStudySection
+            id="goal"
+            title="Goal"
+            tldr="Make the invisible effects of social media experiential instead of explained -- a VR/AI experience students feel and interact with, since a knowledge gap this behavioural wasn't going to close through more reading."
+          >
             <Paragraph>
-              To create an engaging VR/Web App learning experience, I needed to understand how students interact with social media, what motivates them, and how they process complex scientific content. Surveys, interviews, and competitor analysis revealed behaviours, needs, and pain points, guiding the design of Neuroloop.
+              Traditional education wasn't moving this number — lectures and text
+              explain attention and dopamine in the abstract, which is exactly the
+              kind of information students already tune out while scrolling. The
+              strategy was to make the effect experiential instead: put students
+              inside a VR environment where they could see and feel how a feed
+              manipulates attention and mood in real time, then reinforce it
+              through an AI-voiced avatar that could respond and explain rather
+              than just narrate.
+            </Paragraph>
+            <Paragraph>
+              That's why the build leaned so heavily on VR, Spline, and Convai
+              rather than a simpler web explainer: the whole bet was that an
+              experiential medium would land where a written one hadn't — and that
+              only holds if the experience itself is polished enough to actually
+              hold attention rather than lose it, the same failure mode as the
+              apps it's teaching students about.
+            </Paragraph>
+          </CaseStudySection>
+
+          {/* ---------- 04 Process ---------- */}
+          <CaseStudySection
+            id="process"
+            title="Process"
+            tldr="Surveys, interviews, and competitor analysis shaped two student personas and confirmed the knowledge gap firsthand; from there, VR flows, a web app, and AI-voiced 3D avatars were built and iterated through user testing."
+            tldrMedia={
+              <MediaCard onClick={() => openModal(Survey1)}>
+                <Image src={Survey1} alt="Student survey results on social media habits" />
+              </MediaCard>
+            }
+          >
+            <Paragraph>
+              To create an engaging VR/web app learning experience, I needed to
+              understand how students interact with social media, what motivates
+              them, and how they process complex scientific content. Surveys,
+              interviews, and competitor analysis surfaced real behaviours, needs,
+              and pain points, grounding the goal above in more than a hunch.
             </Paragraph>
 
             {/* ---------- Student Personas ---------- */}
@@ -459,13 +502,14 @@ export default function NeuroloopCaseStudy() {
             <Callout style={{ marginTop: "1.5rem" }}>
               Most students were unaware of how scrolling affects attention and mood. This confirmed a significant knowledge gap that Neuroloop could address through immersive learning.
             </Callout>
-          </CaseStudySection>
 
-          {/* ---------- 04 Design ---------- */}
-          <CaseStudySection id="design" title="Design">
-            <Paragraph>
-              I focused on designing VR flows that made dopamine, attention, and emotional responses visible and interactive.
-              {/* Recommendation: include VR interface screenshots, architecture diagrams */}
+            <Paragraph style={{ marginTop: "2rem" }}>
+              From there the work moved into design: VR flows built to make
+              dopamine, attention, and emotional responses visible and
+              interactive rather than explained in a slide. The harder problem
+              wasn't drawing a clean interface — it was translating an invisible
+              physiological effect into something a student could actually watch
+              happen to them.
             </Paragraph>
 
             <IconRow>
@@ -484,13 +528,36 @@ export default function NeuroloopCaseStudy() {
           </CaseStudySection>
 
           {/* ---------- 05 Outcomes ---------- */}
-          <CaseStudySection id="outcomes" title="Outcomes">
+          <CaseStudySection
+            id="outcomes"
+            title="Outcomes"
+            tldr="Both the VR and web experiences shipped and tested well for clarity and engagement -- but with no structured before/after comprehension check, whether it actually taught the material better than a written explanation is still unverified, not confirmed."
+          >
             <Paragraph>
-              Neuroloop shows that immersive VR design can make abstract neuroscience tangible.
+              Neuroloop shipped: both the VR build and a public web app (linked
+              above) exist and work, and iterative user testing — watching real
+              students move through the flows and adjusting whatever confused or
+              lost them — shaped every round of design. That much of the goal was
+              met: the experience is immersive, and people engaged with it rather
+              than tuning it out.
             </Paragraph>
             <Paragraph>
-              User testing confirmed the clarity of interactions, engagement, and comprehension.
-              {/* Recommendation: add a visual showing key results or engagement metrics */}
+              What I can't honestly claim is that it worked as education. User
+              testing confirmed the experience was clear and engaging, which is a
+              real result, but a weaker one than proving comprehension actually
+              improved. There was no structured before/after check on what
+              students understood about social media's effects on attention and
+              mood before versus after using it, so the core bet — that an
+              experiential medium teaches this better than a written one — is
+              still unverified, not confirmed. The one hint I do have is
+              anecdotal, not data: a classmate who replayed the level and
+              retook the quiz seemed to do noticeably better the second time,
+              but I never captured that systematically, so it's an
+              observation, not evidence. If I ran this again, I'd build a
+              lightweight pre/post comprehension check in from day one: "people
+              found it engaging" and "people understood more afterward" are very
+              different claims, and only one of them is what Neuroloop actually
+              set out to prove.
             </Paragraph>
           </CaseStudySection>
 

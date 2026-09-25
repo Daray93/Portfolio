@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   CaseStudyLayout,
@@ -10,6 +10,7 @@ import {
 } from "../../components/case-study/Index";
 
 import OtherProjects from "../../components/shared/OtherProjects";
+import ProtectedGate from "../../components/shared/ProtectedGate";
 import useProtectedAccess from "../../components/shared/useProtectedAccess";
 import styled from "styled-components";
 
@@ -41,7 +42,7 @@ const Image = styled.img`
   height: auto;
   border-radius: ${({ theme }) => theme.radius.md};
   object-fit: cover;
-  cursor: none;
+  cursor: pointer;
 `;
 
 const ModalOverlay = styled.div`
@@ -68,7 +69,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 2rem;
   color: white;
-  cursor: none;
+  cursor: pointer;
 `;
 
 const PillRow = styled.div`
@@ -126,6 +127,7 @@ const MediaRow = styled.div`
 
 export default function OrthoViveCaseStudy() {
   const { isUnlocked, loading } = useProtectedAccess();
+  const navigate = useNavigate();
   const [modalSrc, setModalSrc] = useState(null);
   const lastActiveRef = useRef(null);
 
@@ -152,7 +154,18 @@ export default function OrthoViveCaseStudy() {
 
   if (loading) return null;
   if (!isUnlocked) {
-    return <Navigate to="/" replace />;
+    // Was a silent `<Navigate to="/" />` -- landing here directly (a
+    // bookmark, the Other Projects link, a shared URL) bounced you home
+    // with zero explanation of why, unlike clicking the locked card on
+    // the homepage grid, which opens this exact same password prompt in
+    // place. Showing it here too means every path to a locked project
+    // behaves the same way. redirectTo points back at this same route
+    // (not away from it) since a successful unlock just needs this
+    // component to re-render with isUnlocked now true, not a navigation
+    // anywhere else.
+    return (
+      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/orthovive" />
+    );
   }
 
   return (
@@ -169,25 +182,25 @@ export default function OrthoViveCaseStudy() {
         <CaseStudyPage>
 
           {/* ---------- Brief ---------- */}
-          <CaseStudySection id="brief" tldrVisible>
-            <CaseStudyMorphMedia image={OrthoViveLogo} imageFit="contain" />
-
+          <CaseStudySection id="brief" title="Overview" tldrVisible>
             <CaseStudyHero
               title="OrthoVive"
               subtitle="From brief to working prototype with Claude + Figma"
             >
-              <Paragraph>
-                <strong>This project began with a brief from the client</strong>{" "}
-                outlining the core problem and goals for the product. I used this as
-                the starting point for early concept exploration.
-              </Paragraph>
-
               <PillRow>
                 <Pill>2025</Pill>
                 <Pill>Figma</Pill>
                 <Pill>React</Pill>
                 <Pill>Claude</Pill>
               </PillRow>
+
+              <CaseStudyMorphMedia image={OrthoViveLogo} imageFit="contain" />
+
+              <Paragraph>
+                <strong>This project began with a brief from the client</strong>{" "}
+                outlining the core problem and goals for the product. I used this as
+                the starting point for early concept exploration.
+              </Paragraph>
 
               <Image
                 src={BriefPhoto}

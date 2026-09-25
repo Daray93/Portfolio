@@ -3,18 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/iOS-favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Manrope is self-hosted via @fontsource/manrope (see GlobalStyle.jsx)
-         -- loading it again here from Google Fonts meant every visitor paid
-         for two separate copies of the same typeface. -->
-
-    <!-- Fontshare: General Sans (headings) -->
-    <link rel="preconnect" href="https://api.fontshare.com" />
-    <link
-      href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Geist (body) and Fraunces (headings) are both self-hosted via
+         @fontsource (see GlobalStyle.jsx) -- loading them again here from
+         a CDN would mean every visitor paying for two separate copies of
+         the same typefaces. -->
 
     <title>Dara Phillips | Product Designer</title>
     <link rel="canonical" href="https://daraphillips.com/" />
@@ -44,7 +39,7 @@
     <style>
       /* Global font setup */
       body {
-        font-family: 'Manrope', sans-serif;
+        font-family: 'Geist', sans-serif;
         margin: 0;
         padding: 0;
         background: #fff;
@@ -52,7 +47,7 @@
       }
 
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'General Sans', sans-serif;
+        font-family: 'Fraunces Variable', serif;
         font-weight: 600;
         margin: 0;
       }

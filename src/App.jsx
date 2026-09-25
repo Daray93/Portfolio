@@ -1,15 +1,16 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { StyleSheetManager } from "styled-components";
 import styled from "styled-components";
 
 import GlobalStyle from "./styles/GlobalStyle";
 import { ThemeModeProvider } from "./styles/ThemeModeContext";
+import { MotionPreferenceProvider, useMotionPreference } from "./styles/MotionPreferenceContext";
+import { HomeMorphIntentProvider, useHomeMorphIntent } from "./styles/HomeMorphIntentContext";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import CustomCursor from "./components/layout/CustomCursor";
 
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
@@ -39,6 +40,39 @@ const Main = styled.main`
   flex: 1;
   width: 100%;
   overflow: visible;
+  /* AnimatePresence's mode="popLayout" below pulls the exiting route out
+     of flow via position:absolute the instant a new route mounts, so it
+     can keep animating (or, for Home, just sit at opacity:1) without
+     blocking the incoming page's own layout. Without a positioned
+     ancestor to anchor that absolute positioning to, it falls back to
+     the nearest one further up the tree (or the viewport) instead of
+     this box -- which read as the outgoing page suddenly jumping to a
+     different position/size for its whole exit duration rather than
+     just fading/sitting in place. */
+  position: relative;
+`;
+
+// Visually hidden until focused -- every route puts Navbar (logo + 4
+// filter pills + theme toggle) ahead of content in the tab order; this
+// lets a keyboard user jump straight past it instead of tabbing through
+// on every single page load.
+const SkipLink = styled.a`
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 10000;
+  padding: 0.65rem 1.25rem;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: ${({ theme }) => theme.buttonPrimaryBg};
+  color: ${({ theme }) => theme.buttonPrimaryText};
+  font-family: "Geist", sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 0.15s ease;
+
+  &:focus-visible {
+    top: 1rem;
+  }
 `;
 
 function ScrollToTopOnRouteChange() {
@@ -69,98 +103,179 @@ function AnalyticsPageview() {
   return null;
 }
 
-// Fades each route in/out; wrapping here (rather than in every page file)
-// is what lets AnimatePresence keep the outgoing page mounted long enough
-// for any morphId element on it (see CaseStudyHero) to finish animating
-// into its counterpart on the incoming page.
+// Wrapping here (rather than in every page file) is what lets
+// AnimatePresence keep the outgoing page mounted long enough for any
+// morphId element on it (see CaseStudyHero) to finish animating into its
+// counterpart on the incoming page -- still needed for About Me's real
+// cross-route morph (layoutId="morph-about-me", see
+// Splash.jsx/AboutMe.jsx/MorphAnimatedPage below) even though regular
+// navigation no longer animates.
 const PageTransition = styled(motion.div)`
   width: 100%;
 `;
 
-// `noFade`: an ancestor's opacity animates the *rendered* (composited)
-// opacity of everything inside it, including a descendant motion element
-// that's independently running its own layoutId scale animation -- so
-// this page-level fade was dragging a homepage cell's opacity down to 0
-// mid-flight even though its own shared-element projection was trying to
-// keep it visually continuous. That read as the cell's content
-// disappearing rather than physically growing. Routes that arrive/leave
-// via a morphId (Home and the case studies) skip the fade entirely and
-// let the layoutId scale be the only thing driving the transition; the
-// exit animation is kept (just non-visual) purely so AnimatePresence
-// still holds the outgoing page mounted for the scale to finish.
-function AnimatedPage({ children, noFade = false }) {
-  if (noFade) {
-    return (
-      <PageTransition
-        initial={false}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
-      >
-        {children}
-      </PageTransition>
-    );
-  }
+// No fade, no delay -- a plain, instant swap for every route except the
+// About Me morph (see MorphAnimatedPage/HomeAnimatedPage below). This
+// used to crossfade over 0.2s; the crossfade itself read as smoother than
+// a hard cut in isolation, but paired with the chrome (Navbar/Footer)
+// toggling on a DIFFERENT, unsynchronised delay (see hideChrome below) it
+// read as a stray, uncoordinated flicker rather than a single clean
+// transition -- worse than just committing to instant on both at once.
+function AnimatedPage({ children }) {
+  return (
+    <PageTransition initial={false} animate={{ opacity: 1 }} exit={{ opacity: 1 }}>
+      {children}
+    </PageTransition>
+  );
+}
 
+// About Me's own route -- unlike AnimatedPage above, this ALWAYS holds at
+// opacity:1 through a real 0.5s exit/entry, both directions. An ancestor's
+// opacity animates the *rendered* (composited) opacity of everything
+// inside it, including a descendant motion element that's independently
+// running its own layoutId scale animation -- so a plain fade here would
+// drag the morphing element's opacity to 0 mid-flight even though its own
+// shared-element projection is trying to keep it visually continuous.
+// That reads as the cell's content disappearing rather than physically
+// growing. There's no directional ambiguity here (only Home links here,
+// only here links back to Home) unlike Home's own route, which needs
+// HomeAnimatedPage below to pick per-navigation instead.
+function MorphAnimatedPage({ children }) {
   return (
     <PageTransition
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.35, ease: "easeInOut" }}
+      exit={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
     >
       {children}
     </PageTransition>
   );
 }
 
-// Blank rather than a spinner -- AnimatedPage already fades the route in
-// from opacity 0, so a matching-background placeholder is invisible in
-// practice while the lazy chunk loads, without adding a flash of its own.
+// Home's exit needs to pick between AnimatedPage's instant swap (leaving
+// to a case study) and MorphAnimatedPage's held-opacity morph (leaving to
+// About Me) -- the About Me cell sets `morphing` right before navigating
+// away (see HomeMorphIntentContext), read live here since Home's own
+// Route props are frozen the instant AnimatePresence starts its exit.
+// Entry stays the plain instant swap either way -- arriving back from
+// About Me was never the reported problem, only leaving to it was.
+function HomeAnimatedPage({ children }) {
+  const { morphing } = useHomeMorphIntent();
+  return (
+    <PageTransition
+      initial={false}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 1 }}
+      transition={morphing ? { duration: 0.5, ease: "easeInOut" } : { duration: 0 }}
+    >
+      {children}
+    </PageTransition>
+  );
+}
+
+// Blank rather than a spinner -- a matching-background placeholder is
+// invisible in practice while the lazy chunk loads, without adding a
+// flash of its own.
 const RouteFallback = styled.div`
   min-height: 60vh;
   background: ${({ theme }) => theme.body};
 `;
 
-const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/audanote", "/about-me"];
+// About Me arrives/leaves via a real morph (layoutId="morph-about-me")
+// that runs over 0.5s (see MorphAnimatedPage), hence its own longer
+// delay below -- chrome toggling needs a matching delay there, or
+// Navbar/Footer would vanish the instant the route changes, a beat
+// before the outgoing page has even started its exit. Every other route
+// swaps instantly (see AnimatedPage), so its chrome toggles instantly
+// too (delay 0) -- keeping both in the same tick is what actually reads
+// as clean rather than glitchy; staggering an instant content swap
+// against a delayed chrome toggle was the flicker.
+const MORPH_CHROMELESS_PREFIXES = ["/about-me"];
+const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/audanote", ...MORPH_CHROMELESS_PREFIXES];
 const shouldHideChrome = (pathname) =>
   CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+const isMorphRoute = (pathname) =>
+  MORPH_CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+// framer-motion's own reducedMotion prop is what actually disables/
+// simplifies every motion.* animation site-wide -- this just bridges the
+// app's own toggle (see MotionPreferenceContext, surfaced in Splash.jsx's
+// mobile utility row and the case study FAB) into it. A separate
+// component (not read directly in App) since useMotionPreference needs
+// MotionPreferenceProvider as an ancestor, not a sibling.
+//
+// `children` is a render-prop (receives `reduced`) rather than a plain
+// node -- framer-motion only reads MotionConfig's reducedMotion value
+// when a motion component is first created (its VisualElement caches
+// "shouldReduceMotion" at mount, not on every render), so flipping the
+// prop alone silently did nothing to whatever was already on screen; it
+// only took effect after a full page reload, when everything mounted
+// fresh under the new value. App forces that same fresh-mount by keying
+// AppWrapper off `reduced` (see below) -- this render-prop is what lets
+// it read the same value the config itself just changed to.
+function MotionPreferenceBridge({ children }) {
+  const { reduced } = useMotionPreference();
+  return (
+    <MotionConfig reducedMotion={reduced ? "always" : "never"}>
+      {children(reduced)}
+    </MotionConfig>
+  );
+}
 
 export default function App() {
   const location = useLocation();
 
-  // Navbar/Footer take up real flex space in AppWrapper, so toggling them
-  // the instant the route changes would yank that space away mid-fade,
-  // right as a project cell is transitioning into its case study. Delaying
-  // the flip to match AnimatedPage's fade duration keeps chrome stable
-  // through the transition instead of jump-cutting under it.
+  // Navbar/Footer take up real flex space in AppWrapper (Navbar itself is
+  // position:fixed, but reserves its height via NavSpacer in normal flow;
+  // Footer sits directly in flow), so toggling them needs to land in the
+  // same tick as the content swap it accompanies -- one changing before
+  // the other is exactly what reads as a glitch, not either change on its
+  // own. Every route now swaps instantly (see AnimatedPage) except About
+  // Me's real 0.5s morph (see MorphAnimatedPage), so only that route
+  // keeps a matching delay; everything else is 0.
   const [hideChrome, setHideChrome] = React.useState(() => shouldHideChrome(location.pathname));
 
   React.useEffect(() => {
     const next = shouldHideChrome(location.pathname);
-    const t = setTimeout(() => setHideChrome(next), next ? 350 : 0);
+    const delay = next && isMorphRoute(location.pathname) ? 350 : 0;
+    const t = setTimeout(() => setHideChrome(next), delay);
     return () => clearTimeout(t);
   }, [location.pathname]);
 
   return (
     <StyleSheetManager shouldForwardProp={(prop) => prop !== "theme"}>
+      <MotionPreferenceProvider>
+      <MotionPreferenceBridge>
+      {(reduced) => (
       <ThemeModeProvider>
         <GlobalStyle />
-        <CustomCursor />
         <ScrollToTopOnRouteChange />
         <AnalyticsPageview />
 
-        <AppWrapper>
+        <SkipLink href="#main-content">Skip to content</SkipLink>
+
+        {/* Keyed off `reduced` so every motion.* component underneath
+            (Navbar's PillNav indicator, the routed page's own reveals/
+            layout transitions, etc.) gets a fresh mount picking up the
+            new reducedMotion setting -- see MotionPreferenceBridge's own
+            comment for why that's necessary. ScrollToTopOnRouteChange/
+            AnalyticsPageview stay outside this boundary on purpose: they
+            fire their effects on mount, and remounting them here would
+            re-trigger an unwanted scroll-to-top/pageview every time this
+            toggle flips. */}
+        <AppWrapper key={reduced}>
           {!hideChrome && <Navbar />}
 
-          <Main>
+          <Main id="main-content" tabIndex={-1}>
+            <HomeMorphIntentProvider>
             <AnimatePresence mode="popLayout" initial={false}>
               <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<AnimatedPage noFade><Home /></AnimatedPage>} />
+                <Route path="/" element={<HomeAnimatedPage><Home /></HomeAnimatedPage>} />
                 <Route
                   path="/orthovive"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <OrthoViveCaseStudy />
                       </Suspense>
@@ -170,7 +285,7 @@ export default function App() {
                 <Route
                   path="/kropt"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <Kropt />
                       </Suspense>
@@ -180,7 +295,7 @@ export default function App() {
                 <Route
                   path="/neuroloop"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <Neuroloop />
                       </Suspense>
@@ -190,7 +305,7 @@ export default function App() {
                 <Route
                   path="/ibhf"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <IbhfCaseStudy />
                       </Suspense>
@@ -200,7 +315,7 @@ export default function App() {
                 <Route
                   path="/operation-avocado"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <OperationAvocadoCaseStudy />
                       </Suspense>
@@ -210,7 +325,7 @@ export default function App() {
                 <Route
                   path="/audanote"
                   element={
-                    <AnimatedPage noFade>
+                    <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <AudanoteCaseStudy />
                       </Suspense>
@@ -220,21 +335,25 @@ export default function App() {
                 <Route
                   path="/about-me"
                   element={
-                    <AnimatedPage noFade>
+                    <MorphAnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <AboutMe />
                       </Suspense>
-                    </AnimatedPage>
+                    </MorphAnimatedPage>
                   }
                 />
                 <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
               </Routes>
             </AnimatePresence>
+            </HomeMorphIntentProvider>
           </Main>
 
           {!hideChrome && <Footer />}
         </AppWrapper>
       </ThemeModeProvider>
+      )}
+      </MotionPreferenceBridge>
+      </MotionPreferenceProvider>
     </StyleSheetManager>
   );
 }

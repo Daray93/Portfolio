@@ -6,7 +6,7 @@ const CaseStudyPage = styled.div`
   flex-direction: column;
   gap: 3rem;
   background: ${({ theme }) => theme.body};
-  border-radius: 24px;
+  border-radius: ${({ theme }) => theme.radius.xl};
 
   @media (max-width: 768px) {
     gap: 1.5rem;

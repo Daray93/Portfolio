@@ -9,12 +9,12 @@ const SIZE = {
   md: css`
     padding: 0.65rem 1.25rem;
     font-size: 1rem;
-    border-radius: 12px;
+    border-radius: ${({ theme }) => theme.radius.btn};
   `,
   sm: css`
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
-    border-radius: 10px;
+    border-radius: ${({ theme }) => theme.radius.btn};
   `,
 };
 
@@ -69,11 +69,11 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
-  cursor: none;
+  cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 
   ${({ $size = "md" }) => SIZE[$size]}
@@ -82,6 +82,11 @@ const Button = styled.button`
   &:disabled {
     opacity: 0.5;
     pointer-events: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.accent};
+    outline-offset: 2px;
   }
 
   svg {

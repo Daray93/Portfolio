@@ -33,11 +33,9 @@ const Nav = styled.nav`
 
   @media (max-width: 560px) {
     top: auto;
-    bottom: ${({ theme }) => theme.space[3]};
+    bottom: 0;
     height: auto;
-    transform: translateY(
-      ${({ $hidden, theme }) => ($hidden ? `calc(100% + ${theme.space[3]})` : "0")}
-    );
+    transform: translateY(${({ $hidden }) => ($hidden ? "100%" : "0")});
   }
 `;
 
@@ -67,11 +65,13 @@ const NavContainer = styled.div`
     padding: 0 1rem;
   }
 
-  /* Only the pill filter shows below 560px (see LogoText/ThemeToggle) --
-     center it now that it's the sole child instead of being pinned left
-     by justify-content: space-between. Side padding matches
-     SplashContainer's own mobile padding (1.25rem) so the pill's outer
-     edge lines up with the grid cards above it. */
+  /* Only the pill filter shows below 560px (see LogoText/ThemeToggle;
+     the theme toggle gets a proper home in Splash's own mobile utility
+     row instead, see UtilityRowInner there) -- center it now that it's
+     the sole child instead of being pinned left by justify-content:
+     space-between. Side padding matches SplashContainer's own mobile
+     padding (1.25rem) so the pill's outer edge lines up with the grid
+     cards above it. */
   @media (max-width: 560px) {
     justify-content: center;
     padding: 0 1.25rem;
@@ -79,19 +79,24 @@ const NavContainer = styled.div`
 `;
 
 const LogoText = styled(NavLink)`
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 400;
   letter-spacing: 0.05rem;
   color: ${({ theme }) => theme.textSecondary};
   text-decoration: none;
   padding: 0.5rem 0.75rem;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.radius.sm};
   border: 1px solid transparent;
 
   &:hover {
     color: ${({ theme }) => theme.text};
     background: ${({ theme }) => theme.cardBackground};
     border: 1px solid ${({ theme }) => theme.skeletonBase};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.accent};
+    outline-offset: 2px;
   }
 
   @media (max-width: 560px) {
@@ -112,16 +117,21 @@ const ThemeToggle = styled.button`
   width: 2.25rem;
   height: 2.25rem;
   padding: 0;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.radius.sm};
   border: 1px solid transparent;
   background: transparent;
   color: ${({ theme }) => theme.textSecondary};
-  cursor: none;
+  cursor: pointer;
 
   &:hover {
     color: ${({ theme }) => theme.text};
     background: ${({ theme }) => theme.cardBackground};
     border: 1px solid ${({ theme }) => theme.skeletonBase};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.accent};
+    outline-offset: 2px;
   }
 
   svg {

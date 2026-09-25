@@ -5,16 +5,10 @@ const Row = styled.section`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: ${({ theme }) => theme.cardBackground};
-  border-radius: 24px; // card rounding
-  border: 1px solid ${({ theme }) => theme.border};
-  padding: 5rem;
   gap: 1.5rem;
 
   @media (max-width: 900px) {
     gap: 0.75rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
   }
 `;
 
@@ -37,9 +31,9 @@ const TitleSquare = styled.div`
 `;
 
 const Title = styled.h2`
-  cursor: none;
+  cursor: pointer;
   font-weight: 400;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -91,6 +85,13 @@ const TldrPlaceholder = styled.p`
   color: ${({ theme }) => theme.textSecondary};
 `;
 
+const TldrBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+`;
+
 export default function CaseStudySection({
   id,
   title,
@@ -98,6 +99,7 @@ export default function CaseStudySection({
   full,
   tldrVisible = false,
   tldr,
+  tldrMedia,
   ...props
 }) {
   const { view } = useCaseStudyView();
@@ -105,9 +107,10 @@ export default function CaseStudySection({
   // TL;DR mode shortens every section rather than removing it -- the
   // overview/hero section (tldrVisible) is exempt since it's already
   // the short version of the page. Everything else swaps its full body
-  // for a condensed one-liner: a real `tldr` prop when a section has
-  // been given one, otherwise a placeholder standing in for copy that
-  // hasn't been written yet.
+  // for a condensed one-liner (a real `tldr` prop when a section has
+  // been given one, otherwise a placeholder) plus, when the section has
+  // one, the same image/video used in the full story -- a skim reader
+  // should still see the work, not just read about it.
   const isShortened = view === "tldr" && !tldrVisible;
 
   return (
@@ -123,12 +126,15 @@ export default function CaseStudySection({
       )}
       <Body>
         {isShortened ? (
-          <TldrPlaceholder>
-            {tldr ||
-              (title
-                ? `TL;DR placeholder — a shortened summary of "${title}" goes here.`
-                : "TL;DR placeholder — a shortened summary goes here.")}
-          </TldrPlaceholder>
+          <TldrBody>
+            {tldrMedia}
+            <TldrPlaceholder>
+              {tldr ||
+                (title
+                  ? `TL;DR placeholder — a shortened summary of "${title}" goes here.`
+                  : "TL;DR placeholder — a shortened summary goes here.")}
+            </TldrPlaceholder>
+          </TldrBody>
         ) : (
           children
         )}

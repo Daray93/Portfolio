@@ -1,6 +1,7 @@
 import React from "react";
 import { CaseStudyLayout, CaseStudyPage } from "../../components/case-study/Index";
 import OperationAvocadoContent from "./OperationAvocadoContent";
+import OtherProjects from "../../components/shared/OtherProjects";
 
 // Same shell every other case study uses (see Kropt.jsx) -- previously
 // this only ran as a bare-bones fallback (CaseStudyLayoutFree) for a cold
@@ -15,16 +16,17 @@ export default function OperationAvocadoCaseStudy() {
     <CaseStudyLayout
       sections={[
         { id: "overview", label: "Overview" },
-        { id: "user", label: "The User" },
-        { id: "vision", label: "Vision" },
+        { id: "problem", label: "Problem" },
+        { id: "goal", label: "Goal" },
         { id: "process", label: "Process" },
-        { id: "challenges", label: "Challenges / Insights" },
-        { id: "results", label: "Results" },
+        { id: "outcomes", label: "Outcomes" },
       ]}
     >
       <CaseStudyPage>
         <OperationAvocadoContent />
       </CaseStudyPage>
+
+      <OtherProjects currentProjectId="operation-avocado" />
     </CaseStudyLayout>
   );
 }

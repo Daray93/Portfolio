@@ -124,7 +124,7 @@ const Card = styled(motion.div)`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  cursor: none;
+  cursor: pointer;
 
   /* Plain (non-morph) usage stays exactly as before -- chrome only
      appears when this card is the source of a homepage->case-study
@@ -134,7 +134,7 @@ const Card = styled(motion.div)`
      of morph state -- a fixed value here (24px) drifted from that
      responsive one at small viewports, so the video's own rounded corner
      no longer lined up with the card clipping it on mobile. */
-  border-radius: clamp(18px, 2.5vw, 32px);
+  border-radius: ${({ theme }) => theme.radius.xxl};
   background: ${({ $morph, theme }) => ($morph ? theme.body : "transparent")};
   border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
   box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};
@@ -175,7 +175,7 @@ const Title = styled.span`
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   font-size: 1.25;
   font-weight: 500;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   letter-spacing: 0.01em;
 `;
 

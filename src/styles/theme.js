@@ -4,11 +4,35 @@
 // only the values swap when ThemeModeContext switches the active mode.
 
 const radius = {
+  xxl: "clamp(18px, 2.5vw, 32px)", // grid/hero cards (Splash's grid, hover cards, case-study media)
   xl: "clamp(16px, 2vw, 24px)", // large containers
   lg: "clamp(12px, 1.5vw, 16px)", // cards
   md: "clamp(8px, 1vw, 12px)", // media
-  sm: "clamp(6px, 0.8vw, 8px)", // buttons/inputs
+  sm: "clamp(6px, 0.8vw, 8px)", // ghost buttons/icon buttons
   xs: "clamp(4px, 0.5vw, 6px)", // pills/chips
+  // Flat (non-responsive) -- the actual <Button>/form-control radius
+  // used everywhere, as opposed to `sm`'s smaller ghost/icon-button one.
+  // Was hardcoded "12px" (and Button.jsx's own "sm" size at "10px",
+  // folded in here too -- a 2px difference in a button's OWN corner
+  // radius between its two sizes was never a deliberate distinction)
+  // scattered across a dozen call sites rather than ever routed through
+  // this scale, which is the actual reason it didn't respond to dark
+  // mode's flattened radius until now.
+  btn: "12px",
+};
+
+// Dark mode's own radius scale -- same keys as `radius` above (every
+// `theme.radius.x` usage across the app just reads whichever scale is
+// active), all flattened to square corners instead of light mode's
+// clamped curves.
+const radiusFlat = {
+  xxl: "0",
+  xl: "0",
+  lg: "0",
+  md: "0",
+  sm: "0",
+  xs: "0",
+  btn: "0",
 };
 
 const space = {
@@ -186,7 +210,7 @@ export const darkTheme = {
     )
   `,
 
-  radius,
+  radius: radiusFlat,
   space,
 };
 

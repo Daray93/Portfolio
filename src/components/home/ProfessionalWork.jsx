@@ -42,7 +42,7 @@ const WorkCta = styled(motion.a)`
   border: 1px solid ${({ theme }) => theme.buttonSecondaryBorder};
   background: ${({ theme }) => theme.buttonSecondaryBg};
   color: ${({ theme }) => theme.buttonSecondaryText};
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
   color: ${({ theme }) => theme.text};

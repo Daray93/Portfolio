@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -48,14 +48,14 @@ const PasswordModal = styled.div`
 
   h3 {
     margin: 0 0 0.25rem;
-    font-family: "General Sans", sans-serif;
+    font-family: "Fraunces Variable", serif;
     color: ${({ theme }) => theme.text};
     font-size: clamp(1rem, 2.5vw, 1.2rem);
   }
 
   p {
     margin: 0;
-    font-family: "Manrope", sans-serif;
+    font-family: "Geist", sans-serif;
     font-size: 0.875rem;
     color: ${({ theme }) => theme.textTertiary};
     line-height: 1.4;
@@ -86,7 +86,7 @@ const PasswordInput = styled.input`
     theme.inputBg};
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 
   &::placeholder {
@@ -120,7 +120,7 @@ const ToggleVisibility = styled.button`
   background: none;
   border: none;
   padding: 0.25rem;
-  cursor: none;
+  cursor: pointer;
 
   img {
     width: 1.2rem;
@@ -163,10 +163,10 @@ const ModalPrimaryButton = styled.button`
   padding: 0.85rem;
   border: none;
   border-radius: ${({ theme }) => theme.radius.lg};
-  cursor: none;
+  cursor: pointer;
   background: ${({ theme }) => theme.buttonPrimaryBg};
   color: ${({ theme }) => theme.buttonPrimaryText};
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 500;
   font-size: 0.95rem;
   transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -188,10 +188,10 @@ const ModalSecondaryButton = styled.button`
   padding: 0.85rem;
   border: 1px solid ${({ theme }) => theme.buttonSecondaryBorder};
   border-radius: ${({ theme }) => theme.radius.lg};
-  cursor: none;
+  cursor: pointer;
   background: ${({ theme }) => theme.buttonSecondaryBg};
   color: ${({ theme }) => theme.buttonSecondaryText};
-  font-family: "Manrope", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 500;
   font-size: 0.95rem;
   transition: background 0.15s ease;
@@ -211,6 +211,42 @@ const ModalSecondaryButton = styled.button`
 
 export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive" }) {
   const navigate = useNavigate();
+  const modalRef = useRef(null);
+
+  // Same reasoning as the About Me modal (Splash.jsx): traps Tab within
+  // the modal and handles Escape, since neither existed before -- Tab
+  // could walk out into whatever grid content sits behind the overlay,
+  // and there was no keyboard way to dismiss this beyond tabbing all the
+  // way to Cancel. The password input already gets initial focus via
+  // autoFocus below, so this only needs to handle the trap + Escape.
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const modal = modalRef.current;
+      const focusable = modal
+        ? modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')
+        : [];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [inputStatus, setInputStatus] = useState("idle"); // idle | empty | error | locked
@@ -295,8 +331,14 @@ export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive"
 
   return (
     <PasswordOverlay onClick={(e) => e.target === e.currentTarget && handleClose()}>
-      <PasswordModal $shaking={isShaking}>
-        <h3>Protected Project</h3>
+      <PasswordModal
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="protected-gate-title"
+        $shaking={isShaking}
+      >
+        <h3 id="protected-gate-title">Protected Project</h3>
         <p>This case study is password protected.</p>
 
         <InputWrapper>

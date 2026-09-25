@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,17 +44,22 @@ const Track = styled.nav`
      (NavContainer carries the matching side padding). It's floating
      directly over scrolling grid content now instead of sitting on a
      mostly-static top bar, so it gets a frosted-glass treatment
-     (blurred backdrop + shadow) to stay legible against whatever's
-     underneath it. navSurface is already translucent -- the blur is
-     what turns that into actual glass instead of a flat tint. */
+     (blurred backdrop + a hairline border, no drop shadow -- this is
+     wayfinding chrome, not a CTA, and shouldn't compete with actual
+     calls to action like the TL;DR toggle) to stay legible against
+     whatever's underneath it. navSurface is already translucent -- the
+     blur is what turns that into actual glass instead of a flat tint. */
   @media (max-width: 560px) {
     display: flex;
     width: 100%;
     padding: 5px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: ${({ theme }) => theme.shadowLg};
-    border: 1px solid ${({ theme }) => theme.border};
+    border-radius: 0;
+    border-top: 1px solid ${({ theme }) => theme.border};
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+    border-left: none;
+    border-right: none;
 
     ${({ $scrollable }) =>
       $scrollable &&
@@ -77,10 +82,10 @@ const PillButton = styled.button`
   border: none;
   background: transparent;
   border-radius: 999px;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: 0.9rem;
   font-weight: 500;
-  cursor: none;
+  cursor: pointer;
   color: ${({ theme, $active }) => ($active ? theme.buttonPrimaryText : theme.textSecondary)};
   transition: color 0.2s ease;
 
@@ -90,6 +95,11 @@ const PillButton = styled.button`
 
   &:active {
     transform: scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.accent};
+    outline-offset: 2px;
   }
 
   @media (max-width: 560px) {
@@ -107,36 +117,46 @@ const PillButton = styled.button`
   }
 `;
 
-// Fades the pill row's edges out to white right where it scrolls under
-// them, hinting there's more to scroll to -- a white gradient (matching
-// the pill nav's own glassy navSurface tone) layered over a backdrop-blur,
-// so it reads as the content fading into the nav's own surface rather
-// than a flat, colourless blur. Overlay only, never intercepts touch/scroll.
+// Fades the pill row's edges out right where it scrolls under them,
+// hinting there's more to scroll to -- faded to the page's own
+// background (theme.body), not the pill's translucent navSurface tone,
+// so the fade reads as correct in both light and dark mode instead of
+// carrying a mismatched tint. Overlay only, never intercepts touch/scroll.
+//
+// The backdrop-filter blur is masked with the same gradient as the color
+// (mask-image, not just a background gradient) -- without that, the blur
+// applies at a flat, uniform strength across the whole strip with a hard
+// cutoff at its inner edge, while only the color fades. That mismatch
+// (color dissolving smoothly, blur stopping dead) is what read as a
+// solid "blob" instead of a graceful fade into the page.
 const EdgeFade = styled.div`
   display: none;
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 32px;
+  width: 40px;
   pointer-events: none;
   z-index: 2;
-  border-radius: 999px;
 
   @media (max-width: 560px) {
     display: ${({ $show }) => ($show ? "block" : "none")};
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   ${({ $side, theme }) =>
     $side === "left"
       ? css`
           left: 0;
-          background: linear-gradient(to right, ${theme.navSurface}, transparent);
+          background: linear-gradient(to right, ${theme.body}, transparent);
+          mask-image: linear-gradient(to right, black, transparent);
+          -webkit-mask-image: linear-gradient(to right, black, transparent);
         `
       : css`
           right: 0;
-          background: linear-gradient(to left, ${theme.navSurface}, transparent);
+          background: linear-gradient(to left, ${theme.body}, transparent);
+          mask-image: linear-gradient(to left, black, transparent);
+          -webkit-mask-image: linear-gradient(to left, black, transparent);
         `}
 `;
 
@@ -176,6 +196,21 @@ export default function PillNav({
   scrollable = false,
 }) {
   const [hoveredId, setHoveredId] = useState(null);
+  const buttonRefs = useRef({});
+
+  // Keeps the active pill visible as `activeId` changes -- whether from a
+  // click or from CaseStudyLayout's scroll-spy following the page -- by
+  // centering it in the track's own scroll viewport. Without this the
+  // highlighted pill can end up scrolled out of sight on mobile, since
+  // nothing was moving the track itself as the active section changed.
+  useEffect(() => {
+    if (!scrollable) return;
+    buttonRefs.current[activeId]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [activeId, scrollable]);
 
   return (
     <ScrollShell>
@@ -185,6 +220,9 @@ export default function PillNav({
           return (
             <PillButton
               key={option.id}
+              ref={(el) => {
+                buttonRefs.current[option.id] = el;
+              }}
               role="tab"
               type="button"
               aria-selected={active}

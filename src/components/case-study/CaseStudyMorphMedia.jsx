@@ -13,7 +13,7 @@ const Frame = styled.div`
   max-width: 900px;
   aspect-ratio: 16 / 9;
   margin: 0 auto 2rem;
-  border-radius: clamp(18px, 2.5vw, 32px);
+  border-radius: ${({ theme }) => theme.radius.xxl};
   border: 1px solid ${({ theme }) => theme.border};
   overflow: hidden;
   background: ${({ theme }) => theme.cardBackground};

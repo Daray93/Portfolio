@@ -4,5 +4,4 @@ export const FILTERS = [
   { id: "all", label: "All" },
   { id: "about", label: "About" },
   { id: "work", label: "Work" },
-  { id: "life", label: "Life" },
 ];

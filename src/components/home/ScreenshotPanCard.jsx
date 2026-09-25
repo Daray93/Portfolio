@@ -1,5 +1,5 @@
 import { useRef, useState, useLayoutEffect } from "react";
-import styled, { css, keyframes } from "styled-components";
+import styled, { css } from "styled-components";
 import { motion, useAnimationControls } from "framer-motion";
 
 const MORPH_TRANSITION = { layout: { duration: 0.5, ease: "easeInOut" } };
@@ -36,11 +36,23 @@ const RESET_DURATION = 0.6;
  * Optional `morphId`: shares a layoutId with a CaseStudyMorphMedia on the
  * linked case study page, same as VideoHoverCard (see Splash.jsx).
  *
- * `sway`: a slow, continuous idle rotation on the image itself (not the
- * pan strip) -- for single-screenshot cards with nothing to pan through
- * (e.g. IBHF's bee photo), so it's not just a static, unmoving tile
- * either. Applied to the image rather than Pan so it never fights the
- * hover/click-driven pan transform on the same element.
+ * `saturateOnHover`: rests slightly desaturated, blooms to full colour
+ * plus a small scale on hover -- for single-screenshot cards with
+ * nothing to pan through (e.g. IBHF's bee photo), so hovering still
+ * reads as a deliberate reveal rather than a static tile. Was a
+ * continuous idle sway (translate the whole photo around) before; that
+ * read as fake motion on a photo where nothing's actually moving, see
+ * git history. Applied to the image rather than Pan so it never fights
+ * the hover/click-driven pan transform on the same element.
+ *
+ * `staticImage`: skips the whole pan mechanism (no measurement, no
+ * hover/click handlers) and crops the first screen to fill the frame
+ * instead -- for a genuinely inert tile (e.g. Kropt's home screen).
+ * Plain `screens={[oneImage]}` alone doesn't guarantee that: at
+ * direction="vertical" the image is sized width:100%/height:auto for
+ * panning, so whenever its natural height (at that width) still
+ * overflows the frame, it pans on hover regardless of there being only
+ * one screen to pan through.
  */
 export default function ScreenshotPanCard({
   screens,
@@ -56,7 +68,8 @@ export default function ScreenshotPanCard({
   // dead space above the subject can rest already panned past it.
   // Hovering still pans the rest of the way to the strip's far edge.
   focalPoint = 0,
-  sway = false,
+  saturateOnHover = false,
+  staticImage = false,
 }) {
   const frameRef = useRef(null);
   const panRef = useRef(null);
@@ -69,6 +82,8 @@ export default function ScreenshotPanCard({
   const restOffset = panDistance * focalPoint;
 
   useLayoutEffect(() => {
+    if (staticImage) return undefined;
+
     const measure = () => {
       if (!frameRef.current || !panRef.current) return;
       const frameSize = horizontal ? frameRef.current.offsetWidth : frameRef.current.offsetHeight;
@@ -89,7 +104,7 @@ export default function ScreenshotPanCard({
     if (panRef.current) ro.observe(panRef.current);
 
     return () => ro.disconnect();
-  }, [screens, horizontal, focalPoint, axis, controls]);
+  }, [screens, horizontal, focalPoint, axis, controls, staticImage]);
 
   const panDuration = Math.max(MIN_PAN_DURATION, panDistance / panSpeed);
 
@@ -102,16 +117,19 @@ export default function ScreenshotPanCard({
   };
 
   const handleMouseEnter = () => {
+    if (staticImage) return;
     isHoveredRef.current = true;
     if (!pausedRef.current) startPan();
   };
 
   const handleMouseLeave = () => {
+    if (staticImage) return;
     isHoveredRef.current = false;
     if (!pausedRef.current) resetPan();
   };
 
   const handleClick = () => {
+    if (staticImage) return;
     const next = !pausedRef.current;
     pausedRef.current = next;
     if (next) {
@@ -134,18 +152,22 @@ export default function ScreenshotPanCard({
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      <Pan ref={panRef} $horizontal={horizontal} animate={controls} initial={false}>
-        {screens.map((entry) =>
-          Array.isArray(entry) ? (
-            <CrossfadeSlot key={entry.join("|")} $horizontal={horizontal}>
-              <Shot src={entry[0]} alt="" $horizontal={horizontal} $sway={sway} />
-              <FadeShot src={entry[1]} alt="" $horizontal={horizontal} />
-            </CrossfadeSlot>
-          ) : (
-            <Shot key={entry} src={entry} alt="" $horizontal={horizontal} $sway={sway} />
-          )
-        )}
-      </Pan>
+      {staticImage ? (
+        <StillShot src={screens[0]} alt="" />
+      ) : (
+        <Pan ref={panRef} $horizontal={horizontal} animate={controls} initial={false}>
+          {screens.map((entry) =>
+            Array.isArray(entry) ? (
+              <CrossfadeSlot key={entry.join("|")} $horizontal={horizontal}>
+                <Shot src={entry[0]} alt="" $horizontal={horizontal} $saturateOnHover={saturateOnHover} />
+                <FadeShot src={entry[1]} alt="" $horizontal={horizontal} />
+              </CrossfadeSlot>
+            ) : (
+              <Shot key={entry} src={entry} alt="" $horizontal={horizontal} $saturateOnHover={saturateOnHover} />
+            )
+          )}
+        </Pan>
+      )}
 
       {(title || tag) && (
         <Overlay>
@@ -166,7 +188,7 @@ const Frame = styled(motion.div)`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  cursor: none;
+  cursor: pointer;
 
   /* Plain (non-morph) usage stays a transparent, simply-rounded box.
      Chrome only appears when this card is the source of a homepage->
@@ -175,7 +197,7 @@ const Frame = styled(motion.div)`
      regardless of morph state -- a fixed value here (24px) drifted from
      that responsive one at small viewports, so the image's own rounded
      corner no longer lined up with the card clipping it on mobile. */
-  border-radius: clamp(18px, 2.5vw, 32px);
+  border-radius: ${({ theme }) => theme.radius.xxl};
   background: ${({ $morph, theme }) => ($morph ? theme.body : "transparent")};
   border: ${({ $morph, theme }) => ($morph ? `1px solid ${theme.border}` : "none")};
   box-shadow: ${({ $morph, theme }) => ($morph ? theme.shadowSm : "none")};
@@ -190,16 +212,13 @@ const Pan = styled(motion.div)`
   will-change: transform;
 `;
 
-// Lifts, then rocks left-right with real amplitude (not a subtle wobble) --
-// scaled up enough that even the widest translated extreme never pulls
-// the image edge in past Frame's own clipped bounds and reveals a sliver
-// of background behind it.
-const swayAnim = keyframes`
-  0% { transform: translate(0, 0) scale(1.1); }
-  25% { transform: translate(0, -8px) scale(1.1); }
-  50% { transform: translate(12px, -4px) scale(1.1); }
-  75% { transform: translate(-12px, -4px) scale(1.1); }
-  100% { transform: translate(0, 0) scale(1.1); }
+// staticImage's own image -- cropped to fill the frame with no pan, no
+// filter/scale transition, nothing. A genuinely inert tile.
+const StillShot = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const Shot = styled.img`
@@ -208,10 +227,25 @@ const Shot = styled.img`
   width: ${({ $horizontal }) => ($horizontal ? "auto" : "100%")};
   height: ${({ $horizontal }) => ($horizontal ? "100%" : "auto")};
 
-  ${({ $sway }) =>
-    $sway &&
+  /* Rests slightly muted rather than fully desaturated -- strong enough
+     to read as deliberate once it blooms on hover, not so strong it
+     looks broken/washed-out sitting at rest next to the grid's other
+     full-colour cards. */
+  ${({ $saturateOnHover }) =>
+    $saturateOnHover &&
     css`
-      animation: ${swayAnim} 6s ease-in-out infinite;
+      filter: saturate(0.6) contrast(0.98);
+      transform: scale(1);
+      /* Same snap-and-settle curve as CaseStudyFab's own transform
+         transition -- a deliberate, confident bloom rather than the
+         generic linear-ish feel of a plain ease. */
+      transition: filter 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+
+      ${Frame}:hover & {
+        filter: saturate(1.15) contrast(1.02);
+        transform: scale(1.045);
+      }
     `}
 `;
 
@@ -251,6 +285,12 @@ const Overlay = styled.div`
      just text color) keeps the title/pill legible no matter what the
      underlying screenshot looks like at that point in the animation. */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 65%);
+
+  /* Title/tag move to their own plain-text row below the image at this
+     width instead (see Splash.jsx's MobileCaptionLink/Button). */
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 
 const LeftStack = styled.div`
@@ -263,7 +303,7 @@ const Title = styled.span`
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   letter-spacing: 0.01em;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 `;

@@ -33,6 +33,7 @@ const Image = styled.img`
   height: auto;
   border-radius: ${({ theme }) => theme.radius.md};
   object-fit: cover;
+  cursor: pointer;
 `;
 
 const VideoContainer = styled.div`
@@ -91,7 +92,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 2rem;
   color: white;
-  cursor: none;
+  cursor: pointer;
 `;
 
 /* ---------- Responsive solution container ---------- */
@@ -242,11 +243,10 @@ export default function KroptCaseStudy() {
       <CaseStudyLayout
         sections={[
           { id: "overview", label: "Overview" },
-          { id: "user", label: "The User" },
-          { id: "vision", label: "Vision" },
-          { id: "proof", label: "Proof of Concept" },
-          { id: "challenges", label: "Challenges / Insights" },
-          { id: "results", label: "Results" },
+          { id: "problem", label: "Problem" },
+          { id: "goal", label: "Goal" },
+          { id: "process", label: "Process" },
+          { id: "outcomes", label: "Outcomes" },
         ]}
       >
         <CaseStudyPage>
@@ -282,7 +282,6 @@ export default function KroptCaseStudy() {
                 <Image
                   src={kroptHeader}
                   alt="Kropt header screen"
-                  data-cursor="zoom"
                   onClick={() => openModal(kroptHeader)}
                 />
               </SolutionContainer>
@@ -290,20 +289,25 @@ export default function KroptCaseStudy() {
 
             <RoleContainer>
               <RoleHeading>My Role</RoleHeading>
-              I led the UX research and UX UI design from early discovery to high fidelity prototypes. This included speaking with farmers, mapping real
-              fidelity prototypes. This included speaking with farmers, mapping real
-              world workflows, and creating practical interfaces that are clear,
-              usable, and built to support real farm work rather than just look good.
+              I led the UX research and UI design from early discovery through to
+              high-fidelity prototypes — speaking with farmers, mapping their real
+              workflows, and turning that into interfaces built to hold up in real
+              farm conditions, not just look good on a screen.
             </RoleContainer>
           </CaseStudySection>
 
-          {/* ---------- The User ---------- */}
-          <CaseStudySection id="user" title="The User">
+          {/* ---------- Problem ---------- */}
+          <CaseStudySection
+            id="problem"
+            title="Problem"
+            tldr="Farm records live scattered across paper, spreadsheets, and separate tools, so farmers can't see patterns over time or prove regenerative practices are actually working."
+          >
             <Paragraph>
               Kropt is built for small to medium regenerative farmers who care deeply
               about the long term health of their land. They work hands on, rely on
-              experience and observation, and value tools that fit naturally into
-              daily farm life.
+              experience and observation, and keep their records the way farming
+              always has — on paper, in notebooks, spread across whatever tool was
+              closest at the time.
             </Paragraph>
 
             <UserGrid>
@@ -327,54 +331,79 @@ export default function KroptCaseStudy() {
               </UserCard>
 
               <UserCard>
-                <h4>What matters to them</h4>
+                <h4>What's at stake</h4>
                 <p>
-                  Farmers want to improve soil, support animal welfare, and leave the
-                  land better than they found it. They value clarity and confidence
-                  in decisions without adding extra admin to what are already long days.
+                  Without one place to see soil, livestock, and crop data together,
+                  it's hard to tell whether regenerative practices are actually
+                  paying off — decisions end up made on instinct, and years of
+                  hands-on work go undocumented and unproven.
                 </p>
               </UserCard>
             </UserGrid>
 
             <Callout>
-              These farmers are not seeking complex software. They want a simple,
-              reliable system that fits real farm work and quietly builds
-              understanding over time.
+              These farmers aren't short on effort or care. They're short on a
+              system that turns years of hands-on work into evidence they can
+              actually use — and until that exists, good practice stays invisible,
+              even to the people doing it.
             </Callout>
           </CaseStudySection>
 
-          {/* ---------- Vision ---------- */}
-          <CaseStudySection id="vision" title="Vision">
+          {/* ---------- Goal ---------- */}
+          <CaseStudySection
+            id="goal"
+            title="Goal"
+            tldr="A calm, offline-capable app built around fast daily logging and pattern-level insight instead of raw numbers — designed to fit into existing farm routines, not fight them."
+            tldrMedia={
+              <MediaCard>
+                <Image
+                  src={kroptHome}
+                  alt="Home screen showing calm summaries and daily priorities"
+                  onClick={() => openModal(kroptHome)}
+                />
+                <Caption>
+                  The home screen summarises the farm day, showing priorities
+                  and progress without overwhelming the user.
+                </Caption>
+              </MediaCard>
+            }
+          >
             <Paragraph>
-              Kropt was designed to feel calm, practical, and trustworthy. 
+              What these farmers actually want isn't complex software — it's a
+              simple, reliable way to see whether the work they're already doing is
+              paying off, without adding admin to days that are already long. They
+              want to improve soil, support animal welfare, and leave the land
+              better than they found it; the goal was to build something that helps
+              them see that progress, not something that asks more of them to use.
             </Paragraph>
 
             <Paragraph>
-              The interface focuses on fast daily actions and clear visual feedback.
-              Instead of isolated numbers, it shows patterns and insights that help
-              farmers understand what needs to be done, and to make better decisions over time.
+              Kropt was designed to feel calm, practical, and trustworthy. The
+              interface focuses on fast daily actions and clear visual feedback —
+              instead of isolated numbers, it shows patterns and insights that help
+              farmers understand what needs to be done and make better decisions
+              over time.
             </Paragraph>
 
             <Paragraph>
-              Farmers rise early to milk cows and often finish late doing the same.
-              Screens must be legible in dim light yet readable in bright daylight.
-            </Paragraph>
-
-            <Paragraph>
-              Dark mode reduces glare during long days. Strong contrast, large touch
-              targets, and clear hierarchy make the system reliable, usable, and
-              trustworthy.
+              Farmers milk cows at first light and are often still working the
+              fields after dark, so screens had to be legible in dim light and
+              readable in bright daylight — dark mode, strong contrast, large touch
+              targets, and clear hierarchy were the strategy for making the system
+              reliable and usable in those real conditions, not just on a desk in
+              daylight.
             </Paragraph>
 
             <MediaCard>
               <Image
                 src={kroptProcess}
-                alt="User flow showing daily logging leading to long term insight"
-                data-cursor="zoom"
+                alt="Design process moving from problem to goal to proof of concept to outcomes"
                 onClick={() => openModal(kroptProcess)}
               />
               <Caption>
-                Here is the process I undertook to design Kropt, starting with understanding the user and their needs, then defining a clear vision, creating a proof of concept, and finally reflecting on challenges and results.
+                The process moved from understanding the problem, to defining a
+                clear goal, building and testing a proof of concept, and reflecting
+                on outcomes.
               </Caption>
             </MediaCard>
 
@@ -382,7 +411,6 @@ export default function KroptCaseStudy() {
               <Image
                 src={kroptHome}
                 alt="Home screen showing calm summaries and daily priorities"
-                data-cursor="zoom"
                 onClick={() => openModal(kroptHome)}
               />
               <Caption>
@@ -395,7 +423,6 @@ export default function KroptCaseStudy() {
               <Image
                 src={kroptSoilHealth}
                 alt="Soil health analytics showing trend insights"
-                data-cursor="zoom"
                 onClick={() => openModal(kroptSoilHealth)}
               />
               <Caption>
@@ -410,73 +437,30 @@ export default function KroptCaseStudy() {
             </Callout>
           </CaseStudySection>
 
-          {/* ---------- Proof of Concept ---------- */}
-          <CaseStudySection id="proof" title="Proof of Concept">
-            <Paragraph>
-              The proof of concept tested how soil, livestock, and crop data could
-              come together in a single, practical system. Early wireframes explored
-              modular cards for quick daily logging with optional deeper insights.
-            </Paragraph>
-
-            <MediaCard>
-              <Image
-                src={kroptWireframes}
-                alt="Wireframes showing modular card approach for logging farm data"
-                data-cursor="zoom"
-                onClick={() => openModal(kroptWireframes)}
-              />
-              <Caption>
-                Wireframes explored modular cards for daily input and long term
-                tracking, balancing speed with depth.
-              </Caption>
-            </MediaCard>
-
-            <Paragraph>
-              A complete user flow validated navigation, hierarchy, and transitions.
-              Logging activities, reviewing trends, and discovering insights needed
-              to feel natural and efficient.
-            </Paragraph>
-
-            <MediaCard>
-              <Image
-                src={kroptFlow}
-                alt="User flow showing logging to insight journey"
-                data-cursor="zoom"
-                onClick={() => openModal(kroptFlow)}
-              />
-              <Caption>
-                The user flow illustrates the journey from daily logging to reviewing
-                trends and gaining insight, reducing cognitive load and building
-                confidence.
-              </Caption>
-            </MediaCard>
-
-            <Paragraph>
-              The interactive prototype showed that farm operations could be captured
-              in seconds while supporting meaningful long term analysis. Offline
-              support, clear hierarchy, and dark mode were tested for real
-              conditions.
-            </Paragraph>
-
-            <MediaCard>
-              <VideoContainer>
-                <Video autoPlay loop muted playsInline>
-                  <source src={kroptDemoVideo} type="video/mp4" />
-                </Video>
-              </VideoContainer>
-              <Caption>
-                Prototype video shows daily logging, visual feedback, and trend
-                analysis in action.
-              </Caption>
-            </MediaCard>
-          </CaseStudySection>
-
-          {/* ---------- Challenges / Insights ---------- */}
-          <CaseStudySection id="challenges" title="Challenges / Insights">
+          {/* ---------- Process ---------- */}
+          <CaseStudySection
+            id="process"
+            title="Process"
+            tldr="Farmer conversations and tool/literature research surfaced four real design tensions, tested through wireframes, a full user flow, and an interactive offline-first prototype."
+            tldrMedia={
+              <MediaCard>
+                <VideoContainer>
+                  <Video autoPlay loop muted playsInline>
+                    <source src={kroptDemoVideo} type="video/mp4" />
+                  </Video>
+                </VideoContainer>
+                <Caption>
+                  Prototype video shows daily logging, visual feedback, and
+                  trend analysis in action.
+                </Caption>
+              </MediaCard>
+            }
+          >
             <Paragraph>
               Research included conversations with local farmers, analysis of farm
               management tools, and review of regenerative agriculture literature.
-              This highlighted tensions between simplicity and data depth.
+              That grounded the goal above in real tensions to design around, not
+              just a feature list:
             </Paragraph>
 
             <UserGrid>
@@ -517,21 +501,104 @@ export default function KroptCaseStudy() {
               Visual feedback, not raw data, drives long term engagement. Farmers are
               more likely to log consistently when trends and outcomes are clear.
             </Callout>
+
+            <Paragraph>
+              The proof of concept tested how soil, livestock, and crop data could
+              come together in a single, practical system. Early wireframes explored
+              modular cards for quick daily logging with optional deeper insights.
+            </Paragraph>
+
+            <MediaCard>
+              <Image
+                src={kroptWireframes}
+                alt="Wireframes showing modular card approach for logging farm data"
+                onClick={() => openModal(kroptWireframes)}
+              />
+              <Caption>
+                Wireframes explored modular cards for daily input and long term
+                tracking, balancing speed with depth.
+              </Caption>
+            </MediaCard>
+
+            <Paragraph>
+              A complete user flow validated navigation, hierarchy, and transitions.
+              Logging activities, reviewing trends, and discovering insights needed
+              to feel natural and efficient.
+            </Paragraph>
+
+            <MediaCard>
+              <Image
+                src={kroptFlow}
+                alt="User flow showing logging to insight journey"
+                onClick={() => openModal(kroptFlow)}
+              />
+              <Caption>
+                The user flow illustrates the journey from daily logging to reviewing
+                trends and gaining insight, reducing cognitive load and building
+                confidence.
+              </Caption>
+            </MediaCard>
+
+            <Paragraph>
+              The interactive prototype showed that farm operations could be captured
+              in seconds while supporting meaningful long term analysis. Offline
+              support, clear hierarchy, and dark mode were tested for real
+              conditions.
+            </Paragraph>
+
+            <MediaCard>
+              <VideoContainer>
+                <Video autoPlay loop muted playsInline>
+                  <source src={kroptDemoVideo} type="video/mp4" />
+                </Video>
+              </VideoContainer>
+              <Caption>
+                Prototype video shows daily logging, visual feedback, and trend
+                analysis in action.
+              </Caption>
+            </MediaCard>
           </CaseStudySection>
 
-          {/* ---------- Results ---------- */}
-          <CaseStudySection id="results" title="Results">
+          {/* ---------- Outcomes ---------- */}
+          <CaseStudySection
+            id="outcomes"
+            title="Outcomes"
+            tldr="The prototype validated the offline-first, pattern-over-numbers approach in testing — but Kropt was never built or shipped, so whether farmers would actually adopt it day to day is still an open question."
+            tldrMedia={
+              <MediaCard>
+                <Image
+                  src={kroptHeader}
+                  alt="Kropt header screen"
+                  onClick={() => openModal(kroptHeader)}
+                />
+                <Caption>
+                  Mobile-first, offline-first design tested through prototyping —
+                  the open question is whether it holds up in daily use in the
+                  field, since Kropt was never actually built.
+                </Caption>
+              </MediaCard>
+            }
+          >
             <Paragraph>
-              Kropt demonstrates that mobile first design can support complex farm
-              workflows under real world constraints. Offline capability,
-              progressive disclosure, and data integration were validated in
-              context.
+              Kropt demonstrates that mobile-first, offline-capable design can
+              support complex farm workflows under real world constraints — the
+              prototype held up under testing for progressive disclosure, offline
+              logging, and dark-mode legibility in dim and bright conditions. What
+              it doesn't answer is whether real farmers would actually adopt it:
+              Kropt is a concept project, never built or shipped, so the goal of
+              proving this fits into daily farm life the way paper and notebooks
+              currently do remains unvalidated.
             </Paragraph>
 
             <Paragraph>
-              While conceptual, the project illustrates a scalable approach for
-              sustainability focused industries where clear visibility drives better
-              decisions.
+              The clearest open question this project leaves is adoption, not
+              usability — farmers already have a system that works well enough to
+              keep using: paper. A prototype can prove an interface is clear and
+              fast; it can't prove people will actually change a habit that's
+              served them for years. If this moved forward, the next step wouldn't
+              be more screens — it'd be a real pilot with a handful of farmers
+              logging real data for a real season, to see whether the pattern-level
+              insight is actually worth the switch.
             </Paragraph>
 
             <ResCarousel images={[kroptHeader, kroptHome, kroptSoilHealth, kroptFarmTasks]} openModal={openModal} />

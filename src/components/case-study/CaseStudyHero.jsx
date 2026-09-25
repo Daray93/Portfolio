@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { motion } from "framer-motion";
 import { useCaseStudyView } from "./CaseStudyViewContext";
 
 const Wrap = styled.header`
@@ -7,25 +8,39 @@ const Wrap = styled.header`
   gap: 1.5rem;
 `;
 
+// Groups Title+Subtitle as one unit so Wrap's own 1.5rem gap (meant to
+// separate the whole heading from the hero media/view-toggle below it)
+// doesn't also land between the title and its own tagline -- that spacing
+// is set explicitly on Subtitle instead, much tighter.
+const TitleGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 const Title = styled.h1`
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.05;
+  line-height: 1.1;
   margin: 0;
 `;
 
-const Subtitle = styled.span`
+// A block-level tagline under the title, not a same-size span crammed
+// inside the h1 -- distinct size/weight gives it a clear place in the
+// hierarchy instead of reading as a run-on continuation of the title,
+// and it's now a real <p> rather than part of the h1's accessible name.
+const Subtitle = styled.p`
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
   font-weight: 500;
-  color: #2323238f;
+  line-height: 1.4;
+  margin: 0.5rem 0 0 0;
+  color: ${({ theme }) => theme.textSecondary};
 `;
 
 const ViewToggleRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid ${({ theme }) => theme.border};
 `;
 
 const ViewToggleLabel = styled.span`
@@ -43,20 +58,40 @@ const ViewToggle = styled.div`
 `;
 
 const ViewToggleButton = styled.button`
+  position: relative;
   padding: 0.4rem 0.9rem;
   border: none;
   border-radius: 999px;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: 0.8rem;
   font-weight: 500;
-  cursor: none;
+  cursor: pointer;
   color: ${({ theme, $active }) => ($active ? theme.buttonPrimaryText : theme.textSecondary)};
-  background: ${({ theme, $active }) => ($active ? theme.buttonPrimaryBg : "transparent")};
-  transition: background 0.2s ease, color 0.2s ease;
+  background: transparent;
+  transition: color 0.2s ease;
 
   &:hover {
     color: ${({ theme, $active }) => ($active ? theme.buttonPrimaryHoverText : theme.text)};
   }
+`;
+
+// Physically slides between TL;DR/Full Story via a shared layoutId (same
+// technique as PillNav's own Fill) rather than each button just swapping
+// its own background color in place. border-radius is set via the style
+// prop, not this stylesheet, for the same reason as PillNav's Fill --
+// framer only tracks/corrects inline style values through a shared-layout
+// scale animation, so a CSS-authored radius here would visibly warp for a
+// beat while it slides between the two (differently-sized) buttons.
+const ViewToggleFill = styled(motion.span)`
+  position: absolute;
+  inset: 0;
+  background: ${({ theme }) => theme.buttonPrimaryBg};
+  z-index: 0;
+`;
+
+const ViewToggleLabelText = styled.span`
+  position: relative;
+  z-index: 1;
 `;
 
 export default function CaseStudyHero({ title, subtitle, children }) {
@@ -64,10 +99,10 @@ export default function CaseStudyHero({ title, subtitle, children }) {
 
   return (
     <Wrap>
-      <Title>
-        {title} {subtitle && <Subtitle>{subtitle}</Subtitle>}
-      </Title>
-      {children}
+      <TitleGroup>
+        <Title>{title}</Title>
+        {subtitle && <Subtitle>{subtitle}</Subtitle>}
+      </TitleGroup>
       <ViewToggleRow>
         <ViewToggleLabel>Reading this on the go?</ViewToggleLabel>
         <ViewToggle role="tablist" aria-label="Case study detail level">
@@ -78,7 +113,14 @@ export default function CaseStudyHero({ title, subtitle, children }) {
             $active={view === "tldr"}
             onClick={() => setView("tldr")}
           >
-            TL;DR
+            {view === "tldr" && (
+              <ViewToggleFill
+                layoutId="view-toggle-fill"
+                style={{ borderRadius: 999 }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            )}
+            <ViewToggleLabelText>TL;DR</ViewToggleLabelText>
           </ViewToggleButton>
           <ViewToggleButton
             type="button"
@@ -87,10 +129,18 @@ export default function CaseStudyHero({ title, subtitle, children }) {
             $active={view === "detailed"}
             onClick={() => setView("detailed")}
           >
-            Full Story
+            {view === "detailed" && (
+              <ViewToggleFill
+                layoutId="view-toggle-fill"
+                style={{ borderRadius: 999 }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            )}
+            <ViewToggleLabelText>Full Story</ViewToggleLabelText>
           </ViewToggleButton>
         </ViewToggle>
       </ViewToggleRow>
+      {children}
     </Wrap>
   );
 }

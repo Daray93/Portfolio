@@ -10,9 +10,9 @@ import seagullGlb from "./flying_seagull.glb?url";
 // geometry in the scene (proper depth/occlusion/perspective scale)
 // instead of a DOM overlay, without needing new font assets. Three
 // weights for real eyebrow/heading/body hierarchy.
-import manropeMedium from "@fontsource/manrope/files/manrope-latin-500-normal.woff?url";
-import manropeSemibold from "@fontsource/manrope/files/manrope-latin-600-normal.woff?url";
-import manropeBold from "@fontsource/manrope/files/manrope-latin-700-normal.woff?url";
+import geistMedium from "@fontsource/geist/files/geist-latin-500-normal.woff?url";
+import geistSemibold from "@fontsource/geist/files/geist-latin-600-normal.woff?url";
+import geistBold from "@fontsource/geist/files/geist-latin-700-normal.woff?url";
 
 // Copy node_modules/three/examples/jsm/libs/draco/ into public/draco/ --
 // self-hosted to match the fonts rather than pulling a CDN. Harmless if
@@ -180,136 +180,127 @@ const StoryText = styled.section`
 // hemi/sun intensities are part of the palette on purpose: the overcast
 // stop isn't just greyer, it's flatter-lit, with the key light pulled
 // right down and the ambient hemisphere carrying more of the load.
+// EXPERIMENT: recoloured to lean on the portfolio's own brand tokens
+// (see theme.js) rather than an invented white/violet family -- cream
+// (#f2f0ea) and white now carry most of the weight in zenith/mid, the
+// same way the brand's cream body does; violet is pulled back to a thin
+// horizon/glow accent band instead of saturating the whole sky, using
+// the brand's actual accent (#6c5ce7) rather than the brighter violet
+// tried first. Breathing between stops now comes mostly from lightness
+// (cream <-> near-white <-> warm grey) rather than hue, since violet
+// isn't doing that job anymore -- except at the overcast stop (0.5),
+// which deliberately drops the violet band entirely and leans into a
+// warm charcoal-grey instead, so "black" gets a real beat of its own,
+// not just cream and violet. See git history to restore the prior
+// white/violet version.
 const SKY_PALETTES = [
-  // Dawn
   {
     stop: 0.0,
-    zenith: 0x0d1b33,
-    mid: 0x1f3f67,
-    horizon: 0x8d5f42,
-    glow: 0xf2a35b,
-    hemi: 0.85,
-    sun: 0.75,
+    zenith: 0xf2f0ea,
+    mid: 0xece7db,
+    horizon: 0xd9cdf0,
+    glow: 0xb6a3ea,
+    hemi: 1.0,
+    sun: 1.0,
   },
-
-  // Climbing Light -- dawn's warmth still hanging on the horizon, but the
-  // zenith already deepening toward morning blue.
   {
     stop: 0.1,
-    zenith: 0x0f2c53,
-    mid: 0x2a5480,
-    horizon: 0x7d6b52,
-    glow: 0xf5b978,
-    hemi: 0.93,
-    sun: 0.93,
+    zenith: 0xffffff,
+    mid: 0xf5f2ea,
+    horizon: 0xe2d8f5,
+    glow: 0xc3b3ef,
+    hemi: 1.02,
+    sun: 1.02,
   },
-
-  // Bright Morning
   {
     stop: 0.20,
-    zenith: 0x12335f,
-    mid: 0x35689d,
-    horizon: 0x6b88a5,
-    glow: 0xf0c57a,
-    hemi: 1.0,
-    sun: 1.1,
+    zenith: 0xf6f4ec,
+    mid: 0xeee8db,
+    horizon: 0xd2c2ef,
+    glow: 0xa58eea,
+    hemi: 1.05,
+    sun: 1.08,
   },
-
-  // High Blue -- the sun keeps climbing, colour keeps saturating, the
-  // morning's warm glow cooling off toward midday's pale one.
   {
     stop: 0.30,
-    zenith: 0x173d6c,
-    mid: 0x4276a9,
-    horizon: 0x63879d,
-    glow: 0xdcd6c0,
-    hemi: 1.03,
-    sun: 1.18,
+    zenith: 0xffffff,
+    mid: 0xf3efe4,
+    horizon: 0xdccdf3,
+    glow: 0xab95ec,
+    hemi: 1.05,
+    sun: 1.1,
   },
-
-  // Midday
+  // Midday -- the richest violet moment of the light half, right before
+  // overcast drops it entirely.
   {
     stop: 0.40,
-    zenith: 0x1b4678,
-    mid: 0x4d84b5,
-    horizon: 0x5f87a4,
-    glow: 0xcfe3ef,
-    hemi: 1.05,
-    sun: 1.25,
+    zenith: 0xf5f2ea,
+    mid: 0xebe4d5,
+    horizon: 0xc7b0ee,
+    glow: 0x8f76e6,
+    hemi: 1.08,
+    sun: 1.15,
   },
-
-  // Overcast Drift -- deliberately desaturated and flatter-lit (see the
-  // hemi/sun note above) rather than another shade of blue, so the day
-  // reads as having weather, not just a colour ramp.
+  // Overcast Drift -- the one stop with no violet at all: flat, warm
+  // charcoal-grey instead, so black/near-black gets its own beat rather
+  // than the sky just cycling between cream and violet.
   {
     stop: 0.50,
-    zenith: 0x17395c,
-    mid: 0x51728c,
-    horizon: 0x77807c,
-    glow: 0xdcccb0,
+    zenith: 0xe8e6e2,
+    mid: 0xc9c5be,
+    horizon: 0xaba59f,
+    glow: 0x8f8a86,
+    hemi: 0.85,
+    sun: 0.85,
+  },
+  {
+    stop: 0.60,
+    zenith: 0xffffff,
+    mid: 0xf6f1e6,
+    horizon: 0xddd0f5,
+    glow: 0xab90ec,
+    hemi: 1.02,
+    sun: 1.05,
+  },
+  {
+    stop: 0.71,
+    zenith: 0xf7f4ea,
+    mid: 0xeee6d8,
+    horizon: 0xd0bdf2,
+    glow: 0x9a7fe8,
+    hemi: 1.0,
+    sun: 1.05,
+  },
+  // Lands under the second-last chapter -- kept as the whitest, cleanest
+  // stop of the set (minimal violet) so that beat still reads as a
+  // distinct, fresh moment rather than blending into its neighbours.
+  {
+    stop: 0.82,
+    zenith: 0xffffff,
+    mid: 0xfaf8f0,
+    horizon: 0xece6f7,
+    glow: 0xd6c8f5,
+    hemi: 1.05,
+    sun: 1.0,
+  },
+  {
+    stop: 0.91,
+    zenith: 0xf4f1e8,
+    mid: 0xe7ddd0,
+    horizon: 0xc9b4ee,
+    glow: 0x9678e4,
     hemi: 0.95,
     sun: 0.95,
   },
-
-  // Golden Hour
-  {
-    stop: 0.60,
-    zenith: 0x18365d,
-    mid: 0x4d6486,
-    horizon: 0x96572f,
-    glow: 0xff9345,
-    hemi: 0.9,
-    sun: 1.15,
-  },
-
-  // Late Gold -- one extra beat of warm, saturated light before sunset's
-  // deeper colours take over, rather than jumping straight there.
-  {
-    stop: 0.71,
-    zenith: 0x152e50,
-    mid: 0x46577a,
-    horizon: 0xa8552b,
-    glow: 0xff8340,
-    hemi: 0.85,
-    sun: 1.22,
-  },
-
-  // Sunset -- lands under the second-last chapter ("I'm ready to join my
-  // first product team"), swapped from the original orange sunset to a
-  // clean white/green so that beat reads as a distinct, fresh moment
-  // rather than continuing the warm dusk ramp either side of it.
-  {
-    stop: 0.82,
-    zenith: 0xdff2e2,
-    mid: 0xa8d9a4,
-    horizon: 0x5fa568,
-    glow: 0xf3fff2,
-    hemi: 1.0,
-    sun: 1.1,
-  },
-
-  // Dusk Settle -- sunset's embers cooling into purple, a step down from
-  // it before blue hour's near-night calm.
-  {
-    stop: 0.91,
-    zenith: 0x0d1730,
-    mid: 0x2e2c49,
-    horizon: 0x5f3228,
-    glow: 0xc25f45,
-    hemi: 0.72,
-    sun: 0.85,
-  },
-
-  // Blue Hour -- the flight's final beat, landing on the last chapter's
-  // call to action. Swapped from a dark, near-night navy to a bright
-  // light-blue/pink pastel so the journey ends on an open, hopeful note
-  // instead of fading toward black.
+  // The flight's final beat -- warm cream base with a soft violet-pink
+  // lift on the horizon, so the journey still ends on an open, hopeful
+  // note rather than fading to black.
   {
     stop: 1.0,
-    zenith: 0xaee0f0,
-    mid: 0xd8b8d8,
-    horizon: 0xf7b8c8,
-    glow: 0xfff0e8,
+    zenith: 0xffffff,
+    mid: 0xf6eee0,
+    horizon: 0xe8d2f2,
+    glow: 0xd2ade8,
     hemi: 1.0,
     sun: 1.0,
   },
@@ -530,13 +521,18 @@ const CAPTION_EYEBROW_MAX_WIDTH = 37; // was 56
 const CAPTION_HEADING_MAX_WIDTH = 40; // was 60
 const CAPTION_BODY_MAX_WIDTH = 36; // was 54
 
-// A faint dark halo on the glyphs. Load-bearing now that the sky travels
-// through six palettes -- white type is fine against dusk but nearly
-// invisible against the pale Departure horizon. Set to 0 for the
-// completely unadorned look.
+// EXPERIMENT: the sky palette above is now permanently light (cream/
+// white, no dark stops), so caption fill flipped from white-on-dark to
+// dark-on-light -- CAPTION_TEXT_COLOR below -- with a light halo here
+// instead of a dark one, for the same edge-definition purpose. Text
+// colour matches the portfolio's own near-black brand text (theme.js's
+// `text: "#17171a"`) rather than a violet tint, so the reading text
+// carries the brand's black/cream weighting same as the sky now does.
+// Set the outline width to 0 for the completely unadorned look.
 const CAPTION_OUTLINE_WIDTH = "1.2%";
-const CAPTION_OUTLINE_COLOR = 0x2c4a6b;
-const CAPTION_OUTLINE_OPACITY = 0.35;
+const CAPTION_OUTLINE_COLOR = 0xffffff;
+const CAPTION_OUTLINE_OPACITY = 0.55;
+const CAPTION_TEXT_COLOR = 0x17171a;
 
 // An about-me, told as six short chapters instead of a bullet list --
 // exported shape is also what the hidden HTML fallback renders, so the
@@ -1073,26 +1069,26 @@ export default function AboutMeScene({ flightProgressRef, onJourneyEnd }) {
 
       const eyebrow = makeCaptionText({
         content: turn.eyebrow,
-        fontUrl: manropeSemibold,
+        fontUrl: geistSemibold,
         fontSize: CAPTION_EYEBROW_FONT_SIZE,
         letterSpacing: 0.12,
-        color: 0xffffff,
+        color: CAPTION_TEXT_COLOR,
         maxWidth: CAPTION_EYEBROW_MAX_WIDTH,
         align: turn.align,
       });
       const heading = makeCaptionText({
         content: turn.heading,
-        fontUrl: manropeBold,
+        fontUrl: geistBold,
         fontSize: CAPTION_HEADING_FONT_SIZE,
-        color: 0xffffff,
+        color: CAPTION_TEXT_COLOR,
         maxWidth: CAPTION_HEADING_MAX_WIDTH,
         align: turn.align,
       });
       const body = makeCaptionText({
         content: turn.body,
-        fontUrl: manropeMedium,
+        fontUrl: geistMedium,
         fontSize: CAPTION_BODY_FONT_SIZE,
-        color: 0xffffff,
+        color: CAPTION_TEXT_COLOR,
         maxWidth: CAPTION_BODY_MAX_WIDTH,
         align: turn.align,
       });

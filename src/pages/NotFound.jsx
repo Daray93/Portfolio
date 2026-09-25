@@ -39,7 +39,7 @@ const Content = styled.div`
 `;
 
 const Eyebrow = styled.span`
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.15em;
@@ -48,7 +48,7 @@ const Eyebrow = styled.span`
 `;
 
 const Heading = styled.h1`
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
   letter-spacing: -0.02em;

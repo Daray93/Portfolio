@@ -20,8 +20,29 @@ const INTRO_FADE_SECONDS = 1;
 // than a themed section of the portfolio (chromeless route, see App.jsx).
 const PAPER = "#f5f4f0";
 const BLACK = "#0a0a0a";
-const VIOLET = "#a56eff";
-const AMBER = "#ff9a5c";
+// EXPERIMENT: the sky (AboutMeScene's SKY_PALETTES) is now a light
+// cream/white family (brand tokens from theme.js) instead of a
+// dark-to-light day cycle, so the near-white PAPER chrome this page
+// originally used for the progress track/fill/dots and the close/sound
+// buttons has nowhere near enough contrast against it -- both were
+// designed to read as light marks on a dark sky. INK is that chrome's
+// replacement: the same near-black theme.js uses for body text
+// (`text: "#17171a"`), used everywhere PAPER used to carry the "visible
+// against the sky" job -- so black/cream carry the weight here too, the
+// same as the sky. VIOLET is now only the accent highlight (the
+// milestone glow + its focus ring), matching the brand's actual accent
+// (`accent: "#6c5ce7"`) rather than the brighter violet tried first.
+// CONTROL_BG/BORDER are a separate, deliberately opaque-ish dark chip for
+// the close/sound buttons specifically, since those need to stay legible
+// (and keep a real 3:1 boundary) against every point in the sky's
+// gradient, not just blend into whichever stop happens to be showing.
+const INK = "#17171a";
+const VIOLET = "#6c5ce7";
+const GLOW_EDGE = "#cabdf5";
+const CONTROL_BG = "rgba(23, 23, 26, 0.72)";
+const CONTROL_BG_HOVER = "rgba(23, 23, 26, 0.9)";
+const CONTROL_BORDER = "rgba(255, 255, 255, 0.35)";
+const CONTROL_BORDER_HOVER = "rgba(255, 255, 255, 0.6)";
 
 // How long the exit cover takes to fade fully opaque before the scroll
 // reset + navigate fire underneath it -- see goHome below.
@@ -241,7 +262,7 @@ const ProgressTrack = styled.div`
   width: min(70vw, 640px);
   height: 2px;
   border-radius: 999px;
-  background: rgba(245, 244, 240, 0.16);
+  background: rgba(58, 34, 96, 0.18);
   z-index: 20;
 `;
 
@@ -251,7 +272,7 @@ const ProgressFill = styled(motion.div)`
   left: 0;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, ${PAPER}, ${PAPER});
+  background: ${INK};
 `;
 
 // One per caption, plotted at that chapter's own `t` (see TURNS in
@@ -259,9 +280,7 @@ const ProgressFill = styled(motion.div)`
 // along the flight, not just a generic loading bar. A real <button>
 // (not a styled div) so it's reachable by keyboard/AT and gets a proper
 // click target -- sized well beyond the visible dot for touch, with the
-// dot itself just one of its centred children. data-cursor="view" hooks
-// into CustomCursor's hover detection (it keys off that attribute, not
-// tag name or a CSS class).
+// dot itself just one of its centred children.
 const ProgressMilestoneButton = styled.button`
   position: absolute;
   top: 50%;
@@ -274,7 +293,7 @@ const ProgressMilestoneButton = styled.button`
   background: none;
   border: none;
   padding: 0;
-  cursor: none;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
   &:focus-visible {
@@ -284,15 +303,19 @@ const ProgressMilestoneButton = styled.button`
   }
 `;
 
-// A soft violet-to-amber glow that crossfades in as the flight
-// approaches a milestone and back out past it (see the useTransform
-// input range in ProgressMilestoneItem) -- a moving spotlight handing
-// off between chapters, rather than a flat "reached" state.
+// A soft violet-to-pink glow that crossfades in as the flight approaches
+// a milestone and back out past it (see the useTransform input range in
+// ProgressMilestoneItem) -- a moving spotlight handing off between
+// chapters, rather than a flat "reached" state. Was violet-to-amber;
+// amber read as a clash once the sky itself became a white/violet
+// family, so the outer stop moved to a pink-violet that's actually part
+// of that palette (matches the sky's own blue-hour glow stop) instead of
+// fighting it.
 const ProgressMilestoneGlow = styled(motion.div)`
   position: absolute;
   inset: 3px;
   border-radius: 50%;
-  background: radial-gradient(circle, ${VIOLET} 0%, ${AMBER} 55%, transparent 75%);
+  background: radial-gradient(circle, ${VIOLET} 0%, ${GLOW_EDGE} 55%, transparent 75%);
   filter: blur(3px);
   pointer-events: none;
 `;
@@ -302,7 +325,7 @@ const ProgressMilestoneDot = styled(motion.div)`
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: ${PAPER};
+  background: ${INK};
   pointer-events: none;
 `;
 
@@ -326,7 +349,6 @@ function ProgressMilestoneItem({ turn, prevT, nextT, flightProgress, onSelect })
       style={{ left: `${turn.t * 100}%` }}
       onClick={() => onSelect(turn.t)}
       aria-label={`Jump to chapter: ${turn.heading}`}
-      data-cursor="view"
     >
       <ProgressMilestoneGlow style={{ opacity: glowOpacity }} />
       <ProgressMilestoneDot style={{ opacity: dotOpacity }} />
@@ -334,6 +356,15 @@ function ProgressMilestoneItem({ turn, prevT, nextT, flightProgress, onSelect })
   );
 }
 
+// A dark, deliberately opaque-ish chip rather than the near-white PAPER
+// treatment this used before -- that only had contrast against the old
+// dark sky. The sky's a light white/violet gradient now and drifts
+// through several pastel stops, so this can't rely on any one of them
+// for contrast; it has to carry its own against all of them, in both
+// idle and hover states, which is what CONTROL_BG's opacity is tuned
+// for. Hover used to fade toward transparent (fine against a dark sky,
+// meant the button "resolved into" the surroundings) -- against a light
+// sky that read as the button vanishing, so hover now deepens instead.
 const FixedIconButton = styled.button`
   position: fixed;
   top: clamp(1rem, 2.5vw, 1.5rem);
@@ -343,18 +374,22 @@ const FixedIconButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid rgba(245, 244, 240, 0.25);
-  background: ${PAPER};
+  border: 1px solid ${CONTROL_BORDER};
+  background: ${CONTROL_BG};
   backdrop-filter: blur(12px);
-  color: rgba(5, 3, 8, 0.6);
-  cursor: none;
+  color: #fff;
+  cursor: pointer;
   z-index: 20;
   transition: background 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    color: #fff;
-    background: rgba(245, 244, 240, 0.12);
-    border-color: rgba(245, 244, 240, 0.4);
+    background: ${CONTROL_BG_HOVER};
+    border-color: ${CONTROL_BORDER_HOVER};
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
   }
 
   svg {
@@ -409,7 +444,7 @@ const FlightSpacer = styled.div`
 // The intro's only line now -- same muted treatment the old "Not Your
 // Usual About Page" eyebrow had, just repurposed as the scroll cue.
 const IntroLabel = styled(motion.span)`
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.2em;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import gsap from "gsap";
@@ -43,13 +43,19 @@ const Stage = styled.div`
 // arriving out of nowhere. Red-on-green fails contrast on its own, so
 // urgent state also drops in a near-black pill behind the text rather
 // than relying on the coloured text alone.
+// `top` lifts a bit further as $rigScale shrinks Rig -- Rig's own top
+// edge only retreats modestly on its own (its box shrinks around its
+// centre, see Rig's comment), which wasn't enough clearance on its own
+// for the urgent state's bigger pill/font (see $urgent below) to land
+// without crowding it. At the default $rigScale of 1 this still lands on
+// 17%, unchanged from before that prop existed.
 const TimerLabel = styled.div`
   position: absolute;
   left: 50%;
-  top: 17%;
+  top: ${({ $rigScale }) => 17 - (1 - $rigScale) * 40}%;
   z-index: 3;
   transform: translate(-50%, -4px);
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-weight: 600;
   font-size: ${({ $urgent }) => ($urgent ? "clamp(1.3rem, 6cqw, 2rem)" : "clamp(0.9rem, 4cqw, 1.3rem)")};
   color: ${({ $urgent }) => ($urgent ? "#FF6B5E" : "#fff")};
@@ -70,13 +76,27 @@ const TimerLabel = styled.div`
 
 // Sized/positioned in ao-body.svg's own viewBox units (71 x 119) so the
 // limb/eye math below lines up 1:1 with that artwork.
+// Centering (-50%/-50%) is applied via gsap.set({ xPercent, yPercent })
+// in the effect below, not a CSS transform -- GSAP also animates `y` on
+// this element for the jump, and if the two share the transform
+// property, GSAP bakes the CSS translate's resolved px value in once
+// (whenever it first touches the element) and never re-reads it. On a
+// hover-gated timeline that first touch happens on mouseenter, not at
+// mount, so if this grid cell's box hadn't settled its final size yet
+// (it's a row-span-2 "tall" shape under `grid-auto-rows: min-content`,
+// so its height depends on whatever else packs into those rows -- that
+// differs by viewport) the baked offset goes stale and Rig sits
+// permanently off-centre. xPercent/yPercent are GSAP-native and get
+// recalculated against the element's live size on every render instead.
+// $rigScale shrinks Rig around its own centre (already pinned to top:50%,
+// see the xPercent/yPercent centering below) -- 28% is the size Splash.jsx
+// and the standalone case-study page both use, at $rigScale's default 1.
 const Rig = styled.div`
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 40%;
+  width: ${({ $rigScale }) => 28 * $rigScale}%;
   aspect-ratio: 71 / 119;
-  transform: translate(-50%, -50%);
   z-index: 1;
 `;
 
@@ -84,20 +104,24 @@ const Rig = styled.div`
 // stays planted while Rig's own `y` jumps -- only its size/opacity
 // tweens, in the same timeline, to read as the avocado casting less
 // shadow at the top of the jump and more at ground contact. `top` is
-// derived from Rig's own geometry (top offset + leg length, converted
-// out of Rig-relative % into Stage-relative %) so it lands right under
-// the feet at rest instead of floating above or below them.
+// eyeballed to sit right under the feet at rest (last adjusted after
+// Rig's own 40%->28% resize, which also took `width` down 1:1 to 34%
+// to match); nudge it if Rig's size changes again. Its own offset from
+// centre (78% - 50% = 28%) scales down with $rigScale the same way Rig's
+// width does, so it stays planted under the feet instead of drifting into
+// the now-empty space below a shrunk Rig.
+// Centering here is also gsap.set xPercent/yPercent, not CSS -- same
+// reason as Rig above (GSAP tweens scaleX/scaleY on this element).
 const Shadow = styled.div`
   position: absolute;
   left: 50%;
-  top: 70%;
-  width: 48%;
+  top: ${({ $rigScale }) => 50 + 28 * $rigScale}%;
+  width: ${({ $rigScale }) => 34 * $rigScale}%;
   aspect-ratio: 3 / 1;
   background: #000;
   opacity: 0.32;
   border-radius: 50%;
   filter: blur(1.5px);
-  transform: translate(-50%, -50%);
   will-change: transform, opacity;
 `;
 
@@ -265,7 +289,14 @@ const COUNTDOWN_START = 10;
 // the case study.
 const URGENT_THRESHOLD = 3;
 
-export default function AvocadoJumpingJack({ fill = false }) {
+// `showTimer`: hides just the countdown readout (see TimerLabel) for a
+// compact preview context (OtherProjects.jsx) where there's no room/need
+// for it -- the hover-driven jump/sweat animation and the 10s
+// hover-to-navigate handoff underneath it are unaffected either way.
+// `rigScale`: shrinks Rig/Shadow (see their own comments) for that same
+// compact context, where the default 28%-wide Rig reaches far enough down
+// to overlap the card's own title/tag caption underneath it.
+export default function AvocadoJumpingJack({ fill = false, showTimer = true, rigScale = 1 }) {
   const navigate = useNavigate();
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_START);
   const stageRef = useRef(null);
@@ -287,7 +318,15 @@ export default function AvocadoJumpingJack({ fill = false }) {
   const sweatLeftRef = useRef(null);
   const sweatRightRef = useRef(null);
 
-  useEffect(() => {
+  // useLayoutEffect, not useEffect: the xPercent/yPercent centering set
+  // below needs to land before the browser's first paint, or Rig/Shadow
+  // would flash at their un-centered top-left CSS position for a frame.
+  useLayoutEffect(() => {
+    // Set unconditionally, ahead of the reduced-motion bail-out below --
+    // this is layout (centering), not motion, so it has to run even when
+    // the rest of the animation setup is skipped.
+    gsap.set([rigRef.current, shadowRef.current], { xPercent: -50, yPercent: -50 });
+
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -448,11 +487,13 @@ export default function AvocadoJumpingJack({ fill = false }) {
 
   return (
     <Stage ref={stageRef} $fill={fill}>
-      <TimerLabel aria-hidden="true" $urgent={secondsLeft <= URGENT_THRESHOLD}>
-        0:{String(secondsLeft).padStart(2, "0")}
-      </TimerLabel>
-      <Shadow ref={shadowRef} />
-      <Rig ref={rigRef}>
+      {showTimer && (
+        <TimerLabel aria-hidden="true" $urgent={secondsLeft <= URGENT_THRESHOLD} $rigScale={rigScale}>
+          0:{String(secondsLeft).padStart(2, "0")}
+        </TimerLabel>
+      )}
+      <Shadow ref={shadowRef} $rigScale={rigScale} />
+      <Rig ref={rigRef} $rigScale={rigScale}>
         <Body ref={bodyRef} src={body} alt="" />
         <LeftArm ref={leftArmRef} src={leftArm} alt="" />
         <RightArm ref={rightArmRef} src={rightArm} alt="" />

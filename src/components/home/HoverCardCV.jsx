@@ -49,7 +49,7 @@ const Card = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  cursor: none;
+  cursor: pointer;
   outline: none;
 
   &:focus-visible {
@@ -139,7 +139,7 @@ const TitleWrapper = styled.div`
 const Title = styled.div`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
-  font-family: "General Sans", sans-serif;
+  font-family: "Fraunces Variable", serif;
   font-weight: 500;
   letter-spacing: 0.01em;
 `;

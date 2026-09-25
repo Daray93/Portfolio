@@ -1,11 +1,15 @@
 import { createGlobalStyle } from "styled-components";
 // Only the weights actually referenced by a `font-weight:` anywhere in
 // src/ -- 200 and 800 were being shipped unused.
-import "@fontsource/manrope/300.css";
-import "@fontsource/manrope/400.css";
-import "@fontsource/manrope/500.css";
-import "@fontsource/manrope/600.css";
-import "@fontsource/manrope/700.css";
+import "@fontsource/geist/300.css";
+import "@fontsource/geist/400.css";
+import "@fontsource/geist/500.css";
+import "@fontsource/geist/600.css";
+import "@fontsource/geist/700.css";
+// Fraunces is a true variable font (weight 100-900 on one file) rather
+// than a set of discrete static weights, so this one import covers every
+// font-weight used against it anywhere in src/.
+import "@fontsource-variable/fraunces";
 
 const GlobalStyle = createGlobalStyle`
   /* ---------------- Base ---------------- */
@@ -17,13 +21,12 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    font-family: "Manrope", sans-serif;
+    font-family: "Geist", sans-serif;
     font-weight: 400;
     background: ${({ theme }) => theme.body};
     color: ${({ theme }) => theme.text};
     transition: background 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
-    cursor: none;
   }
 
   /* ---------------- Text selection ---------------- */
@@ -43,7 +46,6 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 500;
     text-decoration: inherit;
     transition: color 0.25s ease;
-    cursor: none;
   }
 
   a:hover {
@@ -52,11 +54,10 @@ const GlobalStyle = createGlobalStyle`
 
   /* ---------------- Buttons ---------------- */
   button {
-    border-radius: 12px;
+    border-radius: ${({ theme }) => theme.radius.btn};
     font-family: inherit;
     font-weight: 500;
     font-size: 1rem;
-    cursor: none;
     transition: all 0.25s ease;
   }
 
@@ -89,7 +90,7 @@ const GlobalStyle = createGlobalStyle`
     font-family: inherit;
     font-size: 1rem;
     padding: 0.5em 0.75em;
-    border-radius: 12px;
+    border-radius: ${({ theme }) => theme.radius.btn};
     transition: border-color 0.25s ease;
   }
 

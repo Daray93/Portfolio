@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { FiUsers, FiLayers, FiCheckSquare } from "react-icons/fi";
 
@@ -12,6 +12,7 @@ import {
 } from "../../components/case-study/Index";
 
 import OtherProjects from "../../components/shared/OtherProjects";
+import ProtectedGate from "../../components/shared/ProtectedGate";
 import useProtectedAccess from "../../components/shared/useProtectedAccess";
 import AudanoteLogo from "./assets/Audanote-logo.svg";
 
@@ -98,10 +99,17 @@ const IconRow = styled.div`
 
 export default function AudanoteCaseStudy() {
   const { isUnlocked, loading } = useProtectedAccess();
+  const navigate = useNavigate();
 
   if (loading) return null;
   if (!isUnlocked) {
-    return <Navigate to="/" replace />;
+    // See the matching comment in OrthoVive.jsx -- shows the password
+    // prompt in place instead of silently bouncing home, so every path
+    // to a locked project (homepage card, this direct route, Other
+    // Projects) behaves the same way.
+    return (
+      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/audanote" />
+    );
   }
 
   return (
@@ -117,9 +125,7 @@ export default function AudanoteCaseStudy() {
     >
       <CaseStudyPage>
         {/* ---------- Overview ---------- */}
-        <CaseStudySection id="overview" tldrVisible>
-          <CaseStudyMorphMedia image={AudanoteLogo} imageFit="contain" />
-
+        <CaseStudySection id="overview" title="Overview" tldrVisible>
           <CaseStudyHero title="Audanote" subtitle="A health-tech product, designed alongside one stakeholder">
             <PillRow>
               <Pill>Health-Tech</Pill>
@@ -127,6 +133,8 @@ export default function AudanoteCaseStudy() {
               <Pill>Stakeholder Collaboration</Pill>
               <StatusPill>In Progress</StatusPill>
             </PillRow>
+
+            <CaseStudyMorphMedia image={AudanoteLogo} imageFit="contain" />
 
             <Paragraph>
               Placeholder overview — replace with the real one-line pitch for
