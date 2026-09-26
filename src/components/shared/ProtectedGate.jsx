@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
+import { auth, authReady } from "../../firebase";
 
 import ShowPasswordIcon from "../../assets/shared/show-password.svg";
 import HidePasswordIcon from "../../assets/shared/hide-password.svg";
@@ -288,6 +288,7 @@ export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive"
     setSubmitting(true);
     try {
       // The real check happens against Firebase Auth's servers, not this code.
+      await authReady;
       await signInWithEmailAndPassword(auth, VIEWER_EMAIL, password);
       setInputStatus("idle");
       setFeedbackMsg("");
