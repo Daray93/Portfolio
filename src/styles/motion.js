@@ -38,8 +38,8 @@ export const stagger = 0.08;
 // places.
 export const reveal = {
   delay: 0.35, // after the loading details have faded
-  lift: 1.9, // the panel travelling off the top
-  liftCurve: "cubic-bezier(0.16, 1, 0.3, 1)", // launches fast, then slows right down as it leaves
+  lift: 1.1, // the panel travelling off the top
+  liftCurve: "cubic-bezier(0.32, 0, 0.67, 0)", // gathers speed and leaves at full pace, no braking at the end
   spread: 2.4, // the cards gliding out once uncovered
   spreadCurve: "cubic-bezier(0.22, 1, 0.36, 1)", // a long, even deceleration
 };
