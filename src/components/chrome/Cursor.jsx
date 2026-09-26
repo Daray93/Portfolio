@@ -79,7 +79,8 @@ const Root = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 6000;
+  /* above everything, dialogs included: it stands in for the system cursor */
+  z-index: 100000;
   pointer-events: none;
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity ${dur.fast}s ${ease.out};
