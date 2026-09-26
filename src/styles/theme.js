@@ -98,7 +98,7 @@ export const lightTheme = {
   inputBorder: "#e2ded2",
   inputBorderHover: "#c9c4b4",
   inputBorderFocus: "#6c5ce7",
-  inputError: "#ef4444",
+  inputError: "#c62828",        // dark enough to read on cream
   inputSuccess: "#15803d",      // dark enough to read on cream
   placeholder: "#a19d92",
 

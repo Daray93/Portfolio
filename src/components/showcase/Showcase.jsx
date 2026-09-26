@@ -1083,7 +1083,7 @@ export default function Showcase() {
       <Cursor reduced={reduced} />
 
       {createPortal(
-        <ProtectedGate open={!!gateFor} onClose={closeGate} redirectTo={gateFor?.to ?? "/"} />,
+        <ProtectedGate open={!!gateFor} onClose={closeGate} redirectTo={gateFor?.to ?? "/"} title={gateFor?.title} />,
         document.body
       )}
     </Page>

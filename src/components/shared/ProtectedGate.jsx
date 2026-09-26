@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { FiEye, FiEyeOff, FiLock } from "react-icons/fi";
 import { auth, authReady } from "../../firebase";
-
-import ShowPasswordIcon from "../../assets/shared/show-password.svg";
-import HidePasswordIcon from "../../assets/shared/hide-password.svg";
+import RollText from "./RollText";
+import { ease, dur } from "../../styles/motion";
 
 // Shared Firebase Auth account gating every NDA-protected case study.
 // The real password lives only in Firebase Auth — never in this repo.
 const VIEWER_EMAIL = "viewer@daraphillips.com";
 
 const MAX_ATTEMPTS = 5;
+
+// Styled like the rest of the site: the menu's dark, blurred backdrop, and a
+// glass panel with a lit rim like the cursor's disc. Follows the page's
+// theme, so it works over the dark homepage and on the light case study.
 
 const shake = keyframes`
   0%   { transform: translateX(0); }
@@ -24,201 +28,224 @@ const shake = keyframes`
   100% { transform: translateX(0); }
 `;
 
+const appear = keyframes`
+  from { opacity: 0; }
+`;
+
+const rise = keyframes`
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+`;
+
+const dark = ({ theme }) => theme.mode === "dark";
+
 const PasswordOverlay = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
-  padding: 1rem;
+  padding: 16px;
+  background: ${(p) => (dark(p) ? "rgba(8, 8, 8, 0.72)" : "rgba(242, 240, 234, 0.72)")};
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  animation: ${appear} ${dur.base}s ${ease.out} both;
 `;
 
 const PasswordModal = styled.div`
-  width: 420px;
+  width: 440px;
   max-width: 100%;
-  padding: 2rem;
-  border-radius: ${({ theme }) => theme.radius.xl};
-  background: ${({ theme }) => theme.cardBackground};
-  border: 1px solid ${({ theme }) => theme.border};
-  box-shadow: ${({ theme }) => theme.shadowLg};
+  padding: 36px;
+  border-radius: 20px;
+  background: ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.72)")};
+  box-shadow:
+    inset 0 1px 0 ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 255, 255, 0.9)")},
+    inset 0 0 0 1px ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.08)" : p.theme.border)},
+    0 24px 64px ${(p) => (dark(p) ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.12)")};
+  color: ${({ theme }) => theme.text};
+  animation: ${rise} ${dur.base}s ${ease.out} both;
 
-  animation: ${({ $shaking }) => $shaking ? shake : "none"} 0.45s ease;
-
-  h3 {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-sans);
-    color: ${({ theme }) => theme.text};
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-  }
-
-  p {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 0.875rem;
-    color: ${({ theme }) => theme.textTertiary};
-    line-height: 1.4;
-  }
+  ${({ $shaking }) =>
+    $shaking &&
+    css`
+      animation: ${shake} 0.45s ${ease.out};
+    `}
 
   @media (max-width: 480px) {
-    padding: 1.5rem;
+    padding: 24px;
   }
+`;
+
+// the padlock, in a small glass circle
+const Badge = styled.span`
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 24px;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.9)")},
+    inset 0 0 0 1px ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.16)" : p.theme.border)};
+
+  svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+  }
+`;
+
+const Title = styled.h2`
+  margin: 0 0 8px;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+`;
+
+const Lede = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: ${({ theme }) => theme.textSecondary};
 `;
 
 const InputWrapper = styled.div`
   position: relative;
-  margin-top: 1rem;
+  margin-top: 28px;
 `;
+
+const invalid = (status) => status === "error" || status === "empty";
 
 const PasswordInput = styled.input`
   width: 100%;
-  padding: 1rem 3rem 1rem 1rem;
-  box-sizing: border-box;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  border: 1px solid ${({ $status, theme }) =>
-    $status === "error" ? theme.inputError :
-    $status === "empty" ? theme.inputError :
-    theme.inputBorder};
-  background: ${({ $status, theme }) =>
-    $status === "error" ? "rgba(239, 68, 68, 0.04)" :
-    $status === "empty" ? "rgba(239, 68, 68, 0.04)" :
-    theme.inputBg};
+  padding: 16px 52px 16px 20px;
+  border-radius: 999px;
+  border: 1px solid
+    ${(p) => (invalid(p.$status) ? p.theme.inputError : dark(p) ? "rgba(255, 255, 255, 0.16)" : p.theme.inputBorder)};
+  background: ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.8)")};
   color: ${({ theme }) => theme.text};
+  font: inherit;
   font-size: 1rem;
-  font-family: var(--font-sans);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    border-color ${dur.fast}s ${ease.out},
+    box-shadow ${dur.fast}s ${ease.out};
 
   &::placeholder {
-    color: ${({ theme }) => theme.placeholder};
-  }
-
-  &:hover {
-    border-color: ${({ $status, theme }) =>
-      $status === "error" || $status === "empty" ? theme.inputError : theme.inputBorderHover};
+    color: ${({ theme }) => theme.textTertiary};
   }
 
   &:focus {
     outline: none;
-    border-color: ${({ $status, theme }) =>
-      $status === "error" || $status === "empty" ? theme.inputError : theme.inputBorderFocus};
-    box-shadow: ${({ $status }) =>
-      $status === "error" || $status === "empty"
-        ? "0 0 0 3px rgba(239, 68, 68, 0.12)"
-        : "0 0 0 3px rgba(37, 99, 235, 0.12)"};
+    border-color: ${(p) => (invalid(p.$status) ? p.theme.inputError : p.theme.text)};
+    box-shadow: 0 0 0 4px ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.08)" : "rgba(23, 23, 26, 0.08)")};
+  }
+
+  &:disabled {
+    opacity: 0.5;
   }
 `;
 
 const ToggleVisibility = styled.button`
   position: absolute;
-  right: 0.875rem;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
   background: none;
-  border: none;
-  padding: 0.25rem;
+  color: ${({ theme }) => theme.textTertiary};
   cursor: pointer;
+  transition: color ${dur.fast}s ${ease.out};
 
-  img {
-    width: 1.2rem;
-    height: 1.2rem;
-    opacity: 0.4;
-    transition: opacity 0.15s ease;
+  svg {
+    width: 18px;
+    height: 18px;
   }
 
-  &:hover img {
-    opacity: 0.7;
+  &:hover {
+    color: ${({ theme }) => theme.text};
   }
 
   &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.inputBorderFocus};
-    border-radius: 4px;
+    outline: 2px solid ${({ theme }) => theme.text};
+    outline-offset: 2px;
   }
 `;
 
 const FeedbackText = styled.p`
-  margin-top: 0.5rem !important;
-  font-size: 0.8rem !important;
-  color: ${({ $type, theme }) =>
-    $type === "error" ? theme.inputError : theme.textTertiary} !important;
-  min-height: 1.1rem;
-  transition: color 0.15s ease;
+  margin: 10px 0 0 20px;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: ${({ $type, theme }) => ($type === "error" ? theme.inputError : theme.textTertiary)};
 `;
 
 const PasswordButtons = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 12px;
+  margin-top: 20px;
 
   @media (max-width: 360px) {
-    flex-direction: column;
+    flex-direction: column-reverse;
+  }
+`;
+
+const pill = css`
+  flex: 1;
+  display: inline-flex;
+  justify-content: center;
+  padding: 14px 20px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color ${dur.fast}s ${ease.out},
+    opacity ${dur.fast}s ${ease.out};
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.text};
+    outline-offset: 3px;
   }
 `;
 
 const ModalPrimaryButton = styled.button`
-  flex: 1;
-  padding: 0.85rem;
-  border: none;
-  border-radius: ${({ theme }) => theme.radius.lg};
-  cursor: pointer;
-  background: ${({ theme }) => theme.buttonPrimaryBg};
-  color: ${({ theme }) => theme.buttonPrimaryText};
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  opacity: ${({ disabled }) => disabled ? 0.5 : 1};
+  ${pill}
+  border: 1px solid ${({ theme }) => theme.text};
+  background: ${({ theme }) => theme.text};
+  color: ${({ theme }) => theme.body};
 
-  &:hover:not(:disabled) {
-    background: ${({ theme }) => theme.buttonPrimaryHover};
-    box-shadow: ${({ theme }) => theme.shadowSm};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.inputBorderFocus};
-    outline-offset: 2px;
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 `;
 
 const ModalSecondaryButton = styled.button`
-  flex: 1;
-  padding: 0.85rem;
-  border: 1px solid ${({ theme }) => theme.buttonSecondaryBorder};
-  border-radius: ${({ theme }) => theme.radius.lg};
-  cursor: pointer;
-  background: ${({ theme }) => theme.buttonSecondaryBg};
-  color: ${({ theme }) => theme.buttonSecondaryText};
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background 0.15s ease;
+  ${pill}
+  border: 1px solid ${(p) => (dark(p) ? "rgba(255, 255, 255, 0.16)" : p.theme.border)};
+  background: transparent;
+  color: ${({ theme }) => theme.text};
 
   &:hover {
-    background: ${({ theme }) => theme.buttonSecondaryHover};
-    color: ${({ theme }) => theme.linkHover};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.inputBorderFocus};
-    outline-offset: 2px;
+    border-color: ${({ theme }) => theme.text};
   }
 `;
 
 // ---------------- Component ----------------
 
-export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive" }) {
+export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive", title = "Protected project" }) {
   const navigate = useNavigate();
   const modalRef = useRef(null);
 
-  // Same reasoning as the About Me modal (Splash.jsx): traps Tab within
-  // the modal and handles Escape, since neither existed before -- Tab
-  // could walk out into whatever grid content sits behind the overlay,
-  // and there was no keyboard way to dismiss this beyond tabbing all the
-  // way to Cancel. The password input already gets initial focus via
-  // autoFocus below, so this only needs to handle the trap + Escape.
+  // Traps Tab within the modal and handles Escape. The password input gets
+  // initial focus via autoFocus below, so this only needs the trap + Escape.
   useEffect(() => {
     if (!open) return;
 
@@ -339,13 +366,19 @@ export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive"
         aria-labelledby="protected-gate-title"
         $shaking={isShaking}
       >
-        <h3 id="protected-gate-title">Protected Project</h3>
-        <p>This case study is password protected.</p>
+        <Badge aria-hidden="true">
+          <FiLock />
+        </Badge>
+        <Title id="protected-gate-title">{title}</Title>
+        <Lede>This case study is under NDA. Enter the password to view it.</Lede>
 
         <InputWrapper>
           <PasswordInput
             type={showPassword ? "text" : "password"}
-            placeholder="Enter password"
+            placeholder="Password"
+            aria-label="Password"
+            aria-describedby="protected-gate-feedback"
+            aria-invalid={invalid(inputStatus)}
             value={password}
             $status={inputStatus}
             onChange={handleChange}
@@ -359,27 +392,21 @@ export default function ProtectedGate({ open, onClose, redirectTo = "/orthovive"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              <img
-                src={showPassword ? HidePasswordIcon : ShowPasswordIcon}
-                alt={showPassword ? "Hide password" : "Show password"}
-              />
+              {showPassword ? <FiEyeOff aria-hidden="true" /> : <FiEye aria-hidden="true" />}
             </ToggleVisibility>
           )}
         </InputWrapper>
 
-        <FeedbackText $type={inputStatus === "idle" ? "hint" : "error"}>
+        <FeedbackText id="protected-gate-feedback" role="alert" $type={inputStatus === "idle" ? "hint" : "error"}>
           {feedbackMsg || " "}
         </FeedbackText>
 
         <PasswordButtons>
-          <ModalSecondaryButton onClick={handleClose}>
-            Cancel
+          <ModalSecondaryButton type="button" onClick={handleClose}>
+            <RollText>Cancel</RollText>
           </ModalSecondaryButton>
-          <ModalPrimaryButton
-            onClick={handlePasswordSubmit}
-            disabled={isLocked || submitting}
-          >
-            {isLocked ? "Locked" : submitting ? "Checking..." : "Enter"}
+          <ModalPrimaryButton type="button" onClick={handlePasswordSubmit} disabled={isLocked || submitting}>
+            {isLocked ? "Locked" : submitting ? "Checking…" : <RollText>View case study</RollText>}
           </ModalPrimaryButton>
         </PasswordButtons>
       </PasswordModal>

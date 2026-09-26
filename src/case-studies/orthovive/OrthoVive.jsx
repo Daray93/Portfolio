@@ -164,7 +164,7 @@ export default function OrthoViveCaseStudy() {
     // component to re-render with isUnlocked now true, not a navigation
     // anywhere else.
     return (
-      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/orthovive" />
+      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/orthovive" title="OrthoVive" />
     );
   }
 
