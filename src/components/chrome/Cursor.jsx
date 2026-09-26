@@ -6,9 +6,9 @@ import { ease, dur } from "../../styles/motion";
 // Custom cursor: one piece of embossed glass that changes shape with what's
 // under it.
 //   ring   anywhere else: a small, empty glass ring on the pointer
-//   hover  over a link or button: the ring slides onto it and stretches into
-//          a rounded shape around it (matching its corners), drifting a
-//          little toward the pointer. No blur here, so the item stays sharp.
+//   hover  over a link or button: the ring slides onto it and wraps what you
+//          can see of it (see visibleBox) with the same room on every side,
+//          drifting a little toward the pointer. No blur here, so the item stays sharp.
 //   disc   over the carousel (`data-cursor-area`): a large glass disc saying
 //          what a click does, from the nearest `data-cursor`:
 //            open  enlarge arrows  the card in focus (it grows into the project)
@@ -31,8 +31,11 @@ const ICON_ONLY = new Set(["open", "lock", "prev", "next"]);
 const RING = 20;
 const DISC = 88;
 // room around a hovered item
-const PAD_X = 10;
-const PAD_Y = 6;
+// room around a hovered item's visible content (see visibleBox), the same on
+// every side whatever the control's own box is
+const PAD = 8;
+// corners of the hover shape: a pill on small things, gently rounded on big
+const HOVER_RADIUS = 16;
 // how far the hover shape leans toward the pointer (share of the distance)
 const LEAN = 0.08;
 // anything bigger than this isn't wrapped (it would just be a big box)
@@ -153,6 +156,72 @@ const Label = styled.span`
   }
 `;
 
+const SVG_SHAPES = "path, circle, ellipse, rect, line, polyline, polygon";
+
+const paints = (cs) =>
+  (cs.backgroundColor && !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor)) ||
+  cs.backgroundImage !== "none" ||
+  (cs.maskImage && cs.maskImage !== "none") ||
+  (cs.webkitMaskImage && cs.webkitMaskImage !== "none");
+
+// What of a control you can actually see -- its letters, icons, lines and
+// fills -- as insets from its own box. Controls pad themselves differently
+// (the menu button is a 44px box around two short lines, a pager button a
+// 28px box around a ring), so wrapping the box itself would give each a
+// different gap. Hidden parts are skipped: anything transparent, screen-
+// reader-only text, and whatever sits outside the box (a rolled-away label,
+// a tooltip). Text is trimmed to its font size, dropping the line's extra
+// leading, so words and icons get the same visual room.
+function visibleBox(el) {
+  const box = el.getBoundingClientRect();
+  let l = Infinity;
+  let t = Infinity;
+  let r = -Infinity;
+  let b = -Infinity;
+  const add = (rc) => {
+    const L = Math.max(rc.left, box.left);
+    const T = Math.max(rc.top, box.top);
+    const R = Math.min(rc.right, box.right);
+    const B = Math.min(rc.bottom, box.bottom);
+    if (R - L < 1 || B - T < 1) return;
+    l = Math.min(l, L);
+    t = Math.min(t, T);
+    r = Math.max(r, R);
+    b = Math.max(b, B);
+  };
+  const walk = (node) => {
+    for (const child of node.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (!child.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(child);
+        const size = parseFloat(getComputedStyle(child.parentElement).fontSize) || 16;
+        for (const rc of range.getClientRects()) {
+          const mid = rc.top + rc.height / 2;
+          const h = Math.min(rc.height, size);
+          add({ left: rc.left, right: rc.right, top: mid - h / 2, bottom: mid + h / 2 });
+        }
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE || child.classList.contains("sr-only")) continue;
+      const cs = getComputedStyle(child);
+      if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) continue;
+      const tag = child.tagName.toLowerCase();
+      if (tag === "svg") {
+        const shapes = child.querySelectorAll(SVG_SHAPES);
+        if (shapes.length) shapes.forEach((shape) => add(shape.getBoundingClientRect()));
+        else add(child.getBoundingClientRect());
+        continue;
+      }
+      if (tag === "img" || tag === "video" || tag === "canvas" || paints(cs)) add(child.getBoundingClientRect());
+      walk(child);
+    }
+  };
+  walk(el);
+  if (l === Infinity) return { l: 0, t: 0, r: 0, b: 0 };
+  return { l: l - box.left, t: t - box.top, r: box.right - r, b: box.bottom - b };
+}
+
 // what's under the pointer: { mode, label, el }
 function read(target) {
   const ring = { mode: "ring", label: null, el: null };
@@ -186,20 +255,24 @@ export default function Cursor({ reduced }) {
     const pointer = { x: -100, y: -100 };
     // the shape as drawn: centre, size, corner radius
     const cur = { x: -100, y: -100, w: RING, h: RING, r: RING / 2 };
-    const now = { mode: "ring", el: null, down: false, fresh: true };
+    // insets: the hovered control's visible content within its box
+    const now = { mode: "ring", el: null, insets: null, down: false, fresh: true };
     let raf = 0;
     let last = performance.now();
 
     const target = () => {
       if (now.mode === "hover" && now.el?.isConnected) {
-        const rect = now.el.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const w = rect.width + PAD_X * 2;
-        const h = rect.height + PAD_Y * 2;
-        // follow the item's own corners, never rounder than a pill
-        const own = parseFloat(getComputedStyle(now.el).borderTopLeftRadius) || 0;
-        const r = Math.min(h / 2, own ? own + PAD_Y : 12);
+        const box = now.el.getBoundingClientRect();
+        const i = now.insets ?? { l: 0, t: 0, r: 0, b: 0 };
+        const left = box.left + i.l;
+        const top = box.top + i.t;
+        const cw = box.width - i.l - i.r;
+        const ch = box.height - i.t - i.b;
+        const cx = left + cw / 2;
+        const cy = top + ch / 2;
+        const w = cw + PAD * 2;
+        const h = ch + PAD * 2;
+        const r = Math.min(h / 2, HOVER_RADIUS);
         return { x: cx + (pointer.x - cx) * LEAN, y: cy + (pointer.y - cy) * LEAN, w, h, r };
       }
       const size = now.mode === "disc" ? DISC : RING;
@@ -233,8 +306,11 @@ export default function Cursor({ reduced }) {
     };
     raf = requestAnimationFrame(tick);
 
-    const update = (el) => {
+    // `measure`: re-read the content even if the control hasn't changed (its
+    // label can change under a still pointer, e.g. "Copied")
+    const update = (el, measure = false) => {
       const next = read(el);
+      if (next.el && (next.el !== now.el || measure)) now.insets = visibleBox(next.el);
       now.mode = next.mode;
       now.el = next.el;
       setMode(next.mode);
@@ -251,7 +327,7 @@ export default function Cursor({ reduced }) {
     };
     // the element under a still pointer can change (the carousel moves, the
     // menu opens) -- re-check now and then
-    const recheck = () => update(document.elementFromPoint(pointer.x, pointer.y));
+    const recheck = () => update(document.elementFromPoint(pointer.x, pointer.y), true);
     const onLeave = () => setVisible(false);
     const onDown = () => (now.down = true);
     const onUp = () => (now.down = false);
