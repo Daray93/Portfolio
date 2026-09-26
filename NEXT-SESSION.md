@@ -42,7 +42,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
    - Pints Yurt: real numbers (pubs, prices reported, users)
 4. **MISE:** fold into the Operation Avocado case study as a "what I did differently the second time" section.
 5. **About page:** replace the WebGL scroll story with a statement, intro plus facts, a timeline of roles, and education.
-6. **Websites page:** started at `/websites` (in the menu: Case studies, About, Websites). Lists Alice Abreu Music, Gülfem Cevheribucak, MISE and IBHF; check the one-line descriptions for Alice Abreu and MISE (written from their titles only) and the order. Add more sites to `src/data/websites.js` (name, one line, URL, optional year).
+6. **Websites page:** started at `/websites` (in the menu: Work, About, Websites). Lists Alice Abreu Music, Gülfem Cevheribucak, MISE and IBHF; check the one-line descriptions for Alice Abreu and MISE (written from their titles only) and the order. Add more sites to `src/data/websites.js` (name, one line, URL, optional year).
 7. **Clean-up:**
    - delete the unused Bento homepage code (`src/components/home/Splash.jsx` and its card components)
    - remove the leftover Audanote mentions in `OtherProjects.jsx` comments

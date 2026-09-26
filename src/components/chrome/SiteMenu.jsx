@@ -129,7 +129,7 @@ export default function SiteMenu({ open, onClose }) {
   }, [open, onClose]);
 
   const links = [
-    { to: "/", label: "Case studies" },
+    { to: "/", label: "Work" },
     { to: "/about-me", label: "About" },
     { to: "/websites", label: "Websites" },
   ];
