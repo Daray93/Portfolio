@@ -141,7 +141,8 @@ const Page = styled.div`
     $ready &&
     css`
       > section {
-        animation: ${settle} ${reveal.lift}s ${reveal.liftCurve} backwards;
+        /* lands softly under the lift (which itself speeds away) */
+        animation: ${settle} ${reveal.lift + dur.fast}s ${ease.out} backwards;
       }
     `}
 
