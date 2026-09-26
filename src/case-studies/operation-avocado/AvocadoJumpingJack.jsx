@@ -55,7 +55,7 @@ const TimerLabel = styled.div`
   top: ${({ $rigScale }) => 17 - (1 - $rigScale) * 40}%;
   z-index: 3;
   transform: translate(-50%, -4px);
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: ${({ $urgent }) => ($urgent ? "clamp(1.3rem, 6cqw, 2rem)" : "clamp(0.9rem, 4cqw, 1.3rem)")};
   color: ${({ $urgent }) => ($urgent ? "#FF6B5E" : "#fff")};

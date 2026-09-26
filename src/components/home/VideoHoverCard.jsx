@@ -175,7 +175,7 @@ const Title = styled.span`
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   font-size: 1.25;
   font-weight: 500;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
 `;
 

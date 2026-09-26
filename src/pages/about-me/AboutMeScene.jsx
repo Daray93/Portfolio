@@ -10,9 +10,9 @@ import seagullGlb from "./flying_seagull.glb?url";
 // geometry in the scene (proper depth/occlusion/perspective scale)
 // instead of a DOM overlay, without needing new font assets. Three
 // weights for real eyebrow/heading/body hierarchy.
-import geistMedium from "@fontsource/geist/files/geist-latin-500-normal.woff?url";
-import geistSemibold from "@fontsource/geist/files/geist-latin-600-normal.woff?url";
-import geistBold from "@fontsource/geist/files/geist-latin-700-normal.woff?url";
+import fontMedium from "@fontsource/instrument-sans/files/instrument-sans-latin-500-normal.woff?url";
+import fontSemibold from "@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff?url";
+import fontBold from "@fontsource/instrument-sans/files/instrument-sans-latin-700-normal.woff?url";
 
 // Copy node_modules/three/examples/jsm/libs/draco/ into public/draco/ --
 // self-hosted to match the fonts rather than pulling a CDN. Harmless if
@@ -1069,7 +1069,7 @@ export default function AboutMeScene({ flightProgressRef, onJourneyEnd }) {
 
       const eyebrow = makeCaptionText({
         content: turn.eyebrow,
-        fontUrl: geistSemibold,
+        fontUrl: fontSemibold,
         fontSize: CAPTION_EYEBROW_FONT_SIZE,
         letterSpacing: 0.12,
         color: CAPTION_TEXT_COLOR,
@@ -1078,7 +1078,7 @@ export default function AboutMeScene({ flightProgressRef, onJourneyEnd }) {
       });
       const heading = makeCaptionText({
         content: turn.heading,
-        fontUrl: geistBold,
+        fontUrl: fontBold,
         fontSize: CAPTION_HEADING_FONT_SIZE,
         color: CAPTION_TEXT_COLOR,
         maxWidth: CAPTION_HEADING_MAX_WIDTH,
@@ -1086,7 +1086,7 @@ export default function AboutMeScene({ flightProgressRef, onJourneyEnd }) {
       });
       const body = makeCaptionText({
         content: turn.body,
-        fontUrl: geistMedium,
+        fontUrl: fontMedium,
         fontSize: CAPTION_BODY_FONT_SIZE,
         color: CAPTION_TEXT_COLOR,
         maxWidth: CAPTION_BODY_MAX_WIDTH,

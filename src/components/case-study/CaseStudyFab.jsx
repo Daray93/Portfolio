@@ -9,12 +9,10 @@ import { useThemeMode } from "../../styles/ThemeModeContext";
 // find what "next" means for the mobile fab's next-project arrow, and
 // (exported) CaseStudyLayout's desktop Next button beside the pill nav.
 export const CASE_STUDY_ORDER = [
+  { path: "/cruciate", label: "Cruciate" },
   { path: "/operation-avocado", label: "Operation Avocado" },
+  { path: "/pints-yurt", label: "Pints Yurt" },
   { path: "/orthovive", label: "OrthoVive" },
-  { path: "/ibhf", label: "IBHF" },
-  { path: "/audanote", label: "Audanote" },
-  { path: "/kropt", label: "Kropt Mobile App" },
-  { path: "/neuroloop", label: "Neuroloop" },
 ];
 
 const bounce = keyframes`

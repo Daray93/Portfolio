@@ -246,7 +246,7 @@ const CTAButton = styled.a`
   padding: 0.65rem 1.25rem;
   border-radius: ${({ theme }) => theme.radius.btn};
   border: 1px solid ${({ theme }) => theme.buttonPrimaryBg};
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 1rem;
   color: ${({ theme }) => theme.buttonPrimaryText};

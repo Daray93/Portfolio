@@ -303,7 +303,7 @@ const Title = styled.span`
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 `;

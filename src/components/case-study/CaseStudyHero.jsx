@@ -62,7 +62,7 @@ const ViewToggleButton = styled.button`
   padding: 0.4rem 0.9rem;
   border: none;
   border-radius: 999px;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;

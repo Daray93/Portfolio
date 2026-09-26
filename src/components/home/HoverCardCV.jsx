@@ -139,7 +139,7 @@ const TitleWrapper = styled.div`
 const Title = styled.div`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   letter-spacing: 0.01em;
 `;

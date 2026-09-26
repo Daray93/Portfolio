@@ -82,7 +82,7 @@ const PillButton = styled.button`
   border: none;
   background: transparent;
   border-radius: 999px;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;

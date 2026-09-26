@@ -259,7 +259,7 @@ const CardSurface = styled(Card)`
 `;
 
 const CellLabel = styled.span`
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   color: ${({ theme }) => theme.textTertiary};
 `;
@@ -297,14 +297,14 @@ const HeroTextStack = styled.div`
 `;
 
 const HeroName = styled.span`
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   color: ${({ theme }) => theme.text};
 `;
 
 const HeroRole = styled.span`
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(0.9rem, 1.5vw, 1rem);
   color: ${({ theme }) => theme.textSecondary};
 `;
@@ -388,7 +388,7 @@ const EmailIcon = styled.span`
 `;
 
 const EmailAddress = styled.span`
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(0.8rem, 1.8vw, 0.95rem);
   color: ${({ theme }) => theme.textSecondary};
   text-align: center;
@@ -457,7 +457,7 @@ const UtilityButton = styled.button`
 `;
 
 const UtilityButtonLabel = styled.span`
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.7rem;
   font-weight: 500;
 `;
@@ -520,7 +520,7 @@ const ComingSoonPill = styled.span`
   background: ${({ theme }) => theme.navSurface};
   border: 1px solid ${({ theme }) => theme.border};
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 400;
   border-radius: 20px;
@@ -571,7 +571,7 @@ const AvocadoOverlayTitle = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
   font-weight: 500;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
 `;
 
@@ -652,7 +652,7 @@ const AboutMeTextStack = styled.div`
 `;
 
 const AboutMeHeader = styled.span`
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 500;
   color: ${({ theme }) => theme.text};
@@ -660,7 +660,7 @@ const AboutMeHeader = styled.span`
 `;
 
 const AboutMeSubtext = styled.span`
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 500;
   margin-top: 0.1rem;
@@ -763,7 +763,7 @@ const ModalMetaItem = styled.div`
   border-radius: 999px;
   border: 1px solid ${({ theme }) => theme.border};
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.8rem;
   white-space: nowrap;
 
@@ -775,7 +775,7 @@ const ModalMetaItem = styled.div`
 
 const ModalText = styled.p`
   margin: 0;
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.95rem;
   line-height: 1.55;
   color: ${({ theme }) => theme.textSecondary};
@@ -839,7 +839,7 @@ const MobileSectionHeading = styled.h3`
        heading above them instead of the work section. */
     order: 5;
     margin: 2rem 0 0.25rem;
-    font-family: "Fraunces Variable", serif;
+    font-family: var(--font-sans);
     font-weight: 600;
     font-size: 1.05rem;
     color: ${({ theme }) => theme.text};
@@ -883,7 +883,7 @@ const MobileCaptionButton = styled.button`
 `;
 
 const MobileCaptionTitle = styled.span`
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 1rem;
   color: ${({ theme }) => theme.text};

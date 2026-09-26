@@ -10,6 +10,7 @@ import { MotionPreferenceProvider, useMotionPreference } from "./styles/MotionPr
 import { HomeMorphIntentProvider, useHomeMorphIntent } from "./styles/HomeMorphIntentContext";
 
 import Navbar from "./components/layout/Navbar";
+import { ExpandTransitionProvider } from "./components/showcase/ExpandTransition";
 import Footer from "./components/layout/Footer";
 
 import Home from "./pages/Home";
@@ -27,6 +28,8 @@ const OrthoViveCaseStudy = lazy(() => import("./case-studies/orthovive/OrthoVive
 const IbhfCaseStudy = lazy(() => import("./case-studies/ibhf/Ibhf"));
 const OperationAvocadoCaseStudy = lazy(() => import("./case-studies/operation-avocado/OperationAvocado"));
 const AudanoteCaseStudy = lazy(() => import("./case-studies/audanote/Audanote"));
+const PintsYurtCaseStudy = lazy(() => import("./case-studies/pints-yurt/PintsYurt"));
+const CruciateCaseStudy = lazy(() => import("./case-studies/cruciate/Cruciate"));
 const AboutMe = lazy(() => import("./pages/about-me/AboutMe"));
 
 const AppWrapper = styled.div`
@@ -65,7 +68,7 @@ const SkipLink = styled.a`
   border-radius: ${({ theme }) => theme.radius.sm};
   background: ${({ theme }) => theme.buttonPrimaryBg};
   color: ${({ theme }) => theme.buttonPrimaryText};
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   text-decoration: none;
   transition: top 0.15s ease;
@@ -192,9 +195,20 @@ const RouteFallback = styled.div`
 // as clean rather than glitchy; staggering an instant content swap
 // against a delayed chrome toggle was the flicker.
 const MORPH_CHROMELESS_PREFIXES = ["/about-me"];
-const CHROMELESS_PREFIXES = ["/kropt", "/neuroloop", "/orthovive", "/ibhf", "/operation-avocado", "/audanote", ...MORPH_CHROMELESS_PREFIXES];
+const CHROMELESS_PREFIXES = [
+  "/pints-yurt",
+  "/cruciate",
+  "/kropt",
+  "/neuroloop",
+  "/orthovive",
+  "/ibhf",
+  "/operation-avocado",
+  "/audanote",
+  ...MORPH_CHROMELESS_PREFIXES,
+];
+// The showcase homepage brings its own header/menu/footer (see Showcase.jsx).
 const shouldHideChrome = (pathname) =>
-  CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  pathname === "/" || CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 const isMorphRoute = (pathname) =>
   MORPH_CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
@@ -264,6 +278,7 @@ export default function App() {
             fire their effects on mount, and remounting them here would
             re-trigger an unwanted scroll-to-top/pageview every time this
             toggle flips. */}
+        <ExpandTransitionProvider>
         <AppWrapper key={reduced}>
           {!hideChrome && <Navbar />}
 
@@ -333,6 +348,26 @@ export default function App() {
                   }
                 />
                 <Route
+                  path="/pints-yurt"
+                  element={
+                    <AnimatedPage>
+                      <Suspense fallback={<RouteFallback />}>
+                        <PintsYurtCaseStudy />
+                      </Suspense>
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/cruciate"
+                  element={
+                    <AnimatedPage>
+                      <Suspense fallback={<RouteFallback />}>
+                        <CruciateCaseStudy />
+                      </Suspense>
+                    </AnimatedPage>
+                  }
+                />
+                <Route
                   path="/about-me"
                   element={
                     <MorphAnimatedPage>
@@ -350,6 +385,7 @@ export default function App() {
 
           {!hideChrome && <Footer />}
         </AppWrapper>
+        </ExpandTransitionProvider>
       </ThemeModeProvider>
       )}
       </MotionPreferenceBridge>

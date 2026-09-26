@@ -444,7 +444,7 @@ const FlightSpacer = styled.div`
 // The intro's only line now -- same muted treatment the old "Not Your
 // Usual About Page" eyebrow had, just repurposed as the scroll cue.
 const IntroLabel = styled(motion.span)`
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.2em;

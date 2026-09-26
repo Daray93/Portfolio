@@ -79,7 +79,7 @@ const NavContainer = styled.div`
 `;
 
 const LogoText = styled(NavLink)`
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 400;
   letter-spacing: 0.05rem;
   color: ${({ theme }) => theme.textSecondary};

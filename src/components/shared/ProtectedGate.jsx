@@ -48,14 +48,14 @@ const PasswordModal = styled.div`
 
   h3 {
     margin: 0 0 0.25rem;
-    font-family: "Fraunces Variable", serif;
+    font-family: var(--font-sans);
     color: ${({ theme }) => theme.text};
     font-size: clamp(1rem, 2.5vw, 1.2rem);
   }
 
   p {
     margin: 0;
-    font-family: "Geist", sans-serif;
+    font-family: var(--font-sans);
     font-size: 0.875rem;
     color: ${({ theme }) => theme.textTertiary};
     line-height: 1.4;
@@ -86,7 +86,7 @@ const PasswordInput = styled.input`
     theme.inputBg};
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 
   &::placeholder {
@@ -166,7 +166,7 @@ const ModalPrimaryButton = styled.button`
   cursor: pointer;
   background: ${({ theme }) => theme.buttonPrimaryBg};
   color: ${({ theme }) => theme.buttonPrimaryText};
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 0.95rem;
   transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -191,7 +191,7 @@ const ModalSecondaryButton = styled.button`
   cursor: pointer;
   background: ${({ theme }) => theme.buttonSecondaryBg};
   color: ${({ theme }) => theme.buttonSecondaryText};
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 0.95rem;
   transition: background 0.15s ease;

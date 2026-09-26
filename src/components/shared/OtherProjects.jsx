@@ -6,11 +6,9 @@ import { motion } from "framer-motion";
 import ScreenshotPanCard from "../home/ScreenshotPanCard";
 import AvocadoJumpingJack from "../../case-studies/operation-avocado/AvocadoJumpingJack";
 import { lightTheme } from "../../styles/theme";
-import neuroloopHero from "../../case-studies/neuroloop/assets/NeuroloopHero.png";
-import kroptHeader from "../../case-studies/kropt/assets/KroptHeader.png";
-import IbhfCell from "../../case-studies/ibhf/assets/ibhf-cell.png";
+import PintsIcon from "../../case-studies/pints-yurt/assets/pints-icon.png";
+import CruciateLogo from "../../case-studies/cruciate/assets/cruciate-logo.svg";
 import OrthoViveLogo from "../../case-studies/orthovive/assets/OrthoVive.png";
-import AudanoteLogo from "../../case-studies/audanote/assets/Audanote-logo.svg";
 
 // ---------------- Styled ----------------
 const Wrapper = styled(motion.section)`
@@ -134,7 +132,7 @@ const IconTitle = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
   font-weight: 500;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
 `;
 
@@ -173,7 +171,7 @@ const AvocadoBadge = styled.span`
   background: ${({ theme }) => theme.navSurface};
   border: 1px solid ${({ theme }) => theme.border};
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 400;
   border-radius: 20px;
@@ -196,12 +194,17 @@ const fadeUp = {
 // Splash.jsx) -- including which CARD TYPE it uses (static screenshot,
 // icon, or the Avocado rig), so this reads as the same tile shown a
 // second time, not a differently-styled stand-in for it.
-const NEUROLOOP_SCREENS = [neuroloopHero];
-const KROPT_SCREENS = [kroptHeader];
-const IBHF_SCREENS = [IbhfCell];
 
 // Newest to oldest project.
 const PROJECTS = [
+  {
+    id: "cruciate",
+    type: "icon",
+    title: "Cruciate",
+    icon: CruciateLogo,
+    tag: "Health App",
+    path: "/cruciate",
+  },
   {
     id: "operation-avocado",
     type: "avocado",
@@ -210,47 +213,20 @@ const PROJECTS = [
     path: "/operation-avocado",
   },
   {
+    id: "pints-yurt",
+    type: "icon",
+    title: "Pints Yurt",
+    icon: PintsIcon,
+    tag: "Community App",
+    path: "/pints-yurt",
+  },
+  {
     id: "orthovive",
     type: "icon",
     title: "OrthoVive",
     icon: OrthoViveLogo,
     tag: "Med-Tech Case Study",
     path: "/orthovive",
-  },
-  {
-    id: "ibhf",
-    type: "screenshot",
-    title: "IBHF",
-    screens: IBHF_SCREENS,
-    tag: "Conservation Case Study",
-    tagColor: "#92400E",
-    path: "/ibhf",
-  },
-  {
-    id: "audanote",
-    type: "icon",
-    title: "Audanote",
-    icon: AudanoteLogo,
-    tag: "Health-Tech Case Study",
-    path: "/audanote",
-  },
-  {
-    id: "kropt",
-    type: "screenshot",
-    title: "Kropt Mobile App",
-    screens: KROPT_SCREENS,
-    tag: "Ag-Tech Case Study",
-    tagColor: "#497025",
-    path: "/kropt",
-  },
-  {
-    id: "neuroloop",
-    type: "screenshot",
-    title: "Neuroloop",
-    screens: NEUROLOOP_SCREENS,
-    tag: "AI & VR Case Study",
-    tagColor: "#0c5562",
-    path: "/neuroloop",
   },
 ];
 
@@ -282,7 +258,7 @@ export default function OtherProjects({ currentProjectId }) {
             <ThemeProvider
               key={project.id}
               theme={(outer) =>
-                project.id === "orthovive" || project.id === "audanote"
+                project.id === "orthovive" || project.id === "audanote" || project.id === "pints-yurt"
                   ? { ...lightTheme, radius: outer.radius }
                   : outer
               }

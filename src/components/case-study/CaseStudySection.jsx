@@ -33,7 +33,7 @@ const TitleSquare = styled.div`
 const Title = styled.h2`
   cursor: pointer;
   font-weight: 400;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;

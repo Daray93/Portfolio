@@ -21,6 +21,9 @@ export function MotionPreferenceProvider({ children }) {
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, String(reduced));
+    // CSS transitions/animations follow the toggle too (see GlobalStyle),
+    // not just framer-motion
+    document.documentElement.classList.toggle("reduce-motion", reduced);
   }, [reduced]);
 
   const toggleReduced = () => setReduced((r) => !r);

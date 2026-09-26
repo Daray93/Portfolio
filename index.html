@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- SVG first: black or white to match the browser's light/dark mode.
+         PNG for browsers without SVG favicons (Safari). -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/iOS-favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Geist (body) and Fraunces (headings) are both self-hosted via
-         @fontsource (see GlobalStyle.jsx) -- loading them again here from
-         a CDN would mean every visitor paying for two separate copies of
-         the same typefaces. -->
+    <!-- Instrument Sans is self-hosted via @fontsource (see
+         GlobalStyle.jsx) -- loading it again here from a CDN would mean
+         every visitor paying for two copies of the same typeface. -->
 
     <title>Dara Phillips | Product Designer</title>
     <link rel="canonical" href="https://daraphillips.com/" />
@@ -37,17 +39,19 @@
     />
 
     <style>
-      /* Global font setup */
+      /* Paints before the app loads -- matches the dark default theme so
+         there's no white flash. Headings share the body font (Instrument
+         Sans, see GlobalStyle.jsx); only size and weight set them apart. */
       body {
-        font-family: 'Geist', sans-serif;
+        font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
         margin: 0;
         padding: 0;
-        background: #fff;
-        color: #1a1a1a;
+        background: #161616;
+        color: #f4f4f4;
       }
 
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Fraunces Variable', serif;
+        font-family: inherit;
         font-weight: 600;
         margin: 0;
       }

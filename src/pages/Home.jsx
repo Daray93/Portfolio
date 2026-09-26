@@ -1,13 +1,5 @@
 import React from "react";
-import Splash from "../components/home/Splash";
-import styled from "styled-components";
-
-
-// Content container above LaserFlow
-const ContentWrapper = styled.div`
-  position: relative;
-  z-index: 0; /* above LaserFlow */
-`;
+import Showcase from "../components/showcase/Showcase";
 
 export default function Home() {
   return (
@@ -24,9 +16,7 @@ export default function Home() {
       <meta property="og:url" content="https://daraphillips.com" />
       <meta property="og:image" content="https://daraphillips.com/preview.jpg" />
 
-      <ContentWrapper>
-        <Splash />
-      </ContentWrapper>
+      <Showcase />
     </>
   );
 }

@@ -69,7 +69,7 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;

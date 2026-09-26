@@ -155,7 +155,7 @@ const Title = styled.span`
   color: ${({ theme }) => theme.text};
   font-size: 1rem;
   font-weight: 500;
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
 `;
 

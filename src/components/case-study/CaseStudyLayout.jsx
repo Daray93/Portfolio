@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { FiHome, FiArrowRight } from "react-icons/fi";
 import PillNav from "../shared/PillNav";
 import CaseStudyFab, { CASE_STUDY_ORDER } from "./CaseStudyFab";
 import { CaseStudyViewContext } from "./CaseStudyViewContext";
+import ProjectCover from "./ProjectCover";
+import { ease, dur } from "../../styles/motion";
+import projects from "../../data/projects";
+import { RETURN_KEY } from "../showcase/ExpandTransition";
 
 const Shell = styled.div`
   width: 100%;
@@ -50,6 +54,13 @@ const Content = styled.main`
   min-width: 0;
 `;
 
+// cover (full width) stacked above the reading column
+const Main = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
 // PillNav's own mobile styling (see PillNav.jsx, @media max-width: 560px)
 // makes its pills width: 100% / flex: 1 -- that only does anything useful
 // if ITS OWN parent actually has a real width to fill. Above 560px this
@@ -64,6 +75,8 @@ const Content = styled.main`
 // that line on plenty of real viewport widths -- forcing the pill nav's
 // own track (and its option labels) to wrap. A full-width bar gives the
 // centre section real, unconstrained room via flex:1 instead.
+// Hidden while the project cover fills the screen (it has its own way
+// back), sliding in once the reader scrolls into the case study itself.
 const NavWrapper = styled.div`
   position: fixed;
   top: 1.5rem;
@@ -72,6 +85,14 @@ const NavWrapper = styled.div`
   z-index: 1000;
   display: flex;
   justify-content: center;
+  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
+  transform: translateY(${({ $hidden }) => ($hidden ? "-12px" : "0")});
+  pointer-events: ${({ $hidden }) => ($hidden ? "none" : "auto")};
+  visibility: ${({ $hidden }) => ($hidden ? "hidden" : "visible")};
+  transition:
+    opacity ${dur.base}s ${ease.out},
+    transform ${dur.slow}s ${ease.out},
+    visibility 0s linear ${({ $hidden }) => ($hidden ? `${dur.slow}s` : "0s")};
 
   @media (max-width: 560px) {
     top: 0;
@@ -158,7 +179,7 @@ const NextButton = styled(Link)`
   border: 1px solid transparent;
   background: transparent;
   color: ${({ theme }) => theme.textSecondary};
-  font-family: "Fraunces Variable", serif;
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -209,6 +230,36 @@ export default function CaseStudyLayout({ sections, children }) {
   const { pathname } = useLocation();
   const homeFilter = getHomeFilter();
 
+  // the carousel entry for this page, if it has one -- drives the cover
+  const project = projects.find((p) => pathname.startsWith(p.to));
+  const coverRef = useRef(null);
+  const [coverInView, setCoverInView] = useState(Boolean(project));
+
+  useEffect(() => {
+    const el = coverRef.current;
+    if (!el) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setCoverInView(entry.isIntersecting), {
+      threshold: 0.35,
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [project]);
+
+  // The homepage plays the card's way back only when the visitor returns
+  // to it straight from here -- leaving for anywhere else forgets it.
+  useEffect(
+    () => () => {
+      if (window.location.pathname !== "/") {
+        try {
+          sessionStorage.removeItem(RETURN_KEY);
+        } catch {
+          // storage blocked -- nothing was stored either
+        }
+      }
+    },
+    []
+  );
+
   const currentIndex = CASE_STUDY_ORDER.findIndex((p) => pathname.startsWith(p.path));
   const nextProject =
     currentIndex === -1
@@ -254,7 +305,7 @@ export default function CaseStudyLayout({ sections, children }) {
   return (
     <CaseStudyViewContext.Provider value={{ view, setView }}>
       <Shell>
-        <NavWrapper>
+        <NavWrapper $hidden={coverInView} inert={coverInView}>
           <NavContainer>
             <HomeButton
               type="button"
@@ -287,9 +338,12 @@ export default function CaseStudyLayout({ sections, children }) {
           </NavContainer>
         </NavWrapper>
 
-        <Frame>
-          <Content>{children}</Content>
-        </Frame>
+        <Main>
+          {project && <ProjectCover ref={coverRef} project={project} />}
+          <Frame>
+            <Content>{children}</Content>
+          </Frame>
+        </Main>
 
         <CaseStudyFab homeFilter={homeFilter} />
       </Shell>

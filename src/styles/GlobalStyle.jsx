@@ -1,18 +1,18 @@
 import { createGlobalStyle } from "styled-components";
-// Only the weights actually referenced by a `font-weight:` anywhere in
-// src/ -- 200 and 800 were being shipped unused.
-import "@fontsource/geist/300.css";
-import "@fontsource/geist/400.css";
-import "@fontsource/geist/500.css";
-import "@fontsource/geist/600.css";
-import "@fontsource/geist/700.css";
-// Fraunces is a true variable font (weight 100-900 on one file) rather
-// than a set of discrete static weights, so this one import covers every
-// font-weight used against it anywhere in src/.
-import "@fontsource-variable/fraunces";
+// Instrument Sans is the one typeface across the whole site -- hierarchy
+// comes from size and weight, not a second family. Only the weights
+// actually used are imported.
+import "@fontsource/instrument-sans/400.css";
+import "@fontsource/instrument-sans/500.css";
+import "@fontsource/instrument-sans/600.css";
+import "@fontsource/instrument-sans/700.css";
 
 const GlobalStyle = createGlobalStyle`
   /* ---------------- Base ---------------- */
+  :root {
+    --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -21,7 +21,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    font-family: "Geist", sans-serif;
+    font-family: var(--font-sans);
     font-weight: 400;
     background: ${({ theme }) => theme.body};
     color: ${({ theme }) => theme.text};
@@ -114,6 +114,35 @@ const GlobalStyle = createGlobalStyle`
     letter-spacing: 0.05em;
     text-transform: uppercase;
     backdrop-filter: blur(6px);
+  }
+
+  /* ---------------- Reduced motion ---------------- */
+  /* driven by the in-site toggle (MotionPreferenceContext), which starts
+     from the OS setting -- so this one class covers both, and switching
+     the toggle off still wins over the OS. Things still change state,
+     they just don't travel to get there. */
+  html.reduce-motion *,
+  html.reduce-motion *::before,
+  html.reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* ---------------- Screen-reader only ---------------- */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* ---------------- Misc ---------------- */
