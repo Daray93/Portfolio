@@ -30,12 +30,26 @@ const ICON_ONLY = new Set(["open", "lock", "prev", "next"]);
 
 const RING = 20;
 const DISC = 88;
-// room around a hovered item
-// room around a hovered item's visible content (see visibleBox), the same on
-// every side whatever the control's own box is
+// The hover shape around a control's visible content (see visibleBox).
+// Small controls -- the header and footer items -- all get the same height,
+// with the space left and right matching the space above and below, so the
+// logo, name, menu button, pager and "Get in touch." wrap alike: text as a
+// pill, small icons (the menu lines, a pager ring) as a circle. Anything
+// taller keeps PAD all round.
+const HOVER_H = 44;
 const PAD = 8;
-// corners of the hover shape: a pill on small things, gently rounded on big
+// corners on the taller shapes (small ones are full pills / circles)
 const HOVER_RADIUS = 16;
+
+// the shape for content of cw x ch
+function hoverSize(cw, ch) {
+  const h = Math.max(HOVER_H, ch + PAD * 2);
+  if (h > HOVER_H) return { w: cw + PAD * 2, h, r: Math.min(h / 2, HOVER_RADIUS) };
+  // an icon that fits inside the circle: a circle
+  if (cw <= h - PAD * 2) return { w: h, h, r: h / 2 };
+  const side = Math.max(PAD, (h - ch) / 2);
+  return { w: cw + side * 2, h, r: h / 2 };
+}
 // how far the hover shape leans toward the pointer (share of the distance)
 const LEAN = 0.08;
 // anything bigger than this isn't wrapped (it would just be a big box)
@@ -270,9 +284,7 @@ export default function Cursor({ reduced }) {
         const ch = box.height - i.t - i.b;
         const cx = left + cw / 2;
         const cy = top + ch / 2;
-        const w = cw + PAD * 2;
-        const h = ch + PAD * 2;
-        const r = Math.min(h / 2, HOVER_RADIUS);
+        const { w, h, r } = hoverSize(cw, ch);
         return { x: cx + (pointer.x - cx) * LEAN, y: cy + (pointer.y - cy) * LEAN, w, h, r };
       }
       const size = now.mode === "disc" ? DISC : RING;
