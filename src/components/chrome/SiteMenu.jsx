@@ -196,7 +196,7 @@ export default function SiteMenu({ open, onClose }) {
         <Setting>
           <span id="motion-label">Reduce motion</span>
           <Segmented>
-            <Segment type="button" $on={reduced} aria-pressed={reduced} aria-labelledby="motion-label" onClick={toggleReduced} data-cursor="toggle">
+            <Segment type="button" $on={reduced} aria-pressed={reduced} aria-labelledby="motion-label" onClick={toggleReduced}>
               {reduced ? "On" : "Off"}
             </Segment>
           </Segmented>

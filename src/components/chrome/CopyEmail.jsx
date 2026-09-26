@@ -133,7 +133,6 @@ export default function CopyEmail() {
       <Button
         type="button"
         onClick={copy}
-        data-cursor={copied ? "copied" : "copy"}
         aria-label={`Copy email address ${EMAIL}`}
       >
         <IconSlot aria-hidden="true">

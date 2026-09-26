@@ -155,7 +155,6 @@ export default function SiteHeader({ menuOpen, onMenuToggle, overIntro = false }
         aria-label={menuOpen ? "Close menu" : "Open menu"}
         aria-expanded={menuOpen}
         aria-controls="site-menu"
-        data-cursor={menuOpen ? "close" : "menu"}
       >
         <span aria-hidden="true" />
         <span aria-hidden="true" />
