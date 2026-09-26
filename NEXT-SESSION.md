@@ -29,7 +29,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
    - the carousel doesn't skip to the next project after coming back
 2. **Per-page themes.** Homepage dark, case studies light. Opening a card, the page behind should fade from dark to the cream case study background with no seam at the cover; coming back, it should fade from cream into the dark carousel. Reload a case study URL directly: it should paint cream from the first frame, no dark flash. The menu no longer has a Theme switch, and the case study bottom bar no longer has a sun/moon button.
 3. **The cursor.** Off the carousel: a small empty glass ring. Hover the logo, name, menu button, pager icons, "Get in touch.", and in the menu the big links, copy email and LinkedIn: the ring should wrap each one smoothly, following its shape (round for the pager icons). On the carousel: the big disc with its icons. The password field in the OrthoVive gate should show the normal text caret.
-4. **The intro.** Open a new tab to replay it: about 2.5–3s in all: a short count (0.7s minimum), then a solid lift that speeds up as it leaves (no slowing at the end); side cards spread once the focused card is uncovered; header visible throughout.
+4. **The intro.** Open a new tab to replay it (about 2.5–3s): a short count, then the black becomes a window the shape of the focused card, the card fades up alone inside it, and the window opens out to the screen edges, speeding up, with the side cards gliding out as it opens. Check the card fades up exactly inside the window (no gap or offset at the edges or corners), on a phone too. Header visible throughout.
 
 ## To do, in order
 

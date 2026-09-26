@@ -68,10 +68,10 @@ function saveSlide(i) {
 // ---------------- Layout ----------------
 
 // Two ways to arrive:
-//   "wipe"  first visit -- the loading screen lifts away over a page that's
-//           already there while the stage settles (a slow push-in, like a
-//           camera coming to rest); the cards wait, stacked, until the
-//           panel uncovers the focused card, then glide out
+//   "wipe"  first visit -- the loading screen opens on the focused card
+//           alone (see Preloader) while the stage settles (a slow push-in,
+//           like a camera coming to rest); the cards wait, stacked behind
+//           it, until the window opens out, then glide out
 //   "fade"  arriving from another page -- the header drops in, the stage
 //           fades up and the footer follows
 const introFade = keyframes`
@@ -141,8 +141,8 @@ const Page = styled.div`
     $ready &&
     css`
       > section {
-        /* lands softly under the lift (which itself speeds away) */
-        animation: ${settle} ${reveal.lift + dur.fast}s ${ease.out} backwards;
+        /* pushes in through the shot and the opening, landing softly */
+        animation: ${settle} ${reveal.shot + reveal.hold + reveal.open + dur.fast}s ${ease.out} backwards;
       }
     `}
 
@@ -709,9 +709,9 @@ export default function Showcase() {
     if (returning) return null;
     return willPreload() ? "wipe" : "fade";
   });
-  // ready: the page's entrance has begun (the lift has started, or there's
-  // no loading screen). spreading: the lift has uncovered the focused card,
-  // so the cards can move. settled: they've mostly arrived, caption's turn.
+  // ready: the page's entrance has begun (the intro's shot has started, or
+  // there's no loading screen). spreading: the intro's window is opening
+  // out, so the cards can move. settled: they've mostly arrived, caption's turn.
   const [ready, setReady] = useState(() => !willPreload());
   const [spreading, setSpreading] = useState(() => intro !== "wipe");
   const [settled, setSettled] = useState(() => intro !== "wipe");
@@ -724,12 +724,20 @@ export default function Showcase() {
     return () => clearTimeout(t);
   }, [spreading, settled]);
 
-  // where the loading screen's bottom edge has to reach before the cards
-  // move: the bottom of the focused card, read live as the lift runs
-  const getRevealLine = useCallback(
-    () => cardRefs.current[startIndex]?.getBoundingClientRect().bottom ?? window.innerHeight * 0.7,
-    [startIndex]
-  );
+  // The focused card's box and corners, for the intro's window onto it.
+  // Also centres the stage's settle (push-in) on that card, so the card only
+  // grows inside its window rather than drifting against its edges.
+  const getFrame = useCallback(() => {
+    const card = cardRefs.current[startIndex];
+    if (!card) return null;
+    const { top, left, width, height } = card.getBoundingClientRect();
+    const stage = card.closest("section");
+    if (stage) {
+      const s = stage.getBoundingClientRect();
+      stage.style.transformOrigin = `${left + width / 2 - s.left}px ${top + height / 2 - s.top}px`;
+    }
+    return { top, left, width, height, radius: parseFloat(getComputedStyle(card).borderRadius) || 0 };
+  }, [startIndex]);
   const [selected, setSelected] = useState(startIndex);
   const [menuOpen, setMenuOpen] = useState(false);
   const [gateFor, setGateFor] = useState(null);
@@ -958,10 +966,10 @@ export default function Showcase() {
       <Preloader
         sources={PRELOAD}
         reduced={reduced}
-        onLiftStart={() => setReady(true)}
+        onStart={() => setReady(true)}
         onReveal={() => setSpreading(true)}
         onDone={() => setCovered(false)}
-        getRevealLine={getRevealLine}
+        getFrame={getFrame}
       />
       <Backdrop projects={projects} active={selected} light={light} still={reduced} />
 

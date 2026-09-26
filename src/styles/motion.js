@@ -32,14 +32,16 @@ export const dur = {
 // gap between items revealed in sequence
 export const stagger = 0.08;
 
-// The intro reveal. The loading screen lifts away as one solid panel; the
-// carousel cards stay stacked behind the focused one until the panel's
-// bottom edge passes the bottom of that card, then glide out to their
-// places.
+// The intro reveal (see Preloader). It opens on a single shot: the loading
+// screen's black becomes a window in the shape of the focused card, the card
+// fades up inside it, then the window opens out to the screen's edges and
+// the side cards glide out as it goes.
 export const reveal = {
-  delay: 0.15, // the lift starts as the loading details finish fading
-  lift: 0.85, // the panel travelling off the top
-  liftCurve: "cubic-bezier(0.32, 0, 0.67, 0)", // gathers speed and leaves at full pace, no braking at the end
-  spread: 1.3, // the cards gliding out once uncovered (overlaps the lift)
+  delay: 0.15, // the shot starts as the loading details finish fading
+  shot: 0.6, // the card fading up inside its window
+  hold: 0.1, // a beat on the single shot
+  open: 0.85, // the window opening out to the screen's edges
+  openCurve: "cubic-bezier(0.32, 0, 0.67, 0)", // gathers speed and meets the edges at full pace, no braking
+  spread: 1.3, // the side cards gliding out as the window opens
   spreadCurve: "cubic-bezier(0.22, 1, 0.36, 1)", // a long, even deceleration
 };
