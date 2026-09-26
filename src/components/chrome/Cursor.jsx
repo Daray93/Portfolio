@@ -1,20 +1,104 @@
 import { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle, css } from "styled-components";
-import { FiArrowUpRight, FiLock, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import {
+  FiArrowDown,
+  FiArrowLeft,
+  FiArrowRight,
+  FiArrowUpRight,
+  FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCopy,
+  FiLock,
+  FiMenu,
+  FiToggleRight,
+  FiX,
+} from "react-icons/fi";
 import { ease, dur } from "../../styles/motion";
 
 // Custom cursor for fine pointers (mouse/trackpad) only -- touch devices
-// never mount it. Its shape comes from the nearest `data-cursor` attribute
-// under the pointer:
-//   "open"  large ball + arrow   (the card in focus)
-//   "lock"  large ball + padlock (a locked card in focus)
-//   "drag"  chevrons either side (the carousel around the focused card)
-// Any other link or button grows the ball a little.
+// never mount it, and neither do forced-colours (high contrast) modes,
+// which keep the system cursor.
+//
+// One look everywhere: a solid disc in the page's text colour with a thin
+// ring of the page colour (so it reads over any media), and an icon in the
+// middle naming what a click will do. It comes in two sizes:
+//   large    over the carousel (`data-cursor-size="large"`): the disc sits
+//            on the pointer, like a lens over the card
+//   control  over links and buttons: a small badge beside the pointer, so
+//            it never covers the words, with a dot marking the exact point
+//            that clicks
+//
+// The icon comes from the nearest `data-cursor` under the pointer, or is
+// worked out from the element (see stateFor). The vocabulary:
+//   open      →   open this project
+//   link      →   go to another page on the site
+//   back      ←   go back to the previous page
+//   down      ↓   scroll down to the content
+//   external  ↗   opens in a new tab / leaves the site
+//   prev/next ‹ › move the carousel that way
+//   drag      ‹›  drag (or scroll) to browse
+//   lock      padlock  password protected
+//   copy / copied      copy to the clipboard, then a tick once it's done
+//   menu / close       open or close the menu
+//   toggle    switch a setting
+//   press     any other button (a plain dot: "clickable")
+//   none      just the dot (e.g. the pager button already in focus)
+// Text fields get the system text cursor back.
+
+// the arrows on either side of a drag: Feather's chevrons, drawn as one icon
+function DragIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
+    </svg>
+  );
+}
+
+function PressIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
+    </svg>
+  );
+}
+
+const ICONS = {
+  open: FiArrowRight,
+  link: FiArrowRight,
+  back: FiArrowLeft,
+  down: FiArrowDown,
+  external: FiArrowUpRight,
+  prev: FiChevronLeft,
+  next: FiChevronRight,
+  drag: DragIcon,
+  lock: FiLock,
+  copy: FiCopy,
+  copied: FiCheck,
+  menu: FiMenu,
+  close: FiX,
+  toggle: FiToggleRight,
+  press: PressIcon,
+};
+
+const SIZE = { large: 76, control: 34 };
+// how far the control badge sits from the pointer, on each axis
+const OFFSET = 24;
+// the badge flips to the other side this close to the window's edge
+const EDGE = OFFSET + SIZE.control;
 
 const HideNative = createGlobalStyle`
-  html.has-cursor,
-  html.has-cursor * {
-    cursor: none !important;
+  @media (forced-colors: none) {
+    html.has-cursor,
+    html.has-cursor * {
+      cursor: none !important;
+    }
+
+    html.has-cursor input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"]),
+    html.has-cursor textarea,
+    html.has-cursor [contenteditable="true"] {
+      cursor: text !important;
+    }
   }
 `;
 
@@ -26,119 +110,123 @@ const Root = styled.div`
   pointer-events: none;
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity ${dur.fast}s ${ease.out};
+
+  @media (forced-colors: active) {
+    display: none;
+  }
 `;
 
-const Ball = styled.div`
+const ring = ({ theme }) => `0 0 0 1px color-mix(in srgb, ${theme.body} 45%, transparent)`;
+
+// the exact point that clicks
+const Dot = styled.div`
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.text};
+  box-shadow: ${ring};
+  transform: scale(${({ $hidden }) => ($hidden ? 0 : 1)});
+  transition: transform ${dur.fast}s ${ease.out};
+`;
+
+const Disc = styled.div`
+  --x: 0px;
+  --y: 0px;
+  --s: 0;
   position: absolute;
   display: grid;
   place-items: center;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: ${SIZE.control}px;
+  height: ${SIZE.control}px;
   border-radius: 50%;
   background: ${({ theme }) => theme.text};
   color: ${({ theme }) => theme.body};
+  box-shadow: ${ring};
+  font-size: 16px; /* the icon's size */
+  transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(var(--s));
   transition:
     width ${dur.base}s ${ease.out},
     height ${dur.base}s ${ease.out},
-    margin ${dur.base}s ${ease.out},
-    background-color ${dur.fast}s ${ease.out},
-    opacity ${dur.fast}s ${ease.out},
-    transform ${dur.fast}s ${ease.out};
+    font-size ${dur.base}s ${ease.out},
+    transform ${dur.base}s ${ease.out};
 
-  svg {
-    width: 26px;
-    height: 26px;
-    opacity: 0;
-    transform: scale(0.4);
-    transition:
-      opacity ${dur.fast}s ${ease.out},
-      transform ${dur.base}s ${ease.out};
-  }
-
-  ${({ $state }) =>
-    ($state === "open" || $state === "lock") &&
+  ${({ $size, $flipX, $flipY }) =>
+    $size === "control" &&
     css`
-      width: 84px;
-      height: 84px;
-      margin: -42px 0 0 -42px;
+      --x: ${$flipX ? -OFFSET : OFFSET}px;
+      --y: ${$flipY ? -OFFSET : OFFSET}px;
+      --s: 1;
     `}
 
-  ${({ $state }) =>
-    $state === "link" &&
+  ${({ $size }) =>
+    $size === "large" &&
     css`
-      width: 44px;
-      height: 44px;
-      margin: -22px 0 0 -22px;
-      opacity: 0.35;
+      --s: 1;
+      width: ${SIZE.large}px;
+      height: ${SIZE.large}px;
+      font-size: 26px;
     `}
 
-  ${({ $state }) =>
-    $state === "drag" &&
+  ${({ $size, $down }) =>
+    $size && $down &&
     css`
-      width: 64px;
-      height: 64px;
-      margin: -32px 0 0 -32px;
-      background: transparent;
-      border: 1.5px solid ${({ theme }) => theme.text};
+      --s: 0.88;
     `}
 
-  ${({ $down }) =>
-    $down &&
+  ${({ $reduced }) =>
+    $reduced &&
     css`
-      transform: scale(0.85);
+      transition: none;
     `}
 `;
 
+// every icon is stacked in the disc; the current one fades and scales in
 const Icon = styled.span`
   position: absolute;
   display: grid;
   place-items: center;
-
-  ${({ $on }) =>
-    $on &&
-    css`
-      svg {
-        opacity: 1;
-        transform: none;
-      }
-    `}
-`;
-
-const Chevrons = styled.span`
-  position: absolute;
-  display: flex;
-  gap: 58px;
-  color: ${({ theme }) => theme.text};
+  opacity: ${({ $on }) => ($on ? 1 : 0)};
+  transform: scale(${({ $on }) => ($on ? 1 : 0.5)});
+  transition:
+    opacity ${dur.fast}s ${ease.out},
+    transform ${dur.base}s ${ease.out};
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 1em;
+    height: 1em;
   }
-
-  ${({ $on }) =>
-    $on &&
-    css`
-      svg {
-        opacity: 1;
-        transform: none;
-      }
-    `}
 `;
 
+const isExternal = (a) => a.target === "_blank" || (a.origin && a.origin !== window.location.origin);
+
+// what a click on `target` does: { state, size }
 function stateFor(target) {
-  if (!(target instanceof Element)) return "default";
-  const tagged = target.closest("[data-cursor]");
-  if (tagged) return tagged.dataset.cursor;
-  if (target.closest("a, button, [role='button'], label, input, select, textarea")) return "link";
-  return "default";
+  const none = { state: "default", size: null };
+  if (!(target instanceof Element)) return none;
+  if (target.closest("input:not([type='checkbox'], [type='radio'], [type='button'], [type='submit']), textarea, select, [contenteditable='true']")) {
+    return { state: "native", size: null };
+  }
+  const size = target.closest("[data-cursor-size='large']") ? "large" : "control";
+
+  let state = target.closest("[data-cursor]")?.dataset.cursor;
+  if (!state) {
+    const link = target.closest("a[href]");
+    if (link) state = isExternal(link) ? "external" : "link";
+    else if (target.closest("button, [role='button'], label, summary")) state = "press";
+  }
+  return ICONS[state] ? { state, size } : none;
 }
 
 export default function Cursor({ reduced }) {
-  const [enabled] = useState(() => window.matchMedia("(pointer: fine)").matches);
-  const [state, setState] = useState("default");
+  const [enabled] = useState(
+    () => window.matchMedia("(pointer: fine)").matches && !window.matchMedia("(forced-colors: active)").matches
+  );
+  const [{ state, size }, setCurrent] = useState({ state: "default", size: null });
   const [visible, setVisible] = useState(false);
   const [down, setDown] = useState(false);
+  const [flip, setFlip] = useState({ x: false, y: false });
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -164,6 +252,15 @@ export default function Cursor({ reduced }) {
     };
     raf = requestAnimationFrame(tick);
 
+    // setState bails out on an identical value, so only real changes render
+    const update = (el) => {
+      const next = stateFor(el);
+      setCurrent((c) => (c.state === next.state && c.size === next.size ? c : next));
+      const x = target.x > window.innerWidth - EDGE;
+      const y = target.y > window.innerHeight - EDGE;
+      setFlip((f) => (f.x === x && f.y === y ? f : { x, y }));
+    };
+
     const onMove = (e) => {
       target.x = e.clientX;
       target.y = e.clientY;
@@ -172,14 +269,18 @@ export default function Cursor({ reduced }) {
         pos.y = target.y;
       }
       setVisible(true);
-      setState(stateFor(e.target));
+      update(e.target);
     };
     // the element under a still pointer can change (carousel slides move,
-    // the menu opens) -- re-check now and then
-    const recheck = () => setState(stateFor(document.elementFromPoint(target.x, target.y)));
+    // the menu opens, "Copy" turns to "Copied") -- re-check now and then
+    const recheck = () => update(document.elementFromPoint(target.x, target.y));
     const onLeave = () => setVisible(false);
     const onDown = () => setDown(true);
-    const onUp = () => setDown(false);
+    const onUp = () => {
+      setDown(false);
+      // a click often changes what's under the pointer (copied, menu open)
+      setTimeout(recheck, 60);
+    };
     const interval = setInterval(recheck, 250);
 
     window.addEventListener("pointermove", onMove, { passive: true });
@@ -203,19 +304,18 @@ export default function Cursor({ reduced }) {
   return (
     <>
       <HideNative />
-      <Root ref={rootRef} $visible={visible} aria-hidden="true">
-        <Ball $state={state} $down={down}>
-          <Icon $on={state === "open"}>
-            <FiArrowUpRight />
-          </Icon>
-          <Icon $on={state === "lock"}>
-            <FiLock />
-          </Icon>
-          <Chevrons $on={state === "drag"}>
-            <FiChevronLeft />
-            <FiChevronRight />
-          </Chevrons>
-        </Ball>
+      <Root ref={rootRef} $visible={visible && state !== "native"} aria-hidden="true">
+        <Disc $size={size} $down={down} $flipX={flip.x} $flipY={flip.y} $reduced={reduced}>
+          {Object.keys(ICONS).map((name) => {
+            const Glyph = ICONS[name];
+            return (
+              <Icon key={name} $on={state === name}>
+                <Glyph />
+              </Icon>
+            );
+          })}
+        </Disc>
+        <Dot $hidden={size === "large"} />
       </Root>
     </>
   );

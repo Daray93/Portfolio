@@ -28,7 +28,8 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
    - pulling back, "All work" and browser back all shrink cleanly into the card
    - the carousel doesn't skip to the next project after coming back
 2. **Per-page themes.** Homepage dark, case studies light. Opening a card, the page behind should fade from dark to the cream case study background with no seam at the cover; coming back, it should fade from cream into the dark carousel. Reload a case study URL directly: it should paint cream from the first frame, no dark flash. The menu no longer has a Theme switch, and the case study bottom bar no longer has a sun/moon button.
-3. **The intro.** Open a new tab to replay it: solid lift, fast then slow; side cards spread once the focused card is uncovered; header visible throughout.
+3. **The cursor.** Hover each thing on the homepage and check the icon matches the action: the focused card (→, or padlock on OrthoVive), the side cards (‹ or ›), the gaps between cards (‹›), the pager icons (‹ or ›, just a dot on the current one), "Get in touch" (↗), the logo and name (→), the menu button (menu, then ×), and in the menu the links (→), copy email (copy, then a tick), LinkedIn (↗) and Reduce motion (toggle). Near the right or bottom edge the badge should flip to the other side of the pointer.
+4. **The intro.** Open a new tab to replay it: solid lift, fast then slow; side cards spread once the focused card is uncovered; header visible throughout.
 
 ## To do, in order
 
@@ -53,7 +54,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 - **Font:** Instrument Sans only, set once as `--font-sans` in `src/styles/GlobalStyle.jsx`.
 - **Theme:** fixed per page, no switch. Homepage dark, every other page (case studies, About, 404) light. Set by the route in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The card transition's curtain and the cover's page are both pinned to `lightTheme.body`, so the handoff is always dark homepage to light case study.
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing.
-- **Cursor:** the original ball cursor (`src/components/chrome/Cursor.jsx`). A follow-the-cursor label was tried and reverted.
+- **Cursor:** `src/components/chrome/Cursor.jsx`. One look everywhere: a solid disc in the text colour with a thin page-colour ring, and an icon in the middle for what a click does (→ open/go to page, ← back, ↓ scroll, ↗ new tab, ‹ › move the carousel, padlock, copy then tick, menu/close, toggle, a dot for any other button). Large and centred over the carousel (`data-cursor-size="large"`), a small badge beside the pointer over links and buttons so it never covers text. Set an element's icon with `data-cursor`. Text fields get the system caret back; high-contrast mode keeps the system cursor. A follow-the-cursor text label was tried and reverted. So far it's only mounted on the homepage.
 - **Card size (desktop):** `--vw: 38vw`. The carousel's vertical position is `padding-block: 136px 132px` on `Stage` in `Showcase.jsx`.
 - **Header and footer on desktop:** 56px from the top and bottom, 88px from the sides. The intro screen's counter matches.
 - **Case study cover frame:** 24px margin (12px on phones), 20px corners (14px on phones), set in `src/components/showcase/coverFrame.js`. The transition and the cover both read it.

@@ -336,6 +336,7 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
       <Back
         to="/"
         aria-label="Back to all work"
+        data-cursor="back"
         onClick={(e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
           e.preventDefault();
@@ -361,7 +362,7 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
               </>
             )}
           </span>
-          <ScrollCue type="button" onClick={scrollToContent}>
+          <ScrollCue type="button" onClick={scrollToContent} data-cursor="down">
             <RollText hover="Scroll to read">Read the case study</RollText>
             <FiArrowDown aria-hidden="true" />
           </ScrollCue>

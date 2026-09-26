@@ -965,7 +965,7 @@ export default function Showcase() {
       <SiteMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <Stage aria-label="Selected work" inert={menuOpen}>
-        <Viewport ref={viewportRef} data-cursor="drag">
+        <Viewport ref={viewportRef} data-cursor="drag" data-cursor-size="large">
           <Track>
             {projects.map((p, i) => {
               const active = i === selected;
@@ -991,7 +991,8 @@ export default function Showcase() {
                   onClick={(e) => onSlideClick(e, i)}
                   aria-label={`${p.title}${locked ? " (password protected)" : ""}`}
                   aria-current={active ? "true" : undefined}
-                  data-cursor={active ? (locked ? "lock" : "open") : undefined}
+                  // a side card moves the carousel to it; the one in focus opens
+                  data-cursor={active ? (locked ? "lock" : "open") : away < 0 ? "prev" : "next"}
                 >
                   <Caption $on={active && ready && settled && !returning && !leavingId} aria-hidden={!active}>
                     <Title>{p.title}</Title>
@@ -1044,6 +1045,11 @@ export default function Showcase() {
               aria-label={p.title}
               aria-pressed={i === selected}
               onClick={() => embla?.scrollTo(i)}
+              // which way the carousel will travel (the short way round);
+              // nothing to do on the project already in focus
+              data-cursor={
+                i === selected ? "none" : (i - selected + projects.length) % projects.length > projects.length / 2 ? "prev" : "next"
+              }
             >
               <svg viewBox="0 0 28 28" aria-hidden="true">
                 <circle cx="14" cy="14" r={RING_R} />
