@@ -11,6 +11,10 @@
 //            Images can add `mobileSrc`, a portrait (4:5) version for phones.
 // backdrop:  three colours the blurred page background is built from while
 //            this card is in focus: [primary glow, secondary glow, base].
+//            The primary glow sits right behind the caption's white text, so
+//            keep it deep (roughly no lighter than #7d693e / #067a6f); bright
+//            colours belong in the secondary glow, low and to the right,
+//            which the text never crosses.
 // icon:      the project's logo for the footer pager. `fill: true` for app
 //            icons that bring their own background (given rounded corners),
 //            false for bare marks on transparent.
@@ -37,7 +41,7 @@ const projects = [
     media: { type: "logo", src: cruciateLogo },
     panel: "#0f1416",
     icon: { src: cruciateLogo, fill: false },
-    backdrop: ["#0f8f82", "#23855a", "#0a1012"],
+    backdrop: ["#067a6f", "#23855a", "#0a1012"],
   },
   {
     id: "operation-avocado",
@@ -48,7 +52,7 @@ const projects = [
     to: "/operation-avocado",
     media: { type: "video", src: oaHero },
     icon: { src: oaIcon, fill: true },
-    backdrop: ["#7bae45", "#cccf5e", "#141c07"],
+    backdrop: ["#4e7623", "#cccf5e", "#141c07"],
   },
   {
     id: "pints-yurt",
@@ -60,8 +64,8 @@ const projects = [
     media: { type: "logo", src: pintGlass },
     panel: "#f3e9d2",
     icon: { src: pintsIcon, fill: true },
-    // stout: black, with its cream head as the light
-    backdrop: ["#e8d6ae", "#8c7550", "#0a0806"],
+    // stout: black, a warm latte glow, and its cream head as the low light
+    backdrop: ["#7d693e", "#e8d6ae", "#0a0806"],
   },
   {
     id: "orthovive",
