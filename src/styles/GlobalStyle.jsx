@@ -25,7 +25,6 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 400;
     background: ${({ theme }) => theme.body};
     color: ${({ theme }) => theme.text};
-    transition: background 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
   }
 

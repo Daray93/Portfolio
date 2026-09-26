@@ -17,13 +17,14 @@ import ProjectMedia from "./ProjectMedia";
 import projects from "../../data/projects";
 import { easeArr, dur } from "../../styles/motion";
 import { coverFrame } from "./coverFrame";
+import { lightTheme } from "../../styles/theme";
 
 // Card <-> page transitions, both directions.
 //
 // Opening: the card scales up into a large framed card -- inset from the
 // screen edges, corners still rounded (see coverFrame) -- while the page
-// behind it settles from the carousel's colour field to the plain light or
-// dark page background. It's a copy of the media sized to that final frame,
+// behind it settles from the dark carousel to the case study's light page
+// background. It's a copy of the media sized to that final frame,
 // clipped to the card's exact box and corners, with the media scaled and
 // placed so the first frame matches the card pixel for pixel. The route
 // changes underneath and the copy hands off to the case study's cover (see
@@ -82,13 +83,17 @@ const Media = styled(motion.div)`
   will-change: transform;
 `;
 
-// the page background, behind the card while it's out of the carousel
+// The page background, behind the card while it's out of the carousel.
+// Always the case study's light page, never the current theme: the theme
+// follows the route, which changes mid-transition. Opening, it fades in over
+// the dark homepage and hands off to the cover's identical page; coming
+// back, it takes over from that page and fades out to the homepage.
 const Curtain = styled(motion.div)`
   position: fixed;
   inset: 0;
   z-index: 4999;
   pointer-events: none;
-  background: ${({ theme }) => theme.body};
+  background: ${lightTheme.body};
 `;
 
 const OPEN_MEDIA = { x: 0, y: 0, scale: 1 };

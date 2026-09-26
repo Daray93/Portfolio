@@ -39,9 +39,10 @@
     />
 
     <style>
-      /* Paints before the app loads -- matches the dark default theme so
-         there's no white flash. Headings share the body font (Instrument
-         Sans, see GlobalStyle.jsx); only size and weight set them apart. */
+      /* Paints before the app loads, in the page's own theme (see
+         ThemeModeContext.jsx): the homepage is dark, every other page light
+         (the script below). Headings share the body font (Instrument Sans,
+         see GlobalStyle.jsx); only size and weight set them apart. */
       body {
         font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
         margin: 0;
@@ -60,7 +61,15 @@
         text-decoration: none;
         color: inherit;
       }
+
+      html.light body {
+        background: #f2f0ea;
+        color: #17171a;
+      }
     </style>
+    <script>
+      if (location.pathname !== "/") document.documentElement.classList.add("light");
+    </script>
   </head>
 
   <body>

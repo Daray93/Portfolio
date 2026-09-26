@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { Link, useLocation } from "react-router-dom";
-import { FiArrowLeft, FiArrowRight, FiHome, FiMoon, FiSun } from "react-icons/fi";
-import { useThemeMode } from "../../styles/ThemeModeContext";
+import { FiArrowLeft, FiArrowRight, FiHome } from "react-icons/fi";
 
 // Mirrors the project order in OtherProjects.jsx's grid -- keep both in
 // sync if a case study is added, removed, or reordered there. Used to
@@ -142,10 +141,6 @@ const iconCircleStyles = css`
   }
 `;
 
-const IconCircleFab = styled.button`
-  ${iconCircleStyles}
-`;
-
 const BackFab = styled(Link)`
   ${iconCircleStyles}
 `;
@@ -171,7 +166,6 @@ export default function CaseStudyFab({ homeFilter }) {
   const lastScrollY = useRef(0);
   const location = useLocation();
   const { pathname } = location;
-  const { mode, toggleMode } = useThemeMode();
 
   const currentIndex = CASE_STUDY_ORDER.findIndex((p) => pathname.startsWith(p.path));
   const nextProject =
@@ -213,8 +207,6 @@ export default function CaseStudyFab({ homeFilter }) {
   }, []);
 
   const goHome = () => (window.location.href = homeFilter ? `/?filter=${homeFilter}` : "/");
-  const themeLabel = mode === "dark" ? "Switch to light mode" : "Switch to dark mode";
-  const themeIcon = mode === "dark" ? <FiSun size={16} /> : <FiMoon size={16} />;
 
   return (
     <FabContainer hidden={hidden}>
@@ -223,9 +215,6 @@ export default function CaseStudyFab({ homeFilter }) {
           <HomeIconFab type="button" onClick={goHome} aria-label="Home">
             <FiHome size={16} />
           </HomeIconFab>
-          <IconCircleFab type="button" onClick={toggleMode} aria-label={themeLabel}>
-            {themeIcon}
-          </IconCircleFab>
           {prevProject && (
             <BackFab
               to={prevProject.path}
@@ -252,9 +241,6 @@ export default function CaseStudyFab({ homeFilter }) {
             <FiHome size={18} />
             Home
           </FabButton>
-          <IconCircleFab type="button" onClick={toggleMode} aria-label={themeLabel}>
-            {themeIcon}
-          </IconCircleFab>
           {nextProject && (
             <NextFab
               to={nextProject.path}

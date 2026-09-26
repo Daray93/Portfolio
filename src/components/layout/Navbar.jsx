@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { FiSun, FiMoon } from "react-icons/fi";
 import PillNav from "../shared/PillNav";
 import { FILTERS } from "../shared/filters";
-import { useThemeMode } from "../../styles/ThemeModeContext";
 
 // ---------------- Styled Components ----------------
 // Fixed, deterministic height shared by Nav and its spacer below --
@@ -12,7 +10,7 @@ import { useThemeMode } from "../../styles/ThemeModeContext";
 // Below 560px the nav drops its top bar entirely and becomes just the
 // floating pill filter, docked to the bottom of the viewport instead --
 // the logo and theme toggle are hidden at that size rather than sharing
-// a bar with the pill (see LogoText/ThemeToggle below). $hidden still
+// a bar with the pill (see LogoText/NavSide below). $hidden still
 // slides it fully out of view on scroll, just downward instead of up
 // since it now lives at the bottom.
 const Nav = styled.nav`
@@ -65,7 +63,7 @@ const NavContainer = styled.div`
     padding: 0 1rem;
   }
 
-  /* Only the pill filter shows below 560px (see LogoText/ThemeToggle;
+  /* Only the pill filter shows below 560px (see LogoText/NavSide;
      the theme toggle gets a proper home in Splash's own mobile utility
      row instead, see UtilityRowInner there) -- center it now that it's
      the sole child instead of being pinned left by justify-content:
@@ -110,34 +108,10 @@ const NavCenter = styled.div`
   justify-content: center;
 `;
 
-const ThemeToggle = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// Balances the logo so the pill filter stays centred (the theme toggle
+// used to sit here; each page has a fixed theme now).
+const NavSide = styled.span`
   width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  border: 1px solid transparent;
-  background: transparent;
-  color: ${({ theme }) => theme.textSecondary};
-  cursor: pointer;
-
-  &:hover {
-    color: ${({ theme }) => theme.text};
-    background: ${({ theme }) => theme.cardBackground};
-    border: 1px solid ${({ theme }) => theme.skeletonBase};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.accent};
-    outline-offset: 2px;
-  }
-
-  svg {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
 
   @media (max-width: 560px) {
     display: none;
@@ -149,7 +123,6 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { mode, toggleMode } = useThemeMode();
 
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -219,13 +192,7 @@ export default function Navbar() {
           />
         </NavCenter>
 
-        <ThemeToggle
-          type="button"
-          onClick={toggleMode}
-          aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {mode === "dark" ? <FiSun /> : <FiMoon />}
-        </ThemeToggle>
+        <NavSide aria-hidden="true" />
       </NavContainer>
     </Nav>
     <NavSpacer />

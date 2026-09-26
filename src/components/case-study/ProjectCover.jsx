@@ -8,9 +8,10 @@ import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { ease, dur } from "../../styles/motion";
 import { COVER_INSET, COVER_RADIUS, COVER_PHONE_QUERY } from "../showcase/coverFrame";
 import { useExpandTransition } from "../showcase/ExpandTransition";
+import { lightTheme } from "../../styles/theme";
 
 // Opener for a case study: a large framed card -- inset from the screen
-// edges with rounded corners, on the page's own light or dark background --
+// edges with rounded corners, on the case study's light page background --
 // showing the same media as the project's carousel card, at exactly the
 // size the card scales up to when it's opened (see ExpandTransition and
 // coverFrame). The card hands off to this without a visible seam, then the
@@ -44,7 +45,9 @@ const Cover = styled.section`
   height: 100vh;
   height: 100dvh; /* the visible height, as the transition measures it */
   padding: ${COVER_INSET.default}px;
-  background: ${({ theme }) => theme.body};
+  /* the same light page as the card transition's curtain, so the handoff
+     between them can't show */
+  background: ${lightTheme.body};
 
   @media ${COVER_PHONE_QUERY} {
     padding: ${COVER_INSET.phone}px;

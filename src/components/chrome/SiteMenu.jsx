@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled, { css } from "styled-components";
 import { SiLinkedin } from "react-icons/si";
-import { FiSun, FiMoon } from "react-icons/fi";
-import { useThemeMode } from "../../styles/ThemeModeContext";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import RollText from "../shared/RollText";
 import { ease, dur, stagger } from "../../styles/motion";
@@ -11,7 +9,7 @@ import { LINKEDIN_URL } from "../../data/contact";
 import CopyEmail from "./CopyEmail";
 
 // Full-screen navigation behind the header's menu button. Also where the
-// site settings live now (theme, reduced motion) instead of the old navbar.
+// site setting lives now (reduced motion) instead of the old navbar.
 
 
 const Panel = styled.div`
@@ -145,66 +143,8 @@ const Segment = styled.button`
   }
 `;
 
-// Light/Dark: a thumb that physically slides between the two options
-// rather than the highlight jumping. The icons turn as it travels.
-const Switch = styled.div`
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border-radius: 999px;
-  border: 1px solid ${({ theme }) => theme.border};
-`;
-
-const Thumb = styled.span`
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
-  width: calc(50% - 3px);
-  border-radius: 999px;
-  background: ${({ theme }) => theme.text};
-  transform: translateX(${({ $right }) => ($right ? "100%" : "0")});
-  transition:
-    transform ${dur.slow}s ${ease.out},
-    background-color ${dur.base}s ${ease.out};
-  pointer-events: none;
-`;
-
-const SwitchOption = styled.button`
-  position: relative; /* above the thumb */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  background: transparent;
-  color: ${({ $on, theme }) => ($on ? theme.body : theme.textSecondary)};
-  transition: color ${dur.base}s ${ease.out};
-
-  svg {
-    transform: rotate(${({ $on }) => ($on ? "0deg" : "-90deg")});
-    transition: transform ${dur.slow}s ${ease.out};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.accent};
-    outline-offset: 2px;
-  }
-`;
-
-const THEME_OPTIONS = [
-  { id: "light", label: "Light", Icon: FiSun },
-  { id: "dark", label: "Dark", Icon: FiMoon },
-];
-
 export default function SiteMenu({ open, onClose }) {
   const { pathname } = useLocation();
-  const { mode, setMode } = useThemeMode();
   const { reduced, toggleReduced } = useMotionPreference();
   const firstLinkRef = useRef(null);
 
@@ -253,24 +193,6 @@ export default function SiteMenu({ open, onClose }) {
       </Row>
 
       <Row $open={open}>
-        <Setting role="group" aria-label="Theme">
-          <span aria-hidden="true">Theme</span>
-          <Switch>
-            <Thumb $right={mode === "dark"} aria-hidden="true" />
-            {THEME_OPTIONS.map((o) => (
-              <SwitchOption
-                key={o.id}
-                type="button"
-                $on={mode === o.id}
-                aria-pressed={mode === o.id}
-                onClick={() => setMode(o.id)}
-              >
-                <o.Icon aria-hidden="true" />
-                {o.label}
-              </SwitchOption>
-            ))}
-          </Switch>
-        </Setting>
         <Setting>
           <span id="motion-label">Reduce motion</span>
           <Segmented>

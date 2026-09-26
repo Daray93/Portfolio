@@ -1,6 +1,6 @@
 # Portfolio redesign: next session
 
-Branch: `redesign/showcase`, started from the `bento-version` tag. **Nothing on this branch is committed yet.** Commit first thing.
+Branch: `redesign/showcase`, started from the `bento-version` tag. The showcase work is committed (`631c31f`); commit per to-do from here.
 
 The Bento version is saved in the `bento-version` tag on GitHub and in `Desktop/Portfolio/my-portfolio-BENTO-VERSION.zip`.
 
@@ -10,7 +10,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 - **Projects, in order:** Cruciate, Operation Avocado, Pints Yurt, OrthoVive (password-locked). Set in `src/data/projects.js`, which is the single source for cards, colours, icons and captions.
 - **Removed from the carousel, but pages and files kept:** Audanote, Kropt, Neuroloop, IBHF. Their routes still work if you visit the URL directly.
-- **Card to project transition:** the card scales up into a large framed card (a margin all round, rounded corners) while the page behind settles to the plain page background. It lands on the case study's cover, which is that same frame.
+- **Card to project transition:** the card scales up into a large framed card (a margin all round, rounded corners) while the dark homepage behind settles to the light case study background. It lands on the case study's cover, which is that same frame.
 - **The way back:**
   - Pulling back on the cover (scroll up at the top, or drag down on a phone) shrinks the frame slightly with the gesture, springing back if let go.
   - Pulled far enough, it plays the reverse: the frame shrinks into its card, and the side cards, header and footer blur and fade in afterwards.
@@ -27,37 +27,31 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
    - the framed cover lands exactly where the transition ends
    - pulling back, "All work" and browser back all shrink cleanly into the card
    - the carousel doesn't skip to the next project after coming back
-2. **The intro.** Open a new tab to replay it: solid lift, fast then slow; side cards spread once the focused card is uncovered; header visible throughout.
+2. **Per-page themes.** Homepage dark, case studies light. Opening a card, the page behind should fade from dark to the cream case study background with no seam at the cover; coming back, it should fade from cream into the dark carousel. Reload a case study URL directly: it should paint cream from the first frame, no dark flash. The menu no longer has a Theme switch, and the case study bottom bar no longer has a sun/moon button.
+3. **The intro.** Open a new tab to replay it: solid lift, fast then slow; side cards spread once the focused card is uncovered; header visible throughout.
 
 ## To do, in order
 
-1. **Theme per page: homepage dark, case studies light.**
-   - Today one Light/Dark setting applies site-wide (dark by default). An earlier "Auto" version did this per page and was removed, so check `src/styles/ThemeModeContext.jsx` and its history.
-   - Decide what the menu's Light/Dark switch does once pages have their own themes. For example, remove it, or let it override both.
-   - The card transition's page-background layer (`Curtain` in `ExpandTransition.jsx`) uses the current theme's background. It needs to become the **destination** page's background:
-     - opening a project: fade to the light case study background
-     - coming back: start from light and fade into the dark homepage
-   - The case study cover's page background (`Cover` in `ProjectCover.jsx`) must match the light theme so the handoff stays invisible.
-2. **Case study template.** Your layout work. Below the cover, every case study still uses the old layout, and the title is repeated under the cover. Aim for one shared template like the reference: intro plus a facts list (Role, Year, Team, Tools), numbered sections, next/previous project links, and a big contact footer. Bring the new header, menu and cursor onto these pages.
-3. **Screenshots for Pints Yurt and Cruciate** (6–10 phone screens each, into a `screenshots` folder in each Desktop project folder). Then:
+1. **Case study template.** Your layout work. Below the cover, every case study still uses the old layout, and the title is repeated under the cover. Aim for one shared template like the reference: intro plus a facts list (Role, Year, Team, Tools), numbered sections, next/previous project links, and a big contact footer. Bring the new header, menu and cursor onto these pages.
+2. **Screenshots for Pints Yurt and Cruciate** (6–10 phone screens each, into a `screenshots` folder in each Desktop project folder). Then:
    - build 16:9 and 4:5 mockup card images to replace the logo cards
    - fill the dashed image slots in both case studies
-4. **Case study copy gaps** (marked with brackets on the pages):
+3. **Case study copy gaps** (marked with brackets on the pages):
    - Cruciate: why you built it, who it's for, feedback
    - Pints Yurt: real numbers (pubs, prices reported, users)
-5. **MISE:** fold into the Operation Avocado case study as a "what I did differently the second time" section.
-6. **About page:** replace the WebGL scroll story with a statement, intro plus facts, a timeline of roles, and education.
-7. **Websites section:** somewhere for IBHF and your recent sites, a simple grid or list linking to the live sites.
-8. **Clean-up:**
+4. **MISE:** fold into the Operation Avocado case study as a "what I did differently the second time" section.
+5. **About page:** replace the WebGL scroll story with a statement, intro plus facts, a timeline of roles, and education.
+6. **Websites section:** somewhere for IBHF and your recent sites, a simple grid or list linking to the live sites.
+7. **Clean-up:**
    - delete the unused Bento homepage code (`src/components/home/Splash.jsx` and its card components)
    - remove the leftover Audanote mentions in `OtherProjects.jsx` comments
    - full pass on phones and tablets
-9. **Deploy** once happy (Firebase hosting).
+8. **Deploy** once happy (Firebase hosting).
 
 ## Decisions made
 
 - **Font:** Instrument Sans only, set once as `--font-sans` in `src/styles/GlobalStyle.jsx`.
-- **Theme:** currently dark by default site-wide, with Light and Dark in the menu. This changes with to-do 1.
+- **Theme:** fixed per page, no switch. Homepage dark, every other page (case studies, About, 404) light. Set by the route in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The card transition's curtain and the cover's page are both pinned to `lightTheme.body`, so the handoff is always dark homepage to light case study.
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing.
 - **Cursor:** the original ball cursor (`src/components/chrome/Cursor.jsx`). A follow-the-cursor label was tried and reverted.
 - **Card size (desktop):** `--vw: 38vw`. The carousel's vertical position is `padding-block: 136px 132px` on `Stage` in `Showcase.jsx`.
