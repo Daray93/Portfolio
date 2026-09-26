@@ -99,7 +99,7 @@ export const lightTheme = {
   inputBorderHover: "#c9c4b4",
   inputBorderFocus: "#6c5ce7",
   inputError: "#ef4444",
-  inputSuccess: "#22c55e",
+  inputSuccess: "#15803d",      // dark enough to read on cream
   placeholder: "#a19d92",
 
   /* LinkedIn hover: the brand blue; its lighter dark-mode blue on dark pages,

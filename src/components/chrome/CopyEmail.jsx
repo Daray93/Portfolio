@@ -58,9 +58,10 @@ const Mail = styled(FiMail)`
 `;
 
 // the tick draws itself along its own path
+// green says "done"; the tick shape and the word "Copied" say it too
 const Tick = styled.svg`
   fill: none;
-  stroke: currentColor;
+  stroke: ${({ theme }) => theme.inputSuccess};
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
