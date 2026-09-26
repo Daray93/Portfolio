@@ -977,7 +977,7 @@ export default function Showcase() {
       <SiteMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <Stage aria-label="Selected work" inert={menuOpen}>
-        <Viewport ref={viewportRef} data-cursor="drag" data-cursor-area>
+        <Viewport ref={viewportRef} data-cursor-area>
           <Track>
             {projects.map((p, i) => {
               const active = i === selected;

@@ -14,7 +14,7 @@ import { ease, dur } from "../../styles/motion";
 //            open  enlarge arrows  the card in focus (it grows into the project)
 //            lock  padlock        the card in focus is password protected
 //            prev  ‹   next  ›     a side card: moves the carousel to it
-//            drag  "Drag"          between cards
+//          Between cards it stays the small ring.
 //
 // Text fields get the system text cursor back. Fine pointers (mouse/trackpad)
 // only; touch devices and forced-colours (high contrast) modes keep the
@@ -25,7 +25,6 @@ const LABELS = {
   lock: <FiLock aria-hidden="true" />,
   prev: <FiChevronLeft aria-hidden="true" />,
   next: <FiChevronRight aria-hidden="true" />,
-  drag: "Drag",
 };
 const ICON_ONLY = new Set(["open", "lock", "prev", "next"]);
 
