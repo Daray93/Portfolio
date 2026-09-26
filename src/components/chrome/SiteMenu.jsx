@@ -59,8 +59,8 @@ const Item = styled.li`
 
 const BigLink = styled(Link)`
   display: inline-block;
-  /* scales with height too, so both links fit a phone on its side */
-  font-size: clamp(2.5rem, min(9vw, 12svh), 6rem);
+  /* scales with height too, so all three links fit a phone on its side */
+  font-size: clamp(2.25rem, min(8vw, 10svh), 5.5rem);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1.05;
@@ -117,8 +117,9 @@ export default function SiteMenu({ open, onClose }) {
   }, [open, onClose]);
 
   const links = [
-    { to: "/", label: "Work" },
+    { to: "/", label: "Case studies" },
     { to: "/about-me", label: "About" },
+    { to: "/websites", label: "Websites" },
   ];
 
   return (

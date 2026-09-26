@@ -31,6 +31,7 @@ const AudanoteCaseStudy = lazy(() => import("./case-studies/audanote/Audanote"))
 const PintsYurtCaseStudy = lazy(() => import("./case-studies/pints-yurt/PintsYurt"));
 const CruciateCaseStudy = lazy(() => import("./case-studies/cruciate/Cruciate"));
 const AboutMe = lazy(() => import("./pages/about-me/AboutMe"));
+const Websites = lazy(() => import("./pages/Websites"));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -204,6 +205,7 @@ const CHROMELESS_PREFIXES = [
   "/ibhf",
   "/operation-avocado",
   "/audanote",
+  "/websites",
   ...MORPH_CHROMELESS_PREFIXES,
 ];
 // The showcase homepage brings its own header/menu/footer (see Showcase.jsx).
@@ -375,6 +377,16 @@ export default function App() {
                         <AboutMe />
                       </Suspense>
                     </MorphAnimatedPage>
+                  }
+                />
+                <Route
+                  path="/websites"
+                  element={
+                    <AnimatedPage>
+                      <Suspense fallback={<RouteFallback />}>
+                        <Websites />
+                      </Suspense>
+                    </AnimatedPage>
                   }
                 />
                 <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
