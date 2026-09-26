@@ -46,51 +46,74 @@ const Root = styled.div`
   pointer-events: none;
 `;
 
+// Smoked glass: a dark tint that blurs and lifts the media behind it, so the
+// disc reads as part of the picture rather than a sticker on it. The tint
+// keeps the white label legible over the brightest card; a lit top rim and
+// a soft shadow give it some depth.
 const Disc = styled.div`
   position: absolute;
   display: grid;
   place-items: center;
-  width: 80px;
-  height: 80px;
-  margin: -40px 0 0 -40px;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
   border-radius: 50%;
-  background: ${({ theme }) => theme.text};
-  color: ${({ theme }) => theme.body};
-  /* a thin ring of the page colour keeps it clear over any media */
-  box-shadow: 0 0 0 1px color-mix(in srgb, ${({ theme }) => theme.body} 45%, transparent);
-  transform: scale(${({ $on, $down }) => (!$on ? 0 : $down ? 0.9 : 1)});
-  transition: transform ${dur.base}s ${ease.out};
+  background: color-mix(in srgb, #000 32%, transparent);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 10px 32px rgba(0, 0, 0, 0.28);
+  opacity: ${({ $on }) => ($on ? 1 : 0)};
+  transform: scale(${({ $on, $down }) => (!$on ? 0.4 : $down ? 0.92 : 1)});
+  transition:
+    opacity ${dur.fast}s ${ease.out},
+    transform ${dur.base}s ${ease.out};
+
+  /* no blur to lean on: a denser tint does the job alone */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background: rgba(0, 0, 0, 0.72);
+  }
 
   ${({ $reduced }) =>
     $reduced &&
     css`
-      transition: none;
+      transition: opacity ${dur.fast}s ${ease.out};
     `}
 `;
 
-// every label is stacked in the disc; the current one fades in
+// every label is stacked in the disc; the current one comes into focus
 const Label = styled.span`
   position: absolute;
   display: grid;
   justify-items: center;
-  gap: 2px;
-  font-size: 0.85rem;
+  gap: 3px;
+  font-size: 0.95rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
   opacity: ${({ $on }) => ($on ? 1 : 0)};
-  transition: opacity ${dur.fast}s ${ease.out};
+  transform: scale(${({ $on }) => ($on ? 1 : 0.8)});
+  filter: blur(${({ $on }) => ($on ? 0 : 4)}px);
+  transition:
+    opacity ${dur.fast}s ${ease.out},
+    transform ${dur.base}s ${ease.out},
+    filter ${dur.fast}s ${ease.out};
 
   svg {
     width: 16px;
     height: 16px;
+    stroke-width: 1.75;
   }
 
   ${({ $icon }) =>
     $icon &&
     css`
       svg {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
+        stroke-width: 1.5;
       }
     `}
 `;
