@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle, css } from "styled-components";
-import { FiChevronLeft, FiChevronRight, FiLock } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiLock, FiMaximize2 } from "react-icons/fi";
 import { ease, dur } from "../../styles/motion";
 
 // A custom cursor for the carousel only. Everywhere else -- header, menu,
@@ -9,7 +9,7 @@ import { ease, dur } from "../../styles/motion";
 //
 // Inside an area marked `data-cursor-area`, the pointer becomes a disc
 // saying what a click does, taken from the nearest `data-cursor`:
-//   open  "View"          the card in focus
+//   open  enlarge arrows  the card in focus (it grows into the project)
 //   lock  padlock, Locked the card in focus is password protected
 //   prev  ‹   next  ›     a side card: moves the carousel to it
 //   drag  "Drag"          between cards
@@ -18,7 +18,7 @@ import { ease, dur } from "../../styles/motion";
 // (high contrast) modes never mount it.
 
 const LABELS = {
-  open: "View",
+  open: <FiMaximize2 aria-hidden="true" />,
   lock: (
     <>
       <FiLock aria-hidden="true" />
@@ -210,7 +210,7 @@ export default function Cursor({ reduced }) {
       <Root ref={rootRef} aria-hidden="true">
         <Disc $on={!!state} $down={down} $reduced={reduced}>
           {Object.keys(LABELS).map((name) => (
-            <Label key={name} $on={shown === name} $icon={name === "prev" || name === "next"}>
+            <Label key={name} $on={shown === name} $icon={name === "open" || name === "prev" || name === "next"}>
               {LABELS[name]}
             </Label>
           ))}

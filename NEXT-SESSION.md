@@ -28,7 +28,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
    - pulling back, "All work" and browser back all shrink cleanly into the card
    - the carousel doesn't skip to the next project after coming back
 2. **Per-page themes.** Homepage dark, case studies light. Opening a card, the page behind should fade from dark to the cream case study background with no seam at the cover; coming back, it should fade from cream into the dark carousel. Reload a case study URL directly: it should paint cream from the first frame, no dark flash. The menu no longer has a Theme switch, and the case study bottom bar no longer has a sun/moon button.
-3. **The cursor.** Over the carousel: "View" on the focused card, "Locked" on OrthoVive, ‹ / › on the side cards, "Drag" in the gaps. Anywhere else (header, menu, pager, footer) it should be your normal cursor.
+3. **The cursor.** Over the carousel: the enlarge icon on the focused card, "Locked" on OrthoVive, ‹ / › on the side cards, "Drag" in the gaps. Anywhere else (header, menu, pager, footer) it should be your normal cursor.
 4. **The intro.** Open a new tab to replay it: solid lift, fast then slow; side cards spread once the focused card is uncovered; header visible throughout.
 
 ## To do, in order
@@ -55,7 +55,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 - **Theme:** fixed per page, no switch. Homepage dark, every other page (case studies, About, 404) light. Set by the route in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The card transition's curtain and the cover's page are both pinned to `lightTheme.body`, so the handoff is always dark homepage to light case study.
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing. Reduced motion follows the visitor's system setting only (live, in `MotionPreferenceContext.jsx`); the menu's switch was removed.
 - **LinkedIn hover:** LinkedIn blue, `theme.linkedin` (`#0A66C2` on light pages, LinkedIn's dark-mode `#70B5F9` on dark ones so it stays readable). Used by the menu's LinkedIn link and the footer's "Get in touch."
-- **Cursor:** `src/components/chrome/Cursor.jsx`, only over the carousel (`data-cursor-area` on its viewport); the system cursor everywhere else. There it's an 88px smoked-glass disc (dark tint, backdrop blur, lit top rim, soft shadow) with a white word: "View" on the focused card, padlock + "Locked" on OrthoVive, ‹ or › on side cards, "Drag" between cards. An icon-badge-on-every-link version was tried and dropped as too busy.
+- **Cursor:** `src/components/chrome/Cursor.jsx`, only over the carousel (`data-cursor-area` on its viewport); the system cursor everywhere else. There it's an 88px smoked-glass disc (dark tint, backdrop blur, lit top rim, soft shadow) with a white word or icon: the enlarge icon on the focused card, padlock + "Locked" on OrthoVive, ‹ or › on side cards, "Drag" between cards. An icon-badge-on-every-link version was tried and dropped as too busy.
 - **Card size (desktop):** `--vw: 38vw`. The carousel's vertical position is `padding-block: 136px 132px` on `Stage` in `Showcase.jsx`.
 - **Header and footer on desktop:** 56px from the top and bottom, 88px from the sides. The intro screen's counter matches.
 - **Case study cover frame:** 24px margin (12px on phones), 20px corners (14px on phones), set in `src/components/showcase/coverFrame.js`. The transition and the cover both read it.
