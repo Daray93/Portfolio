@@ -12,7 +12,7 @@ import { ease, dur } from "../../styles/motion";
 //   disc   over the carousel (`data-cursor-area`): a large glass disc saying
 //          what a click does, from the nearest `data-cursor`:
 //            open  enlarge arrows  the card in focus (it grows into the project)
-//            lock  padlock, Locked the card in focus is password protected
+//            lock  padlock        the card in focus is password protected
 //            prev  ‹   next  ›     a side card: moves the carousel to it
 //            drag  "Drag"          between cards
 //
@@ -22,17 +22,12 @@ import { ease, dur } from "../../styles/motion";
 
 const LABELS = {
   open: <FiMaximize2 aria-hidden="true" />,
-  lock: (
-    <>
-      <FiLock aria-hidden="true" />
-      Locked
-    </>
-  ),
+  lock: <FiLock aria-hidden="true" />,
   prev: <FiChevronLeft aria-hidden="true" />,
   next: <FiChevronRight aria-hidden="true" />,
   drag: "Drag",
 };
-const ICON_ONLY = new Set(["open", "prev", "next"]);
+const ICON_ONLY = new Set(["open", "lock", "prev", "next"]);
 
 const RING = 20;
 const DISC = 88;
