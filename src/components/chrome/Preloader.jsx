@@ -14,10 +14,11 @@ import { ease, dur, reveal } from "../../styles/motion";
 // Coming back to the homepage later in the same session skips it.
 
 const SEEN_KEY = "preloaded";
-const MIN_MS = 1100;
+// long enough to read as a loader rather than a flicker
+const MIN_MS = 700;
 
 // the details clear first, then the panel lifts
-const FADE_S = dur.fast * 1.4;
+const FADE_S = dur.fast * 0.8;
 
 const Screen = styled.div`
   position: fixed;
@@ -134,7 +135,7 @@ export default function Preloader({ sources, reduced, onLiftStart, onReveal, onD
     const tick = (now) => {
       const real = loaded / total;
       const timeCap = Math.min((now - start) / MIN_MS, 1);
-      shown += (Math.min(real, timeCap) - shown) * 0.12;
+      shown += (Math.min(real, timeCap) - shown) * 0.2;
       if (Math.min(real, timeCap) === 1 && shown > 0.995) shown = 1;
       if (fillRef.current) fillRef.current.style.transform = `scaleX(${shown})`;
       setPct(Math.round(shown * 100));

@@ -37,9 +37,9 @@ export const stagger = 0.08;
 // bottom edge passes the bottom of that card, then glide out to their
 // places.
 export const reveal = {
-  delay: 0.35, // after the loading details have faded
-  lift: 1.1, // the panel travelling off the top
+  delay: 0.15, // the lift starts as the loading details finish fading
+  lift: 0.85, // the panel travelling off the top
   liftCurve: "cubic-bezier(0.32, 0, 0.67, 0)", // gathers speed and leaves at full pace, no braking at the end
-  spread: 2.4, // the cards gliding out once uncovered
+  spread: 1.3, // the cards gliding out once uncovered (overlaps the lift)
   spreadCurve: "cubic-bezier(0.22, 1, 0.36, 1)", // a long, even deceleration
 };
