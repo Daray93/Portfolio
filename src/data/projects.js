@@ -60,8 +60,8 @@ const projects = [
     media: { type: "logo", src: pintGlass },
     panel: "#f3e9d2",
     icon: { src: pintsIcon, fill: true },
-    // stout: black, with the ruby it glows when held up to the light
-    backdrop: ["#9a2418", "#4a0e0c", "#050202"],
+    // stout: black, with its cream head as the light
+    backdrop: ["#e8d6ae", "#8c7550", "#0a0806"],
   },
   {
     id: "orthovive",
