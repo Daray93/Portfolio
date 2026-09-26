@@ -8,9 +8,9 @@ import { LINKEDIN_URL } from "../../data/contact";
 import CopyEmail from "./CopyEmail";
 
 // Full-screen navigation behind the header's menu button, on the same grid
-// as the header and homepage footer: the links left-aligned to the logo's
-// margin and centred in the height, the contact row pinned where the footer
-// sits (email left, LinkedIn right). Motion follows the visitor's system
+// as the header and homepage footer: the links centred on the page's centre
+// line (like the name in the header and the focused card), the contact row
+// pinned where the footer sits (email left, LinkedIn right). Motion follows the visitor's system
 // "reduce motion" setting, so there's no switch for it here.
 
 const Panel = styled.div`
@@ -59,6 +59,7 @@ const Links = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
+  text-align: center;
 `;
 
 const Item = styled.li`
