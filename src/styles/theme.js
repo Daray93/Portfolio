@@ -102,6 +102,10 @@ export const lightTheme = {
   inputSuccess: "#22c55e",
   placeholder: "#a19d92",
 
+  /* LinkedIn hover: the brand blue; its lighter dark-mode blue on dark pages,
+     where #0A66C2 would be too dim to read */
+  linkedin: "#0A66C2",
+
   /* Links */
   link: "#17171a",
   linkHover: "#6c5ce7",
@@ -184,6 +188,9 @@ export const darkTheme = {
   inputError: "#ff8389",        // Carbon Red 40 (dark)
   inputSuccess: "#42be65",      // Carbon Green 40 (dark)
   placeholder: "#6f6f6f",
+
+  /* LinkedIn hover (see lightTheme) */
+  linkedin: "#70B5F9",
 
   /* Links */
   link: "#f4f4f4",

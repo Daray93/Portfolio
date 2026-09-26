@@ -53,7 +53,8 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 - **Font:** Instrument Sans only, set once as `--font-sans` in `src/styles/GlobalStyle.jsx`.
 - **Theme:** fixed per page, no switch. Homepage dark, every other page (case studies, About, 404) light. Set by the route in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The card transition's curtain and the cover's page are both pinned to `lightTheme.body`, so the handoff is always dark homepage to light case study.
-- **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing.
+- **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing. Reduced motion follows the visitor's system setting only (live, in `MotionPreferenceContext.jsx`); the menu's switch was removed.
+- **LinkedIn hover:** LinkedIn blue, `theme.linkedin` (`#0A66C2` on light pages, LinkedIn's dark-mode `#70B5F9` on dark ones so it stays readable). Used by the menu's LinkedIn link and the footer's "Get in touch."
 - **Cursor:** `src/components/chrome/Cursor.jsx`, only over the carousel (`data-cursor-area` on its viewport); the system cursor everywhere else. There it's an 88px smoked-glass disc (dark tint, backdrop blur, lit top rim, soft shadow) with a white word: "View" on the focused card, padlock + "Locked" on OrthoVive, ‹ or › on side cards, "Drag" between cards. An icon-badge-on-every-link version was tried and dropped as too busy.
 - **Card size (desktop):** `--vw: 38vw`. The carousel's vertical position is `padding-block: 136px 132px` on `Stage` in `Showcase.jsx`.
 - **Header and footer on desktop:** 56px from the top and bottom, 88px from the sides. The intro screen's counter matches.

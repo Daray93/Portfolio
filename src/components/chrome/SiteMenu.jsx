@@ -1,16 +1,14 @@
 import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { SiLinkedin } from "react-icons/si";
-import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import RollText from "../shared/RollText";
 import { ease, dur, stagger } from "../../styles/motion";
 import { LINKEDIN_URL } from "../../data/contact";
 import CopyEmail from "./CopyEmail";
 
-// Full-screen navigation behind the header's menu button. Also where the
-// site setting lives now (reduced motion) instead of the old navbar.
-
+// Full-screen navigation behind the header's menu button. Motion follows the
+// visitor's system "reduce motion" setting, so there's no switch for it here.
 
 const Panel = styled.div`
   position: fixed;
@@ -102,50 +100,12 @@ const Social = styled.a`
   color: ${({ theme }) => theme.textSecondary};
 
   &:hover {
-    color: ${({ theme }) => theme.text};
-  }
-`;
-
-const Setting = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.85rem;
-  color: ${({ theme }) => theme.textTertiary};
-`;
-
-const Segmented = styled.div`
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 999px;
-  border: 1px solid ${({ theme }) => theme.border};
-`;
-
-const Segment = styled.button`
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  background: transparent;
-  color: ${({ theme }) => theme.textSecondary};
-
-  ${({ $on, theme }) =>
-    $on &&
-    css`
-      background: ${theme.text};
-      color: ${theme.body};
-    `}
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.accent};
-    outline-offset: 2px;
+    color: ${({ theme }) => theme.linkedin};
   }
 `;
 
 export default function SiteMenu({ open, onClose }) {
   const { pathname } = useLocation();
-  const { reduced, toggleReduced } = useMotionPreference();
   const firstLinkRef = useRef(null);
 
   useEffect(() => {
@@ -190,17 +150,6 @@ export default function SiteMenu({ open, onClose }) {
           <RollText>LinkedIn</RollText>
           <span className="sr-only"> (opens in a new tab)</span>
         </Social>
-      </Row>
-
-      <Row $open={open}>
-        <Setting>
-          <span id="motion-label">Reduce motion</span>
-          <Segmented>
-            <Segment type="button" $on={reduced} aria-pressed={reduced} aria-labelledby="motion-label" onClick={toggleReduced}>
-              {reduced ? "On" : "Off"}
-            </Segment>
-          </Segmented>
-        </Setting>
       </Row>
     </Panel>
   );

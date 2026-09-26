@@ -1,34 +1,38 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "reduce-motion";
+const QUERY = "(prefers-reduced-motion: reduce)";
+// the old in-menu switch saved its choice here; cleared so it can't keep
+// overriding the system setting for anyone who once pressed it
+const OLD_STORAGE_KEY = "reduce-motion";
 
 const MotionPreferenceContext = createContext(null);
 
-function getInitialReduced() {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "true" || stored === "false") return stored === "true";
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-// Drives framer-motion's own <MotionConfig reducedMotion> (see App.jsx) --
-// that one prop is what actually disables/simplifies every motion.*
-// animation site-wide, so this context is just the toggle + persistence
-// on top of it. Named "MotionPreference" rather than "ReducedMotion" to
-// avoid colliding with framer-motion's own built-in useReducedMotion hook
-// (which only reads the OS setting, not this app-level override).
+// Follows the visitor's system "reduce motion" setting, live -- the one
+// place people already expect to ask for less motion, so the site has no
+// switch of its own. Drives framer-motion's own <MotionConfig reducedMotion>
+// (see App.jsx) and, via the "reduce-motion" class, CSS transitions too
+// (see GlobalStyle). Named "MotionPreference" rather than "ReducedMotion" to
+// avoid colliding with framer-motion's built-in useReducedMotion hook.
 export function MotionPreferenceProvider({ children }) {
-  const [reduced, setReduced] = useState(getInitialReduced);
+  const [reduced, setReduced] = useState(() => window.matchMedia(QUERY).matches);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, String(reduced));
-    // CSS transitions/animations follow the toggle too (see GlobalStyle),
-    // not just framer-motion
+    try {
+      window.localStorage.removeItem(OLD_STORAGE_KEY);
+    } catch {
+      // storage blocked -- nothing was stored either
+    }
+    const media = window.matchMedia(QUERY);
+    const onChange = () => setReduced(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.classList.toggle("reduce-motion", reduced);
   }, [reduced]);
 
-  const toggleReduced = () => setReduced((r) => !r);
-
-  const value = useMemo(() => ({ reduced, toggleReduced }), [reduced]);
+  const value = useMemo(() => ({ reduced }), [reduced]);
 
   return (
     <MotionPreferenceContext.Provider value={value}>{children}</MotionPreferenceContext.Provider>

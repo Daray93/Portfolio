@@ -683,7 +683,7 @@ const Contact = styled.a`
   color: inherit;
 
   &:hover {
-    color: inherit;
+    color: ${({ theme }) => theme.linkedin};
   }
 `;
 
