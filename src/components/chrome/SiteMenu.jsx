@@ -7,19 +7,21 @@ import { ease, dur, stagger } from "../../styles/motion";
 import { LINKEDIN_URL } from "../../data/contact";
 import CopyEmail from "./CopyEmail";
 
-// Full-screen navigation behind the header's menu button. Motion follows the
-// visitor's system "reduce motion" setting, so there's no switch for it here.
+// Full-screen navigation behind the header's menu button, on the same grid
+// as the header and homepage footer: the links left-aligned to the logo's
+// margin and centred in the height, the contact row pinned where the footer
+// sits (email left, LinkedIn right). Motion follows the visitor's system
+// "reduce motion" setting, so there's no switch for it here.
 
 const Panel = styled.div`
   position: fixed;
   inset: 0;
   z-index: 900;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(32px, 6vh, 64px);
-  padding: 96px 16px 48px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 32px;
+  /* the header's side margins; the bottom matches the homepage footer */
+  padding: 136px 88px 56px;
   overflow-y: auto;
   background: ${({ theme }) => (theme.mode === "dark" ? "rgba(8, 8, 8, 0.94)" : "rgba(242, 240, 234, 0.96)")};
   backdrop-filter: blur(18px);
@@ -35,32 +37,42 @@ const Panel = styled.div`
     transition: none;
   }
 
-  @media (max-height: 520px) and (orientation: landscape) {
-    justify-content: flex-start;
-    gap: 20px;
-    padding: 64px 24px 24px;
+  @media (max-width: 1024px) {
+    padding: 104px 40px 24px;
   }
+
+  @media (max-width: 640px) {
+    padding: 88px 16px 20px;
+  }
+
+  @media (max-height: 520px) and (orientation: landscape) {
+    gap: 16px;
+    padding: 56px 24px 12px;
+  }
+`;
+
+const Nav = styled.nav`
+  align-self: center;
 `;
 
 const Links = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
-  text-align: center;
 `;
 
 const Item = styled.li`
   overflow: hidden;
 
   & + & {
-    margin-top: 8px;
+    margin-top: 4px;
   }
 `;
 
 const BigLink = styled(Link)`
   display: inline-block;
   /* scales with height too, so all three links fit a phone on its side */
-  font-size: clamp(2.25rem, min(8vw, 10svh), 5.5rem);
+  font-size: clamp(2.5rem, min(9vw, 11svh), 6.5rem);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1.05;
@@ -85,7 +97,7 @@ const Row = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 12px 28px;
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   transition: opacity ${({ $open }) => ($open ? `${dur.base}s ${ease.out} ${dur.fast + 3 * stagger}s` : `${dur.fast * 0.6}s ${ease.out} 0s`)};
@@ -124,7 +136,7 @@ export default function SiteMenu({ open, onClose }) {
 
   return (
     <Panel id="site-menu" $open={open} inert={!open}>
-      <nav aria-label="Main">
+      <Nav aria-label="Main">
         <Links>
           {links.map((l, i) => (
             <Item key={l.to}>
@@ -142,7 +154,7 @@ export default function SiteMenu({ open, onClose }) {
             </Item>
           ))}
         </Links>
-      </nav>
+      </Nav>
 
       <Row $open={open}>
         <CopyEmail />
