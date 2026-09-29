@@ -85,21 +85,10 @@ const BigLink = styled(Link)`
   letter-spacing: -0.04em;
   line-height: 1.05;
   /* the other pages in the secondary text colour (AA and then some on the
-     tinted panel); the current one full strength, with a dot beside it so
-     it isn't told apart by colour alone */
+     tinted panel); the current one full strength (and aria-current for
+     screen readers) */
   color: ${({ theme, $current }) => ($current ? theme.text : theme.textSecondary)};
   transition: color ${dur.fast}s ${ease.out};
-
-  &::after {
-    content: "";
-    display: ${({ $current }) => ($current ? "inline-block" : "none")};
-    width: 0.16em;
-    height: 0.16em;
-    margin-left: 0.2em;
-    border-radius: 50%;
-    background: currentColor;
-    vertical-align: 0.12em;
-  }
 
   &:hover,
   &:focus-visible {
@@ -160,8 +149,11 @@ function ContactLinks({ as }) {
   );
 }
 
-export default function SiteMenu({ open, onClose }) {
+// `current` marks a page as current when the URL isn't one of the three
+// (a case study belongs to Work)
+export default function SiteMenu({ open, onClose, current }) {
   const { pathname } = useLocation();
+  const here = current ?? pathname;
   const firstLinkRef = useRef(null);
 
   useEffect(() => {
@@ -182,8 +174,8 @@ export default function SiteMenu({ open, onClose }) {
                   ref={i === 0 ? firstLinkRef : undefined}
                   to={l.to}
                   onClick={onClose}
-                  $current={pathname === l.to}
-                  aria-current={pathname === l.to ? "page" : undefined}
+                  $current={here === l.to}
+                  aria-current={here === l.to ? "page" : undefined}
                 >
                   {l.label}
                 </BigLink>

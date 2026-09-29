@@ -2,9 +2,9 @@ import { FiExternalLink } from "react-icons/fi";
 import { CaseStudyLayout, CaseStudyPage, CaseStudySection } from "../../components/case-study/Index";
 import {
   Paragraph,
+  Subheading,
+  Facts,
   List,
-  PillRow,
-  Pill,
   Callout,
   LiveLink,
   MediaPlaceholder,
@@ -18,9 +18,10 @@ import OtherProjects from "../../components/shared/OtherProjects";
 export default function Cruciate() {
   return (
     <CaseStudyLayout
+      numbered
       sections={[
         { id: "overview", label: "Overview" },
-        { id: "why", label: "Why" },
+        { id: "problem", label: "The problem" },
         { id: "journey", label: "The journey" },
         { id: "progress", label: "Progress" },
         { id: "options", label: "Options" },
@@ -35,53 +36,48 @@ export default function Cruciate() {
             phase-by-phase recovery into one clear plan for today, and shows the progress that&apos;s
             easy to miss week to week.
           </Paragraph>
-          <PillRow>
-            <Pill>Product design</Pill>
-            <Pill>Health</Pill>
-            <Pill>Mobile-first web app</Pill>
-            <Pill>React + TypeScript</Pill>
-            <Pill>Supabase</Pill>
-          </PillRow>
-          <LiveLink href="https://cruciate.vercel.app/" target="_blank" rel="noopener noreferrer">
-            Visit Cruciate <FiExternalLink aria-hidden="true" />
-          </LiveLink>
+          <Facts
+            items={[
+              ["Role", "Design & Development"],
+              ["Year", "2026"],
+              ["Sector", "Health"],
+              ["Team", "Solo"],
+              ["Tools", "React, TypeScript, Supabase, Claude Code"],
+            ]}
+          />
         </CaseStudySection>
 
-        <CaseStudySection id="why" title="Why" tldrVisible>
+        <CaseStudySection id="problem" title="The problem" tldrVisible>
+          <Paragraph>In 2026, I tore my ACL and meniscus.</Paragraph>
+          <Paragraph>The diagnosis was clear. An X-ray and MRI showed exactly what was wrong.</Paragraph>
+          <Paragraph>What came next wasn&apos;t.</Paragraph>
           <Paragraph>
-            Earlier this year I tore my anterior cruciate ligament (ACL), one of the main ligaments
-            holding the knee together, and my meniscus, the cartilage that cushions the joint.
+            Without private health insurance, I faced a long wait for surgery with little guidance on
+            how to prepare, what my options were, or what to do in the meantime.
           </Paragraph>
           <Paragraph>
-            The diagnosis was clear. An X-ray and an MRI told me exactly what was wrong.
+            I later discovered the EU Cross-Border Healthcare Directive, which can allow Irish patients
+            to seek treatment elsewhere in the EU and claim reimbursement through the HSE.
           </Paragraph>
           <Paragraph>
-            What came next wasn&apos;t. With no health insurance, I faced a long public waiting list
-            for surgery. Nobody explained what the operation involved, how to prepare, or what to do
-            with my knee in the meantime.
+            That made me realise the gap wasn&apos;t just access to surgery. It was everything around
+            it.
           </Paragraph>
           <Paragraph>
-            Nobody mentioned my options either. I only found out later about the EU Cross-Border
-            Healthcare Directive, which can let Irish patients get treatment in another EU country and
-            be reimbursed by the HSE. That&apos;s when I realised the problem was bigger than my knee.
+            People need a clear plan before and after surgery, practical guidance between
+            appointments, and enough information to understand their options.
           </Paragraph>
-          <Paragraph>
-            The gap is in the months before and after surgery. People need a plan, and they need the
-            information that should come with a diagnosis. Physiotherapy provides some of that, but
-            only for people who can afford it or get access to it.
-          </Paragraph>
-          <Paragraph>So I framed the problem as three questions:</Paragraph>
+          <Subheading>Three questions</Subheading>
           <List>
             <li>
-              How might we give people a clear plan for the months before and after surgery, without
-              needing a physio?
+              How might we give people a clear pre- and post-surgery plan without relying entirely on
+              physio access?
             </li>
-            <li>
-              How might we keep them going day to day, when progress is slow and motivation fades?
-            </li>
-            <li>How might we make sure they know their treatment options from the start?</li>
+            <li>How might we keep people motivated when progress is slow and difficult to see?</li>
+            <li>How might we make treatment options clear from the moment someone is diagnosed?</li>
           </List>
         </CaseStudySection>
+
 
         <CaseStudySection id="journey" title="The journey">
           <Paragraph>
@@ -157,6 +153,9 @@ export default function Cruciate() {
           <Callout>
             [Add who has used it, feedback from them or a physio, and what you&apos;d change next.]
           </Callout>
+          <LiveLink href="https://cruciate.vercel.app/" target="_blank" rel="noopener noreferrer">
+            Visit Cruciate <FiExternalLink aria-hidden="true" />
+          </LiveLink>
         </CaseStudySection>
       </CaseStudyPage>
 

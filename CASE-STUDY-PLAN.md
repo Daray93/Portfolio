@@ -36,6 +36,21 @@ Every case study uses these sections in this order. A smaller project can merge 
 
 Then next/previous project links and the contact footer.
 
+### Writing style: short, labelled chunks
+
+Borrowed from a strong reference case study (a design-system role at Fresha): keep the eight-section structure, but write every section in short, labelled chunks a hiring manager can skim in a minute, not long paragraphs. Its format alone isn't enough for us: it has no problem, research, insight or validation, and its outcomes are unevidenced claims. So it's the style, inside our structure.
+
+- **Facts block** under the overview: Role, Year, Sector, Team, Tools (`Facts` in `Prose.jsx`).
+- **Each numbered section** opens with a one-line summary under its title.
+- **Each design challenge in The solution** is a numbered block:
+  > **Challenge title**
+  > *One-line summary.*
+  > **Insight:** what the research showed (tagged Evidence or Hypothesis)
+  > **The work:** the design decisions
+  > **Outcome:** what validation found, or "To be validated"
+  > *Screens*
+- **Every outcome** is evidence or labelled as a hypothesis, never a bare claim like "reduced friction".
+
 ### The Insights block: Evidence → Insight → Design response
 
 The most important addition, because David asked about synthesis. Don't just show research artefacts: show what you concluded from them. Laid out as three columns (stacked on phones):

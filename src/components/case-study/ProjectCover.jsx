@@ -1,8 +1,9 @@
-import { forwardRef, useCallback, useEffect, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
-import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { FiArrowDown, FiArrowLeft, FiArrowUp, FiArrowUpRight } from "react-icons/fi";
 import ProjectMedia from "../showcase/ProjectMedia";
+import Tagline from "../showcase/Tagline";
 import RollText from "../shared/RollText";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { ease, dur } from "../../styles/motion";
@@ -16,8 +17,8 @@ import { useExpandTransition } from "../showcase/ExpandTransition";
 // coverFrame). The card hands off to this without a visible seam, then the
 // title and details fade up over it together.
 //
-// Pulling back: scrolling up while the page is at the top (or dragging
-// down on a phone) shrinks the frame a little and fills the ring round
+// Pulling back (mouse and trackpad only): scrolling up while the page is at
+// the top shrinks the frame a little and fills the ring round
 // "All work"'s arrow, both following the gesture smoothly. No words: the
 // frame giving way is the feedback. Past PULL_COMMIT the ring is full and
 // lifts; letting go there plays the way home -- the frame shrinks back into
@@ -25,6 +26,11 @@ import { useExpandTransition } from "../showcase/ExpandTransition";
 // at. Let go short and everything eases back. Nothing goes home until the
 // visitor lets go, and scrolling up the page into the top never pulls on
 // its own (see TOP_REST_MS).
+//
+// Not on touch screens: dragging down at the top of a page is the browser's
+// own pull-to-refresh there, and the two fought (it refreshed as it left).
+// There "All work" is a plain back button, arrow pointing back, and the
+// phone's own back gesture plays the same way home.
 
 // gesture distance (px) to fill the ring -- a deliberate pull, not a flick
 const PULL_COMMIT = 360;
@@ -44,6 +50,35 @@ const TOP_REST_MS = 350;
 // smoother and lazier. Following a pull, then easing back after letting go.
 const FOLLOW = 0.16;
 const SETTLE = 0.07;
+// Hovering "All work" shows the start of a pull: the ring this full
+// (HOVER_PULL), and the frame at the size a pull that far gives it (the
+// same curve as the gesture's `draw`).
+const HOVER_PULL = 0.5;
+const HOVER_SCALE = 1 - PULL_SHRINK * (1 - (1 - HOVER_PULL) ** 2);
+// "or scroll up" under "All work": shown on the first case study of a
+// visit only (remembered for the browser session), then never again
+const PULL_HINT_KEY = "cover-pull-hint-shown";
+// touch screens with no mouse or trackpad: no pull (see above)
+const TOUCH_ONLY = "(hover: none) and (pointer: coarse)";
+const PULL_HINT_S = 3.6;
+
+// the hint's one showing: in after the title, a moment to read, out
+const hintOnce = keyframes`
+  0%   { opacity: 0; transform: translateY(-4px); }
+  12%  { opacity: 1; transform: none; }
+  82%  { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+`;
+
+// the first case study of this visit, and the gesture is on
+function firstPullHint(reduced) {
+  if (reduced || window.matchMedia(TOUCH_ONLY).matches) return false;
+  try {
+    return !sessionStorage.getItem(PULL_HINT_KEY);
+  } catch {
+    return false;
+  }
+}
 
 const EASE = ease.out;
 
@@ -81,10 +116,23 @@ const Frame = styled.div`
   clip-path: inset(0 round ${COVER_RADIUS.default}px);
   background: #000;
   color: #fff;
+  transition: transform ${dur.slow}s ${ease.out};
 
   @media ${COVER_PHONE_QUERY} {
     border-radius: ${COVER_RADIUS.phone}px;
     clip-path: inset(0 round ${COVER_RADIUS.phone}px);
+  }
+
+  /* Hovering "All work" previews the way back: exactly the start of a pull
+     -- the ring half full, and the frame shrunk toward its centre by as
+     much as a pull that far would (HOVER_SCALE), the first step of
+     shrinking home into its card. The button moves with the frame, like
+     everything on it (its hover area has room to spare for that -- see
+     Back). Not while a real pull is on. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:has([data-back]:hover):not(:has([data-pull="on"], [data-pull="full"])) {
+      transform: scale(${HOVER_SCALE});
+    }
   }
 `;
 
@@ -97,15 +145,28 @@ const Media = styled.div`
   isolation: isolate;
 `;
 
-// keeps the text legible whatever the media is: dark at the bottom where
-// the title sits, a little at the top for the back link
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to   { opacity: 1; }
+`;
+
+// Keeps the title legible whatever the media is: a shade low down, only
+// behind the text (the top needs none -- "All work" and "Visit app" carry
+// their own glass). It fades in with the title rather than being there
+// when the card lands, so the cover first looks exactly like the card it
+// grew from, and the shade reads as part of the title arriving.
 const Scrim = styled.div`
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.35) 38%, transparent 62%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, transparent 18%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 26%, transparent 46%);
   pointer-events: none;
+  animation: ${fadeIn} ${dur.slow}s ${EASE} 0.2s both;
+
+  /* narrow screens: the title and details wrap onto more lines, so the
+     shade reaches higher */
+  @media (max-width: 900px) {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 36%, transparent 58%);
+  }
 `;
 
 // "All work", its arrow in a ring that fills as the visitor pulls back
@@ -129,6 +190,16 @@ const Back = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+
+  /* extra hover room all round: hovering shrinks the frame and carries the
+     button a little way inward (see Frame), and the pointer should still
+     be on it when it gets there, not flicker the hover off and on */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -48px;
+  }
   font-size: 0.95rem;
   font-weight: 500;
   color: #fff;
@@ -156,9 +227,24 @@ const Ring = styled.span`
     transform ${dur.base}s ${EASE},
     background-color ${dur.fast}s ${EASE};
 
-  > svg:last-child {
+  > svg.pull,
+  > svg.back {
     width: 20px;
     height: 20px;
+  }
+
+  /* up (scroll up to go back) where the pull is; the usual back arrow on
+     touch screens, where there's no pull */
+  > svg.back {
+    display: none;
+  }
+  @media ${TOUCH_ONLY} {
+    > svg.pull {
+      display: none;
+    }
+    > svg.back {
+      display: block;
+    }
   }
 
   svg.ring {
@@ -207,7 +293,7 @@ const Ring = styled.span`
 
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     ${Back}:hover & circle.hint {
-      stroke-dashoffset: 84;
+      stroke-dashoffset: ${100 - HOVER_PULL * 100};
       opacity: 1;
     }
   }
@@ -228,18 +314,94 @@ const Ring = styled.span`
   }
 `;
 
+// The live app, top right, opposite "All work": the same quiet glass as
+// its ring, and opening in a new tab so the case study stays open behind.
+// Only for projects with a `live` URL (see projects.js).
+// Under "All work", once per visit (see PULL_HINT_KEY): the pull exists.
+// On its own small glass, since the top of the picture has no shade.
+const PullHint = styled.span`
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: ${hintOnce} ${PULL_HINT_S}s ${EASE} 0.9s both;
+
+
+  /* a pull under way says it all: the hint steps aside */
+  [data-pull="on"] > &,
+  [data-pull="full"] > & {
+    visibility: hidden;
+  }
+`;
+
+const Visit = styled.a`
+  position: absolute;
+  top: 20px;
+  right: 32px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 18px 0 20px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.18);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: ${fadeUp} ${dur.slow}s ${EASE} 0.2s both;
+  transition: background-color ${dur.fast}s ${EASE};
+
+  svg {
+    width: 18px;
+    height: 18px;
+    transition: transform ${dur.base}s ${EASE};
+  }
+
+  &:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover svg {
+    transform: translate(2px, -2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 640px) {
+    top: 12px;
+    right: 12px;
+    padding: 0 14px 0 16px;
+  }
+`;
+
 const Caption = styled.div`
   position: absolute;
   left: 40px;
   right: 40px;
   bottom: 40px;
   display: grid;
-  gap: 16px;
+  /* two groups: the name with its tagline, then the details */
+  gap: 32px;
   animation: ${fadeUp} ${dur.slow}s ${EASE} 0.2s both;
 
-  /* clear of the case study's floating bottom bar (CaseStudyFab) */
-  @media (max-width: 900px) {
-    bottom: 108px;
+  @media (max-width: 640px) {
+    bottom: 24px;
+    gap: 22px;
   }
 
   @media (max-width: 640px) {
@@ -254,6 +416,27 @@ const Title = styled.p`
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1;
+  text-wrap: balance;
+`;
+
+// the project's name and its tagline, read as one
+const Heading = styled.div`
+  display: grid;
+  gap: 12px;
+
+  @media (max-width: 640px) {
+    gap: 8px;
+  }
+`;
+
+const Lede = styled.p`
+  margin: 0;
+  max-width: 32ch;
+  font-size: clamp(1.1rem, 1.9vw, 1.6rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.92);
   text-wrap: balance;
 `;
 
@@ -309,6 +492,16 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
   const coverRef = useRef(null);
   const frameRef = useRef(null);
   const barRef = useRef(null);
+  // shown on this cover only if it's the first of the visit
+  const [pullHint] = useState(() => firstPullHint(reduced));
+  useEffect(() => {
+    if (!pullHint) return;
+    try {
+      sessionStorage.setItem(PULL_HINT_KEY, "1");
+    } catch {
+      // storage blocked -- it'll just show again on the next case study
+    }
+  }, [pullHint]);
 
   // hand the frame, as it is right now, to the way-back transition
   const goHome = useCallback(() => {
@@ -333,11 +526,11 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
     const bar = barRef.current;
     // reduced motion: no gesture at all -- "All work" and the browser's back
     // button still take the visitor home
-    if (!frame || reduced) return undefined;
+    if (!frame || reduced || window.matchMedia(TOUCH_ONLY).matches) return undefined;
     const armedAt = performance.now() + PULL_ARM_MS;
     const html = document.documentElement;
     const prevOverscroll = html.style.overscrollBehaviorY;
-    // stop the browser's own bounce / pull-to-refresh fighting the pull
+    // stop the browser's own bounce fighting the pull
     html.style.overscrollBehaviorY = "none";
 
     // pull: the gesture so far; shown: what's drawn, chasing it each frame
@@ -346,7 +539,6 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
     let following = false;
     let raf = 0;
     let released = 0;
-    let touchY = null;
     let gone = false;
     // at the top, and the scroll that brought the page there has stopped
     // (see TOP_REST_MS); true on arrival, when the cover is already showing
@@ -375,6 +567,8 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
       shown += (pull - shown) * k;
       if (Math.abs(pull - shown) < 0.5) shown = pull;
       draw();
+      // back at rest: hand the frame back to its CSS (the hover's ease)
+      if (shown === 0 && pull === 0) frame.style.transition = "";
       raf = shown === pull ? 0 : requestAnimationFrame(tick);
     };
     const animate = () => {
@@ -446,26 +640,9 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
       clearTimeout(released);
       released = setTimeout(release, WHEEL_RELEASE_MS);
     };
-    const onTouchStart = (e) => {
-      touchY = atTop() && armed() ? e.touches[0].clientY : null;
-    };
-    const onTouchMove = (e) => {
-      if (touchY === null || gone) return;
-      const dy = e.touches[0].clientY - touchY;
-      pull = 0;
-      pullBy(Math.max(0, dy) * 1.1);
-    };
-    const onTouchEnd = () => {
-      touchY = null;
-      release();
-    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd);
-    window.addEventListener("touchcancel", onTouchEnd);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(released);
@@ -473,10 +650,6 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
       html.style.overscrollBehaviorY = prevOverscroll;
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("touchcancel", onTouchEnd);
     };
   }, [goHome, reduced]);
 
@@ -506,6 +679,7 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
         <Back
           to="/"
           aria-label="Back to all work"
+          data-back
           onClick={(e) => {
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
             e.preventDefault();
@@ -518,18 +692,35 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
               <circle className="hint" cx="24" cy="24" r="23" pathLength="100" />
               <circle cx="24" cy="24" r="23" pathLength="100" />
             </svg>
-            <FiArrowUp />
+            <FiArrowUp className="pull" />
+            <FiArrowLeft className="back" />
           </Ring>
           <RollText hover="All work">All work</RollText>
         </Back>
+        {pullHint && (
+          <PullHint aria-hidden="true">
+            or scroll up
+          </PullHint>
+        )}
       </TopBar>
 
+      {project.live && (
+        <Visit href={project.live} target="_blank" rel="noopener noreferrer">
+          Visit app
+          <FiArrowUpRight aria-hidden="true" />
+          <span className="sr-only"> (opens in a new tab)</span>
+        </Visit>
+      )}
+
       <Caption>
-        <Title>{project.title}</Title>
+        <Heading>
+          <Title>{project.title}</Title>
+          <Lede>
+            <Tagline project={project} />
+          </Lede>
+        </Heading>
         <Meta>
           <span>
-            {project.description}
-            <br />
             {project.role}
             {project.years && (
               <>

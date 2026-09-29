@@ -3,7 +3,13 @@
 //
 // Caption copy follows one pattern so every card reads the same:
 //   title        the project name, one or two words
-//   description  what it is, a short noun phrase (~25-35 characters)
+//   description  the problem it solves, led with the problem rather than
+//                the product ("Making ACL recovery easier to navigate",
+//                ~25-40 characters). Cruciate first; the others still say
+//                what they are, and move over as their case studies are
+//                restructured (see CASE-STUDY-PLAN.md)
+//   shortDescription  optional: a shorter tagline for phones, where the
+//                full one wraps awkwardly (see Tagline)
 //   role         the work I did: "Design & Development", or "Design" where I
 //                only designed
 //   years        always given
@@ -23,6 +29,8 @@
 //            the pager is plain dots). `fill: true` for app
 //            icons that bring their own background (given rounded corners),
 //            false for bare marks on transparent.
+// live:      the live app's URL, if there is one -- "Visit app" on the case
+//            study's cover, top right
 // locked:    password-protected (see ProtectedGate) -- the card asks for the
 //            password instead of opening, until the visitor has unlocked.
 
@@ -39,10 +47,12 @@ const projects = [
   {
     id: "cruciate",
     title: "Cruciate",
-    description: "ACL rehab tracker, pre and post-op",
+    description: "Making ACL recovery easier to navigate",
+    shortDescription: "Navigating ACL recovery",
     role: "Design & Development",
     years: "2026",
     to: "/cruciate",
+    live: "https://cruciate.vercel.app/",
     // a wall of app screens on the diagonal, bleeding off every edge on a
     // deep teal -- it fills the card at every size
     media: { type: "image", src: cruciateCard },
@@ -57,6 +67,7 @@ const projects = [
     role: "Design & Development",
     years: "2026",
     to: "/operation-avocado",
+    live: "https://operation-avocado.web.app/",
     // the live avocado rig (the hero video, OA-Hero.mp4, is still in the
     // case study's assets)
     media: { type: "avocado" },
@@ -73,6 +84,7 @@ const projects = [
     role: "Design & Development",
     years: "2026",
     to: "/pints-yurt",
+    live: "https://pints-yurt.web.app/",
     // three phones, tilted: the whole set on wide cards; on phones the same
     // drawing framed on the leaderboard (PintsYurt-phone.svg: only its
     // viewBox differs), whole, with its neighbours peeking in. The cards use

@@ -12,6 +12,61 @@ export const Paragraph = styled.p`
   color: ${({ theme }) => theme.text};
 `;
 
+// a heading within a section (the section's own title is the h2)
+export const Subheading = styled.h3`
+  margin: 0.75rem 0 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: ${({ theme }) => theme.text};
+`;
+
+// The project at a glance, under the overview: Role, Year, Sector, Team,
+// Tools. As many across as fit (all five on a wide screen), two on phones.
+// Pass `items` as [label, value] pairs.
+const FactsList = styled.dl`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 1.25rem 2rem;
+  width: 100%;
+  margin: 0.75rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid ${({ theme }) => theme.border};
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  dt {
+    margin: 0 0 0.35rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: ${({ theme }) => theme.textSecondary};
+  }
+
+  dd {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: ${({ theme }) => theme.text};
+  }
+`;
+
+export function Facts({ items }) {
+  return (
+    <FactsList>
+      {items.map(([label, value]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </FactsList>
+  );
+}
+
 export const List = styled.ul`
   margin: 0;
   padding-left: 1.2rem;

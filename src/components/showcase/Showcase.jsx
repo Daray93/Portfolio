@@ -10,6 +10,7 @@ import useProtectedAccess from "../shared/useProtectedAccess";
 import ProtectedGate from "../shared/ProtectedGate";
 import Preloader, { willPreload } from "../chrome/Preloader";
 import ProjectMedia, { PHONE_QUERY } from "./ProjectMedia";
+import Tagline from "./Tagline";
 import { COVER_RADIUS } from "./coverFrame";
 import { useExpandTransition, RETURN_KEY, SLIDE_KEY } from "./ExpandTransition";
 import { useShell } from "../shell/context";
@@ -1154,7 +1155,9 @@ export default function Showcase({ items, kind = "work", label = "Selected work"
                     <Caption $on={active && ready && settled && !returning && !leavingId} aria-hidden={!active}>
                       <Title>{p.title}</Title>
                       <Meta>
-                        <span>{p.description}</span>
+                        <span>
+                          <Tagline project={p} />
+                        </span>
                         <span>
                           {p.role}
                           {p.years && (

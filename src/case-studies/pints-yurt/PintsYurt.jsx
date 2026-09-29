@@ -42,9 +42,6 @@ export default function PintsYurt() {
             <Pill>Maps</Pill>
             <Pill>Claude Code</Pill>
           </PillRow>
-          <LiveLink href="https://pints-yurt.web.app/" target="_blank" rel="noopener noreferrer">
-            Visit Pints Yurt <FiExternalLink aria-hidden="true" />
-          </LiveLink>
         </CaseStudySection>
 
         <CaseStudySection id="question" title="The question" tldrVisible>
@@ -132,6 +129,9 @@ export default function PintsYurt() {
             [Add real numbers: pubs listed, prices reported, people using it, and anything you learned
             from how they used it.]
           </Callout>
+          <LiveLink href="https://pints-yurt.web.app/" target="_blank" rel="noopener noreferrer">
+            Visit Pints Yurt <FiExternalLink aria-hidden="true" />
+          </LiveLink>
         </CaseStudySection>
       </CaseStudyPage>
 
