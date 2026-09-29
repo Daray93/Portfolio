@@ -51,6 +51,10 @@ export const Callout = styled.div`
 
 export const LiveLink = styled.a`
   display: inline-flex;
+  /* sections stack their content in a column, which would stretch the
+     button full width: it keeps its own */
+  align-self: flex-start;
+  justify-self: start;
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;

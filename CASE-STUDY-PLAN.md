@@ -105,11 +105,12 @@ Validation criteria to use:
 
 It isn't public yet because of legal concerns. Say so, and present a private usability test or a physio review as the validation plan.
 
-**To gather:**
-- What research did you actually do: your own recovery, physio conversations, apps you tried, rehab guides?
-- Which insights are evidence, and which are hypotheses?
-- Early sketches or Figma versions of the roadmap and daily screens, and ideas you dropped.
-- Anyone who has tried it (a physio, a friend in rehab), and what they said.
+**Known (29 Sep 2026):** research covered physio advice, other ACL patients, a review of other rehab apps and published protocols, and the exercises and phases come from a mix of them. Not tested by anyone else yet; a physio review is planned. Iterated in code with Claude Code, with no sketches or Figma from the time: use the repo's git history for before and after, and design the Cross-Border step in sketches and Figma first.
+
+**To gather** (full list in NEXT-SESSION.md, "Current focus"):
+- The detail behind each research source: what the physio said, what patients said and where, which apps and what they lacked, which protocols.
+- Which insights are evidence, and which are hypotheses.
+- The physio review's findings, and what changed because of them.
 
 ### Operation Avocado
 

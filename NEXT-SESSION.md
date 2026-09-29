@@ -6,6 +6,45 @@ The Bento version is saved in the `bento-version` tag on GitHub and in `Desktop/
 
 **Start with to-do 1, the case study template.**
 
+## Current focus: the Cruciate case study only
+
+Decided 29 Sep 2026: work on Cruciate alone until it's done, restructured to the eight-section plan in `CASE-STUDY-PLAN.md` (read its Cruciate section). The other case studies wait.
+
+**Known so far (from Dara):**
+- Research done, beyond the personal injury story: physio advice, other ACL patients, a review of other rehab apps, and published rehab protocols.
+- The exercises and phases come from a mix of those sources.
+- Nobody else has tested it yet. Dara can get a physio (and people who've had ACL surgery) to review it.
+- The app was iterated in code with Claude Code; there are no sketches or Figma files from the time.
+
+**Honesty rule for artefacts:** don't present sketches or Figma made now as the original process. Real options instead:
+- the Cruciate repo's git history: earlier versions of key screens, before and after
+- design the Cross-Border onboarding step in sketches and Figma first, for real, before building it
+- any new Figma mapping labelled as done afterwards, to find gaps
+
+**What Claude needs from Dara, most urgent first:**
+
+*Unblocks the Research and Insights sections (a few lines each):*
+1. Physio advice: what did they tell you that shaped the app?
+2. Other ACL patients: where did you hear from them (Reddit, friends, forums), and what came up repeatedly?
+3. Other apps: which ones, and what did each get wrong or leave out?
+4. Protocols: which ones (hospital names are fine), and what did you take from them?
+
+*A decision:* design the case study layout yourself first (Figma or a sketch) for Claude to build, or have Claude build a first version from the eight-section structure for you to react to?
+
+*Validation, over the next week or two:*
+5. Physio review with four set tasks: find today's exercises, log a range-of-motion reading, read the trend chart, respond to a red flag. Note what confused them and what they'd change, then change at least one thing and screenshot before and after. Claude can write a one-page session script for it.
+6. Optional but strong: two or three people who've had ACL surgery doing the same tasks.
+
+*Exploration:*
+7. The go-ahead to mine the Cruciate repo's git history for before-and-after screens, and its location (it isn't at `Desktop/cruciate`).
+8. Sketch and Figma the Cross-Border onboarding step before building it.
+
+*For the page:*
+9. 6–10 phone screenshots of the current app: onboarding, today's rehab, a completed session, range-of-motion logging, the progress chart, history, the symptom check-in, a warning state and a locked exercise.
+10. Anything else that's true, such as whether you use it daily yourself, and for how long.
+
+Items 1–4 and the layout decision unblock the next session; the rest can come in as it's ready.
+
 ## Where it stands
 
 The homepage is done and working: a cinematic showcase carousel inspired by niallphillips.vercel.app/portfolio.
