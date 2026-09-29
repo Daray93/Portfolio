@@ -34,7 +34,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 ## To do, in order
 
-1. **Case study template.** Your layout work. Below the cover, every case study still uses the old layout, and the title is repeated under the cover. Aim for one shared template like the reference: intro plus a facts list (Role, Year, Team, Tools), numbered sections, next/previous project links, and a big contact footer. Bring the new header and menu onto these pages.
+1. **Case study template.** Read `CASE-STUDY-PLAN.md` first: after interview feedback, every case study is being restructured to show process (problem → research → insights → exploration → solution → validation → outcomes), not a feature walkthrough. It has the shared eight-section structure, the components the template needs, a per-project mapping, and the questions Dara needs to answer for each. Below the cover, every case study still uses the old layout, and the title is repeated under the cover. Build the template with Cruciate first. Bring the new header and menu onto these pages.
 2. **Screenshots for Pints Yurt and Cruciate** (6–10 phone screens each, into a `screenshots` folder in each Desktop project folder). Then:
    - build 16:9 and 4:5 mockup card images to replace the current cards
    - fill the dashed image slots in both case studies
