@@ -3,14 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { SiLinkedin } from "react-icons/si";
 import RollText from "../shared/RollText";
-import { ease, dur, stagger } from "../../styles/motion";
+import { ease, dur } from "../../styles/motion";
 import { LINKEDIN_URL } from "../../data/contact";
 import CopyEmail from "./CopyEmail";
+import { pill } from "./pill";
 
-// Full-screen navigation behind the header's menu button, on the same grid
-// as the header and homepage footer: the links centred on the page's centre
-// line (like the name in the header and the focused card), the contact row
-// pinned where the footer sits (email left, LinkedIn right). Motion follows the visitor's system
+// Full-screen navigation behind the header's menu button, on phones and
+// tablets (desktop has the header's pill nav instead): three big links
+// centred, email and LinkedIn below. Motion follows the visitor's system
 // "reduce motion" setting, so there's no switch for it here.
 
 const Panel = styled.div`
@@ -23,15 +23,23 @@ const Panel = styled.div`
   /* the header's side margins; the bottom matches the homepage footer */
   padding: 136px 88px 56px;
   overflow-y: auto;
-  background: ${({ theme }) => (theme.mode === "dark" ? "rgba(8, 8, 8, 0.94)" : "rgba(242, 240, 234, 0.96)")};
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  /* frosted: the page shows through as blurred colour, under a tint deep
+     enough that the links keep their contrast whatever card is behind */
+  background: ${({ theme }) => (theme.mode === "dark" ? "rgba(8, 8, 8, 0.78)" : "rgba(242, 240, 234, 0.86)")};
+  backdrop-filter: blur(48px);
+  -webkit-backdrop-filter: blur(48px);
+
+  /* no backdrop blur (older browsers): fall back to the solid cover */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background: ${({ theme }) => (theme.mode === "dark" ? "rgba(8, 8, 8, 0.94)" : "rgba(242, 240, 234, 0.96)")};
+  }
   color: ${({ theme }) => theme.text};
-  clip-path: inset(0 0 ${({ $open }) => ($open ? "0" : "100%")} 0);
+  /* a quick fade in place, no movement */
+  opacity: ${({ $open }) => ($open ? 1 : 0)};
   visibility: ${({ $open }) => ($open ? "visible" : "hidden")};
   transition:
-    clip-path ${dur.slow}s ${ease.inOut} ${({ $open }) => ($open ? "0s" : `${dur.fast * 0.6}s`)},
-    visibility 0s linear ${({ $open }) => ($open ? "0s" : `${dur.slow + dur.fast}s`)};
+    opacity ${dur.fast * 0.8}s ${ease.out},
+    visibility 0s linear ${({ $open }) => ($open ? "0s" : `${dur.fast * 0.8}s`)};
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
@@ -42,7 +50,7 @@ const Panel = styled.div`
   }
 
   @media (max-width: 640px) {
-    padding: 88px 16px 20px;
+    padding: 88px 24px 20px;
   }
 
   @media (max-height: 520px) and (orientation: landscape) {
@@ -55,20 +63,19 @@ const Nav = styled.nav`
   align-self: center;
 `;
 
+// the gap scales with the screen's height too, so the three links breathe
+// on a tall phone and still fit on one turned sideways
 const Links = styled.ul`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 5svh, 48px);
   list-style: none;
   margin: 0;
   padding: 0;
-  text-align: center;
 `;
 
-const Item = styled.li`
-  overflow: hidden;
-
-  & + & {
-    margin-top: 4px;
-  }
-`;
+const Item = styled.li``;
 
 const BigLink = styled(Link)`
   display: inline-block;
@@ -77,45 +84,81 @@ const BigLink = styled(Link)`
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  color: ${({ theme, $current }) => ($current ? theme.text : theme.textTertiary)};
-  transform: translateY(${({ $open }) => ($open ? "0" : "105%")});
-  transition:
-    transform ${({ $open }) => ($open ? `${dur.slow}s ${ease.out}` : `${dur.fast}s ${ease.inOut}`)}
-      ${({ $open, $i }) => ($open ? `${dur.fast + $i * stagger}s` : "0s")},
-    color ${dur.fast}s ${ease.out};
+  /* the other pages in the secondary text colour (AA and then some on the
+     tinted panel); the current one full strength, with a dot beside it so
+     it isn't told apart by colour alone */
+  color: ${({ theme, $current }) => ($current ? theme.text : theme.textSecondary)};
+  transition: color ${dur.fast}s ${ease.out};
+
+  &::after {
+    content: "";
+    display: ${({ $current }) => ($current ? "inline-block" : "none")};
+    width: 0.16em;
+    height: 0.16em;
+    margin-left: 0.2em;
+    border-radius: 50%;
+    background: currentColor;
+    vertical-align: 0.12em;
+  }
 
   &:hover,
   &:focus-visible {
     color: ${({ theme }) => theme.text};
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    transition: color ${dur.fast}s ${ease.out};
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 6px;
+    border-radius: 6px;
   }
 `;
 
+// Email and LinkedIn as a matching pair of pill buttons, centred under the
+// links: side by side where there's room, stacked full width on phones
+// (the address is too long to share a row there).
 const Row = styled.div`
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 28px;
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transition: opacity ${({ $open }) => ($open ? `${dur.base}s ${ease.out} ${dur.fast + 3 * stagger}s` : `${dur.fast * 0.6}s ${ease.out} 0s`)};
+  justify-content: center;
+  gap: 12px;
+
+  > button,
+  > a {
+    ${pill}
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Social = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: ${({ theme }) => theme.textSecondary};
-
-  &:hover {
+  &:hover svg {
     color: ${({ theme }) => theme.linkedin};
   }
 `;
+
+const LINKS = [
+  { to: "/", label: "Work" },
+  { to: "/about-me", label: "About" },
+  { to: "/websites", label: "Websites" },
+];
+
+// email and LinkedIn, in whichever row the layout needs
+function ContactLinks({ as }) {
+  const Wrap = as;
+  return (
+    <Wrap>
+      <CopyEmail />
+      <Social href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+        <SiLinkedin aria-hidden="true" />
+        <RollText>LinkedIn</RollText>
+        <span className="sr-only"> (opens in a new tab)</span>
+      </Social>
+    </Wrap>
+  );
+}
 
 export default function SiteMenu({ open, onClose }) {
   const { pathname } = useLocation();
@@ -129,42 +172,26 @@ export default function SiteMenu({ open, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const links = [
-    { to: "/", label: "Work" },
-    { to: "/about-me", label: "About" },
-    { to: "/websites", label: "Websites" },
-  ];
-
   return (
     <Panel id="site-menu" $open={open} inert={!open}>
-      <Nav aria-label="Main">
-        <Links>
-          {links.map((l, i) => (
-            <Item key={l.to}>
-              <BigLink
-                ref={i === 0 ? firstLinkRef : undefined}
-                to={l.to}
-                onClick={onClose}
-                $open={open}
-                $i={i}
-                $current={pathname === l.to}
-                aria-current={pathname === l.to ? "page" : undefined}
-              >
-                {l.label}
-              </BigLink>
-            </Item>
-          ))}
-        </Links>
-      </Nav>
-
-      <Row $open={open}>
-        <CopyEmail />
-        <Social href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
-          <SiLinkedin aria-hidden="true" />
-          <RollText>LinkedIn</RollText>
-          <span className="sr-only"> (opens in a new tab)</span>
-        </Social>
-      </Row>
+        <Nav aria-label="Main">
+          <Links>
+            {LINKS.map((l, i) => (
+              <Item key={l.to}>
+                <BigLink
+                  ref={i === 0 ? firstLinkRef : undefined}
+                  to={l.to}
+                  onClick={onClose}
+                  $current={pathname === l.to}
+                  aria-current={pathname === l.to ? "page" : undefined}
+                >
+                  {l.label}
+                </BigLink>
+              </Item>
+            ))}
+          </Links>
+        </Nav>
+        <ContactLinks as={Row} />
     </Panel>
   );
 }

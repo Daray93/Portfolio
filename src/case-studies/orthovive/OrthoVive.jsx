@@ -164,7 +164,7 @@ export default function OrthoViveCaseStudy() {
     // component to re-render with isUnlocked now true, not a navigation
     // anywhere else.
     return (
-      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/orthovive" title="OrthoVive" />
+      <ProtectedGate open onClose={() => navigate("/")} redirectTo="/orthovive" />
     );
   }
 
@@ -188,7 +188,7 @@ export default function OrthoViveCaseStudy() {
               subtitle="From brief to working prototype with Claude + Figma"
             >
               <PillRow>
-                <Pill>2025</Pill>
+                <Pill>2026</Pill>
                 <Pill>Figma</Pill>
                 <Pill>React</Pill>
                 <Pill>Claude</Pill>

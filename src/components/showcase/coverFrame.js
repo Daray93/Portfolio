@@ -6,7 +6,7 @@
 export const COVER_PHONE_QUERY = "(max-width: 640px)";
 
 export const COVER_INSET = { phone: 12, default: 24 };
-export const COVER_RADIUS = { phone: 14, default: 20 };
+export const COVER_RADIUS = { phone: 24, default: 20 };
 
 export function coverFrame() {
   const phone = window.matchMedia(COVER_PHONE_QUERY).matches;

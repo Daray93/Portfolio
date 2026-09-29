@@ -36,7 +36,7 @@ const Stage = styled.div`
 // on hover -- the countdown itself still needs JS (see the interval in
 // the component below) but its *entrance* doesn't. Desktop-only in
 // practice: there's no hover on touch devices, so it never appears on
-// mobile (see the `canHover` check below) -- there the jump animation
+// phone-sized or touch screens (see loopQuery below) -- there the jump
 // just loops ambiently instead. `$urgent` (last few seconds before the
 // set finishes and hands off into the case study) grows the text and
 // flips it to a warm red so the handoff reads as imminent rather than
@@ -296,7 +296,10 @@ const URGENT_THRESHOLD = 3;
 // `rigScale`: shrinks Rig/Shadow (see their own comments) for that same
 // compact context, where the default 28%-wide Rig reaches far enough down
 // to overlap the card's own title/tag caption underneath it.
-export default function AvocadoJumpingJack({ fill = false, showTimer = true, rigScale = 1 }) {
+// `handoff`: false keeps the hover-to-jump but drops the 10s countdown into
+// the case study -- the homepage carousel card, where opening is a click
+// (with its own card transition), not a timer.
+export default function AvocadoJumpingJack({ fill = false, showTimer = true, rigScale = 1, handoff = true }) {
   const navigate = useNavigate();
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_START);
   const stageRef = useRef(null);
@@ -336,9 +339,12 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
     // ran at all there -- this is the one thing that actually differs
     // between desktop and mobile (everything else below just runs
     // either way). Desktop keeps the original "hover starts a timed set"
-    // interaction (see the canHover block below); mobile just gets the
+    // interaction (see the hover block below); phones just get the
     // jump loop running ambiently with no countdown/hand-off.
-    const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    // Phone-sized screens and anything that can't hover just loop the jump
+    // -- no sweat, no countdown -- and it's re-checked live, so resizing a
+    // window (or a browser's mobile preview) switches between the two.
+    const loopQuery = window.matchMedia("(max-width: 640px), (hover: none)");
 
     // The artwork itself is drawn mid-jumping-jack (arms out, legs apart)
     // -- that's rotation 0 / "open". A short crouch (dip + squash) builds
@@ -349,7 +355,7 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
     // bars now -- no elbow bend contributing the rest of the angle
     // needed to read as "down at sides".
     const tl = gsap.timeline({
-      paused: canHover,
+      paused: true,
       repeat: -1,
       yoyo: true,
       defaults: { ease: "power1.inOut" },
@@ -368,10 +374,10 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
     // Sweat beads: appear-drip-fade, looping, one drop per side offset
     // by half a cycle so they don't well up in lockstep. On desktop this
     // only starts a few seconds into a hover (see handleEnter below) --
-    // on mobile, same as the jump loop, it just runs continuously.
+    // phones just loop the jump, without sweat (see setLoop below).
     const sweatDrops = [sweatLeftRef.current, sweatRightRef.current];
     const resetSweat = () => gsap.set(sweatDrops, { opacity: 0, scale: 0, y: 0 });
-    const sweatTl = gsap.timeline({ paused: canHover, repeat: -1 });
+    const sweatTl = gsap.timeline({ paused: true, repeat: -1 });
     sweatTl
       .fromTo(sweatLeftRef.current, { opacity: 0, scale: 0.4, y: 0 }, { opacity: 0.9, scale: 1, duration: 0.25, ease: "power1.out" }, 0)
       .to(sweatLeftRef.current, { y: 14, opacity: 0, duration: 0.6, ease: "power1.in" }, 0.25)
@@ -389,13 +395,14 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
     let handleEnter;
     let handleLeave;
     let stageEl;
-    if (canHover) {
+    {
       const stopCountdown = () => {
         clearInterval(countdownId);
         setSecondsLeft(COUNTDOWN_START);
       };
       const startCountdown = () => {
         clearInterval(countdownId);
+        if (!handoff) return;
         let remaining = COUNTDOWN_START;
         setSecondsLeft(remaining);
         countdownId = setInterval(() => {
@@ -409,11 +416,13 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
       };
 
       handleEnter = () => {
+        if (loopQuery.matches) return;
         tl.play();
         startCountdown();
         sweatTimer = gsap.delayedCall(4, () => sweatTl.play(0));
       };
       handleLeave = () => {
+        if (loopQuery.matches) return;
         gsap.to(tl, { progress: 0, duration: 0.3, ease: "power2.out", onComplete: () => tl.pause(0) });
         stopCountdown();
         sweatTimer?.kill();
@@ -425,6 +434,20 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
       stageEl?.addEventListener("mouseenter", handleEnter);
       stageEl?.addEventListener("mouseleave", handleLeave);
     }
+
+    // looping (phone-sized or no hover): jump on repeat; otherwise rest
+    // until a hover
+    const setLoop = () => {
+      clearInterval(countdownId);
+      setSecondsLeft(COUNTDOWN_START);
+      sweatTimer?.kill();
+      sweatTl.pause(0);
+      resetSweat();
+      if (loopQuery.matches) tl.play();
+      else tl.pause(0);
+    };
+    setLoop();
+    loopQuery.addEventListener("change", setLoop);
 
     // Pupils ease toward the real cursor position, clamped to a small
     // radius inside each socket so they never pop outside the white.
@@ -474,6 +497,7 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
     blinkTimer = gsap.delayedCall(randomBetween(1, 3), doBlink);
 
     return () => {
+      loopQuery.removeEventListener("change", setLoop);
       tl.kill();
       sweatTl.kill();
       sweatTimer?.kill();
@@ -483,7 +507,7 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
       window.removeEventListener("pointermove", handlePointerMove);
       blinkTimer.kill();
     };
-  }, [navigate]);
+  }, [navigate, handoff]);
 
   return (
     <Stage ref={stageRef} $fill={fill}>
@@ -494,7 +518,9 @@ export default function AvocadoJumpingJack({ fill = false, showTimer = true, rig
       )}
       <Shadow ref={shadowRef} $rigScale={rigScale} />
       <Rig ref={rigRef} $rigScale={rigScale}>
-        <Body ref={bodyRef} src={body} alt="" />
+        {/* data-fit: the card transition scales this card as a whole, not
+            as a cover-fitted picture (see ExpandTransition's framing) */}
+        <Body ref={bodyRef} src={body} alt="" data-fit="contain" />
         <LeftArm ref={leftArmRef} src={leftArm} alt="" />
         <RightArm ref={rightArmRef} src={rightArm} alt="" />
         <LeftLeg ref={leftLegRef} src={leftLeg} alt="" />

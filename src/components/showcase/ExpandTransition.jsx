@@ -17,13 +17,12 @@ import ProjectMedia from "./ProjectMedia";
 import projects from "../../data/projects";
 import { easeArr, dur } from "../../styles/motion";
 import { coverFrame } from "./coverFrame";
-import { lightTheme } from "../../styles/theme";
 
 // Card <-> page transitions, both directions.
 //
 // Opening: the card scales up into a large framed card -- inset from the
 // screen edges, corners still rounded (see coverFrame) -- while the page
-// behind it settles from the dark carousel to the case study's light page
+// behind it settles from the carousel's background to the plain page
 // background. It's a copy of the media sized to that final frame,
 // clipped to the card's exact box and corners, with the media scaled and
 // placed so the first frame matches the card pixel for pixel. The route
@@ -83,17 +82,15 @@ const Media = styled(motion.div)`
   will-change: transform;
 `;
 
-// The page background, behind the card while it's out of the carousel.
-// Always the case study's light page, never the current theme: the theme
-// follows the route, which changes mid-transition. Opening, it fades in over
-// the dark homepage and hands off to the cover's identical page; coming
-// back, it takes over from that page and fades out to the homepage.
+// The page background, behind the card while it's out of the carousel, in
+// the site's theme -- the same as the case study cover's page it hands off
+// to, so the handoff can't show.
 const Curtain = styled(motion.div)`
   position: fixed;
   inset: 0;
   z-index: 4999;
   pointer-events: none;
-  background: ${lightTheme.body};
+  background: ${({ theme }) => theme.body};
 `;
 
 const OPEN_MEDIA = { x: 0, y: 0, scale: 1 };
@@ -132,7 +129,10 @@ function framing(cardEl) {
   const box = (cardEl.firstElementChild ?? cardEl).getBoundingClientRect();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const radius = parseFloat(getComputedStyle(cardEl).borderRadius) || 20;
+  // the corners as drawn: the card is scaled while the carousel settles, so
+  // its radius on screen is its CSS radius times that scale
+  const drawn = card.width / (cardEl.offsetWidth || card.width) || 1;
+  const radius = (parseFloat(getComputedStyle(cardEl).borderRadius) || 20) * drawn;
   const frame = frameOnly();
   const fw = vw - 2 * frame.inset;
   const fh = vh - 2 * frame.inset;

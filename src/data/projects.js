@@ -4,81 +4,97 @@
 // Caption copy follows one pattern so every card reads the same:
 //   title        the project name, one or two words
 //   description  what it is, a short noun phrase (~25-35 characters)
-//   role, years  always both
+//   role         the work I did: "Design & Development", or "Design" where I
+//                only designed
+//   years        always given
 //
-// media:     what fills the card -- { type: "image" | "video", src }, or
-//            { type: "logo", src } for a mark centred on the `panel` colour.
-//            Images can add `mobileSrc`, a portrait (4:5) version for phones.
-// backdrop:  three colours the blurred page background is built from while
-//            this card is in focus: [primary glow, secondary glow, base].
-//            The primary glow sits right behind the caption's white text, so
-//            keep it deep (roughly no lighter than #7d693e / #067a6f); bright
-//            colours belong in the secondary glow, low and to the right,
-//            which the text never crosses.
-// icon:      the project's logo for the footer pager. `fill: true` for app
+// media:     what fills the card -- { type: "image" | "video", src } (an
+//            image can add fit: "contain" to show all of it, and mobileFit
+//            to fit differently on phones), or
+//            { type: "logo", src } for a mark centred on the `panel` colour,
+//            or { type: "avocado" } for Operation Avocado's live rig.
+//            Images can add `mobileSrc`, a tall portrait (about 3:5) version for phones.
+// backdrop:  [key, floor, base]. Only the floor colour shows at the
+//            moment: a subtle strip of light under the pager, on the design
+//            system's own page colour (light or dark). Pick a mid-tone of the
+//            project's hue that reads softly on both. Key and base are kept
+//            for if a fuller background comes back.
+// icon:      the project's logo (not shown on the homepage at the moment --
+//            the pager is plain dots). `fill: true` for app
 //            icons that bring their own background (given rounded corners),
 //            false for bare marks on transparent.
 // locked:    password-protected (see ProtectedGate) -- the card asks for the
 //            password instead of opening, until the visitor has unlocked.
 
-import oaHero from "../case-studies/operation-avocado/assets/OA-Hero.mp4";
 import oaIcon from "../case-studies/operation-avocado/assets/Mobile-Logo-OA.png";
 import orthoviveLogo from "../case-studies/orthovive/assets/OrthoVive.png";
-import pintGlass from "../case-studies/pints-yurt/assets/pint.png";
+import orthoviveRender from "../case-studies/orthovive/assets/render.png";
+import pintsCard from "../case-studies/pints-yurt/assets/PintsYurt.svg";
+import pintsCardPhone from "../case-studies/pints-yurt/assets/PintsYurt-phone.svg";
 import pintsIcon from "../case-studies/pints-yurt/assets/pints-icon.png";
 import cruciateLogo from "../case-studies/cruciate/assets/cruciate-logo.svg";
+import cruciateCard from "../case-studies/cruciate/assets/Cruciate.svg";
 
-// Pints Yurt and Cruciate show their marks on a brand-colour panel until
-// screenshots exist for a proper mockup card.
 const projects = [
   {
     id: "cruciate",
     title: "Cruciate",
     description: "ACL rehab tracker, pre and post-op",
-    role: "Designer & Developer",
+    role: "Design & Development",
     years: "2026",
     to: "/cruciate",
-    media: { type: "logo", src: cruciateLogo },
-    panel: "#0f1416",
+    // a wall of app screens on the diagonal, bleeding off every edge on a
+    // deep teal -- it fills the card at every size
+    media: { type: "image", src: cruciateCard },
+    panel: "#0c3d39",
     icon: { src: cruciateLogo, fill: false },
-    backdrop: ["#067a6f", "#23855a", "#0a1012"],
+    backdrop: ["#0a6e66", "#3fb8a8", "#020606"],
   },
   {
     id: "operation-avocado",
     title: "Operation Avocado",
     description: "Workout tracker without a paywall",
-    role: "Designer & Builder",
+    role: "Design & Development",
     years: "2026",
     to: "/operation-avocado",
-    media: { type: "video", src: oaHero },
+    // the live avocado rig (the hero video, OA-Hero.mp4, is still in the
+    // case study's assets)
+    media: { type: "avocado" },
     icon: { src: oaIcon, fill: true },
-    backdrop: ["#4e7623", "#cccf5e", "#141c07"],
+    // the avocado's own greens: its skin, then its card
+    backdrop: ["#456b24", "#7bae45", "#070d04"],
   },
   {
     id: "pints-yurt",
     title: "Pints Yurt",
-    description: "Crowdsourced pint prices for Limerick",
-    role: "Designer & Developer",
+    description: "Crowdsourced pint prices",
+    role: "Design & Development",
     years: "2026",
     to: "/pints-yurt",
-    media: { type: "logo", src: pintGlass },
-    panel: "#f3e9d2",
+    // three phones, tilted: the whole set on wide cards; on phones the same
+    // drawing framed on the leaderboard (PintsYurt-phone.svg: only its
+    // viewBox differs), whole, with its neighbours peeking in
+    media: { type: "image", src: pintsCard, mobileSrc: pintsCardPhone, fit: "contain", mobileFit: "cover" },
+    panel: "#16100b",
     icon: { src: pintsIcon, fill: true },
-    // stout: black, a warm latte glow, and its cream head as the low light
-    backdrop: ["#7d693e", "#e8d6ae", "#0a0806"],
+    // the card's own stout: a deep brown a step lighter than the card, and a
+    // dim latte for the head -- muted and dark, since the background
+    // saturates them
+    backdrop: ["#2a1c12", "#6e5c45", "#060403"],
   },
   {
     id: "orthovive",
     title: "OrthoVive",
-    description: "Med-tech concept, brief to prototype",
-    role: "Product Designer",
-    years: "2025",
+    description: "Med-tech device prototype",
+    role: "Design",
+    years: "2026",
     to: "/orthovive",
     locked: true,
-    media: { type: "logo", src: orthoviveLogo },
-    panel: "#eef1f6",
+    // a 3D render of the knee implant, on its own soft grey
+    media: { type: "image", src: orthoviveRender },
+    panel: "#bebebe",
     icon: { src: orthoviveLogo, fill: false },
-    backdrop: ["#1b3f6e", "#9aa8bd", "#060f20"],
+    backdrop: ["#1f4fb8", "#6f9ee8", "#020409"],
   },
 ];
 

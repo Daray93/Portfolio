@@ -1,16 +1,16 @@
 import { createGlobalStyle } from "styled-components";
-// Instrument Sans is the one typeface across the whole site -- hierarchy
-// comes from size and weight, not a second family. Only the weights
-// actually used are imported.
-import "@fontsource/instrument-sans/400.css";
-import "@fontsource/instrument-sans/500.css";
-import "@fontsource/instrument-sans/600.css";
-import "@fontsource/instrument-sans/700.css";
+// Poppins is the one typeface across the whole site -- hierarchy comes from
+// size and weight, not a second family. Self-hosted via @fontsource, and
+// only the weights actually used are imported.
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
 
 const GlobalStyle = createGlobalStyle`
   /* ---------------- Base ---------------- */
   :root {
-    --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
 
   *, *::before, *::after {
@@ -25,6 +25,7 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 400;
     background: ${({ theme }) => theme.body};
     color: ${({ theme }) => theme.text};
+    transition: background 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
   }
 

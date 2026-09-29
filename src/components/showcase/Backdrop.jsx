@@ -1,55 +1,140 @@
-import styled, { css, keyframes } from "styled-components";
+import { useRef } from "react";
+import styled, { css, keyframes, useTheme } from "styled-components";
 import { ease } from "../../styles/motion";
 
-// The page background behind the carousel, lit like a film frame rather
-// than tinted: each project's colours become a large soft key light and a
-// smaller, dimmer rim light over its base colour, with falloff into dark
-// edges, heavier bands top and bottom (a letterbox without the hard bars)
-// and a fine moving grain over everything. One layer per project,
-// crossfading to whichever card is in focus; the light drifts very slowly.
+// The page background in the shared frame. Two looks, picked by MODE:
 //
-// backdrop colours: [key light, rim light, base]
+//   "ambient"  the card in focus melts into the whole background: its
+//              picture (a screenshot, or what a device mockup shows) is laid
+//              over the screen and blurred 80px, saturated and given a touch
+//              of contrast, so the colour comes from the work itself. Cards
+//              with no picture to use (logos, videos, wordmarks) get two soft
+//              pools of their colours instead, slowly flowing. A dark tint
+//              over the top keeps text readable. The whole stack drifts
+//              very slowly. Dark mode only: light mode is the plain page
+//              colour (a melted colour field under a pale tint turns milky).
+//   "floor"    the design system's plain page colour, with one subtle strip
+//              of the page's colour under the pager (dark mode only).
+//
+// Either way, each change fades a new layer in over the old one.
+//
+// palette: [key, floor, base]; image: a picture to blur, or null. A palette
+// of null means a plain page: whatever was showing fades out.
+const MODE = "ambient";
 
 const CROSSFADE_S = 1.6;
-
-const drift = keyframes`
-  0%   { transform: translate3d(-2%, -1.5%, 0) rotate(0deg) scale(1.04); }
-  50%  { transform: translate3d(2%, 1.5%, 0) rotate(4deg) scale(1.1); }
-  100% { transform: translate3d(-1.5%, 2%, 0) rotate(-3deg) scale(1.05); }
-`;
-
-// grain shifts a few pixels at a time, on a stepped timing like film
-// running through a gate
-const grainShift = keyframes`
-  0%   { transform: translate(0, 0); }
-  20%  { transform: translate(-3%, 2%); }
-  40%  { transform: translate(2%, -3%); }
-  60%  { transform: translate(-2%, -1%); }
-  80%  { transform: translate(3%, 3%); }
-  100% { transform: translate(0, 0); }
-`;
-
-// fractal noise as a tiling image, white specks at varying alpha
-const GRAIN = `url("data:image/svg+xml;utf8,${encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>" +
-    "<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/>" +
-    "<feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 -0.2'/></filter>" +
-    "<rect width='100%' height='100%' filter='url(#n)'/></svg>"
-)}")`;
+// how fast the colour clears for a plain page (About): well inside the
+// page's slide, so it arrives on the plain background, not the last page's
+const PLAIN_S = 0.3;
 
 const Root = styled.div`
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: ${({ $base }) => $base};
-  transition: background-color ${CROSSFADE_S}s ${ease.inOut};
+  background: ${({ theme }) => theme.body};
+  transition: background-color 0.3s ease;
+`;
+
+// ---------------- ambient ----------------
+
+const ambientDrift = keyframes`
+  0%   { transform: translate3d(-1.5%, -1%, 0) scale(1) rotate(-1deg); }
+  50%  { transform: translate3d(1%, 1.5%, 0) scale(1.04) rotate(1deg); }
+  100% { transform: translate3d(2%, -0.5%, 0) scale(1.02) rotate(1.5deg); }
+`;
+
+// the two colour pools also flow around inside their layer
+const flow = keyframes`
+  0%   { background-position: 0% 20%; }
+  50%  { background-position: 60% 80%; }
+  100% { background-position: 100% 40%; }
+`;
+
+// One blur over the whole stack: layers crossfade sharp and are blurred
+// together, so the soft edges look the same however many are showing.
+const Melt = styled.div`
+  position: absolute;
+  inset: 0;
+  filter: blur(80px) saturate(2.4) contrast(1.08);
+  opacity: 0.95;
+  animation: ${ambientDrift} 110s ease-in-out infinite alternate;
+  will-change: transform;
+
+  ${({ $still }) =>
+    $still &&
+    css`
+      animation: none;
+    `}
+
+  /* phones: a lighter blur, and no drift */
+  @media (max-width: 640px) {
+    filter: blur(48px) saturate(2) contrast(1.05);
+    animation: none;
+  }
+`;
+
+const pools = ([a, b, base]) =>
+  `radial-gradient(55% 60% at 28% 30%, ${a} 0%, transparent 70%),
+   radial-gradient(50% 55% at 75% 72%, ${b} 0%, transparent 70%), ${base}`;
+
+// phones: a tall, narrow screen would squeeze those into thin blobs, so the
+// pools run wide and flat instead, each spanning the whole width
+const widePools = ([a, b, base]) =>
+  `radial-gradient(110% 45% at 35% 28%, ${a} 0%, transparent 72%),
+   radial-gradient(105% 42% at 65% 74%, ${b} 0%, transparent 72%), ${base}`;
+
+const Layer = styled.div`
+  position: absolute;
+  inset: 0;
+  transform: scale(1.1);
+  opacity: ${({ $on }) => ($on ? 1 : 0)};
+  /* a plain page clears the colour quickly, before it has slid in */
+  transition: opacity ${({ $plain }) => ($plain ? PLAIN_S : 0.8)}s ${ease.out};
+
+  ${({ $image }) =>
+    $image
+      ? css`
+          background: #0a0a0a center / cover no-repeat;
+          background-image: url("${$image}");
+        `
+      : css`
+          background: ${({ $colours }) => pools($colours)};
+          background-size: 160% 160%;
+          animation: ${flow} 90s ease-in-out infinite alternate;
+
+          @media (max-width: 640px) {
+            background: ${({ $colours }) => widePools($colours)};
+            background-size: 130% 130%;
+          }
+        `}
+
+  ${({ $still }) =>
+    $still &&
+    css`
+      animation: none;
+    `}
+`;
+
+// the tint that keeps text readable over the colour
+const Tint = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+`;
+
+// ---------------- floor ----------------
+
+const floorDrift = keyframes`
+  0%   { transform: translate3d(-1.5%, -0.5%, 0) scale(1.03); }
+  50%  { transform: translate3d(1.5%, 0.5%, 0) scale(1.06); }
+  100% { transform: translate3d(-1%, 1%, 0) scale(1.04); }
 `;
 
 const Drift = styled.div`
   position: absolute;
   inset: -20%;
-  animation: ${drift} 70s ease-in-out infinite alternate;
+  animation: ${floorDrift} 110s ease-in-out infinite alternate;
 
   ${({ $still }) =>
     $still &&
@@ -58,81 +143,85 @@ const Drift = styled.div`
     `}
 `;
 
-const Layer = styled.div`
+// where the floor light sits, like a CSS radial gradient on the screen:
+// [width, height, x, y] -- "58% 12% at 50% 97%"
+const FLOOR = [58, 12, 50, 97];
+
+// Drift runs 20% past the screen on every side, so a screen position x% is
+// (x + 20) / 1.4 % of the Drift box; the light is that box, moved and scaled
+const place = ([rx, ry, cx, cy]) => {
+  const x = (cx - rx + 20) / 1.4;
+  const y = (cy - ry + 20) / 1.4;
+  return { transform: `translate(${x}%, ${y}%) scale(${(2 * rx) / 140}, ${(2 * ry) / 140})` };
+};
+
+const Light = styled.div`
   position: absolute;
   inset: 0;
-  opacity: ${({ $on }) => ($on ? 1 : 0)};
-  transition: opacity ${CROSSFADE_S}s ${ease.inOut};
-
-  /* ::before is the key light (large, soft, high and to the left);
-     ::after the rim light (smaller, dimmer, low and to the right) */
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-  }
-
-  &::before {
-    left: 8%;
-    top: 4%;
-    width: 64%;
-    height: 72%;
-    background: radial-gradient(closest-side, ${({ $c1 }) => $c1}, transparent);
-    opacity: ${({ $light }) => ($light ? 0.4 : 0.9)};
-  }
-
-  &::after {
-    right: 6%;
-    bottom: 6%;
-    width: 42%;
-    height: 48%;
-    background: radial-gradient(closest-side, ${({ $c2 }) => $c2}, transparent);
-    opacity: ${({ $light }) => ($light ? 0.3 : 0.45)};
-  }
+  transform-origin: 0 0;
 `;
 
-// light falls off into the edges, heaviest top and bottom
-const Falloff = styled.div`
+// falling off the way real light does, so there's no visible edge
+const glow = (c) => `radial-gradient(
+  closest-side,
+  ${c} 0%,
+  color-mix(in srgb, ${c} 72%, transparent) 16%,
+  color-mix(in srgb, ${c} 42%, transparent) 36%,
+  color-mix(in srgb, ${c} 18%, transparent) 58%,
+  color-mix(in srgb, ${c} 5%, transparent) 80%,
+  transparent 100%
+)`;
+
+const Glow = styled.div`
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background: ${({ $light }) =>
-    $light
-      ? `radial-gradient(120% 95% at 50% 50%, transparent 55%, rgba(242, 240, 234, 0.75) 100%),
-         linear-gradient(to bottom, rgba(242, 240, 234, 0.5), transparent 14%, transparent 86%, rgba(242, 240, 234, 0.5))`
-      : `radial-gradient(115% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%),
-         linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 16%, transparent 84%, rgba(0, 0, 0, 0.55))`};
+  border-radius: 50%;
+  background: ${({ $c }) => glow($c)};
+  opacity: ${({ $on, theme }) => ($on && theme.mode === "dark" ? 0.4 : 0)};
+  transition: opacity ${({ $plain }) => ($plain ? PLAIN_S : CROSSFADE_S)}s ${ease.inOut};
 `;
 
-const Grain = styled.div`
-  position: absolute;
-  inset: -10%;
-  pointer-events: none;
-  background-image: ${GRAIN};
-  background-size: 180px 180px;
-  opacity: ${({ $light }) => ($light ? 0.05 : 0.075)};
-  animation: ${grainShift} 0.9s steps(5) infinite;
+// before any page has set a colour: a neutral grey
+const NEUTRAL = ["#2a2a30", "#6a6a74", "#050506"];
 
-  ${({ $still }) =>
-    $still &&
-    css`
-      animation: none;
-    `}
-`;
+// Every look seen so far keeps its own layer and only the current one is
+// shown, so a change crossfades from the old to the new wherever it came
+// from -- another card, or another page entirely.
+export default function Backdrop({ palette = NEUTRAL, image = null, still }) {
+  const theme = useTheme();
+  const seen = useRef(new Map());
+  const ambient = MODE === "ambient";
 
-export default function Backdrop({ projects, active, light, still }) {
-  const base = light ? "#f2f0ea" : projects[active]?.backdrop[2] ?? "#0b0b0b";
+  // light mode: just the page colour
+  if (ambient && theme.mode !== "dark") return <Root aria-hidden="true" />;
+
+  const plain = palette === null && !image;
+  const id = plain ? null : ambient && image ? `img:${image}` : palette.join();
+  if (!plain && !seen.current.has(id)) seen.current.set(id, { palette, image: ambient ? image : null });
+  const layers = [...seen.current];
+
+  if (ambient) {
+    return (
+      <Root aria-hidden="true">
+        <Melt $still={still}>
+          {layers.map(([k, l]) => (
+            <Layer key={k} $on={k === id} $plain={plain} $image={l.image} $colours={l.palette} $still={still} />
+          ))}
+        </Melt>
+        <Tint />
+      </Root>
+    );
+  }
 
   return (
-    <Root $base={base} aria-hidden="true">
+    <Root aria-hidden="true">
       <Drift $still={still}>
-        {projects.map((p, i) => (
-          <Layer key={p.id} $on={i === active} $light={light} $c1={p.backdrop[0]} $c2={p.backdrop[1]} />
-        ))}
+        <Light style={place(FLOOR)}>
+          {layers.map(([k, l]) => (
+            <Glow key={k} $on={k === id} $plain={plain} $c={l.palette[1]} />
+          ))}
+        </Light>
       </Drift>
-      <Falloff $light={light} />
-      <Grain $light={light} $still={still} />
     </Root>
   );
 }

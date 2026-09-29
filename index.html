@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="/iOS-favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Instrument Sans is self-hosted via @fontsource (see
+    <!-- Poppins is self-hosted via @fontsource (see
          GlobalStyle.jsx) -- loading it again here from a CDN would mean
          every visitor paying for two copies of the same typeface. -->
 
@@ -20,9 +20,10 @@
       content="Product designer based in Ireland. Case studies in mobile, AI/VR, and health-tech design — designed, built, and shipped end-to-end."
     />
 
-    <!-- Open Graph / social link previews. og:image points at a file that
-         doesn't exist yet -- drop the real graphic in /public/og-image.png
-         (1200x630 recommended) once one's ready. -->
+    <!-- Open Graph / social link previews (LinkedIn, Slack, iMessage...).
+         /public/og-image.png is 1200x630: name, role and headshot on the
+         homepage's dark background. LinkedIn caches previews -- after
+         changing it, re-scrape with linkedin.com/post-inspector. -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://daraphillips.com/" />
     <meta property="og:title" content="Dara Phillips | Product Designer" />
@@ -31,7 +32,11 @@
       content="Product designer based in Ireland. Case studies in mobile, AI/VR, and health-tech design — designed, built, and shipped end-to-end."
     />
     <meta property="og:image" content="https://daraphillips.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Dara Phillips, Product Designer" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://daraphillips.com/og-image.png" />
     <meta name="twitter:title" content="Dara Phillips | Product Designer" />
     <meta
       name="twitter:description"
@@ -39,12 +44,12 @@
     />
 
     <style>
-      /* Paints before the app loads, in the page's own theme (see
-         ThemeModeContext.jsx): the homepage is dark, every other page light
-         (the script below). Headings share the body font (Instrument Sans,
+      /* Paints before the app loads, in the visitor's theme (see
+         ThemeModeContext.jsx): their saved pick, else their device's
+         setting (the script below). Headings share the body font (Poppins,
          see GlobalStyle.jsx); only size and weight set them apart. */
       body {
-        font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
         margin: 0;
         padding: 0;
         background: #161616;
@@ -68,7 +73,14 @@
       }
     </style>
     <script>
-      if (location.pathname !== "/") document.documentElement.classList.add("light");
+      (function () {
+        var pick = null;
+        try {
+          pick = localStorage.getItem("theme-pref");
+        } catch (e) {}
+        var light = pick ? pick === "light" : matchMedia("(prefers-color-scheme: light)").matches;
+        if (light) document.documentElement.classList.add("light");
+      })();
     </script>
   </head>
 

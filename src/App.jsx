@@ -14,7 +14,11 @@ import { ExpandTransitionProvider } from "./components/showcase/ExpandTransition
 import Footer from "./components/layout/Footer";
 
 import Home from "./pages/Home";
+import About from "./pages/About";
+import Websites from "./pages/Websites";
 import NotFound from "./pages/NotFound";
+import Shell from "./components/shell/Shell";
+import { isShellPage } from "./components/shell/context";
 
 import { logEvent } from "firebase/analytics";
 import { analyticsReady } from "./firebase";
@@ -30,8 +34,6 @@ const OperationAvocadoCaseStudy = lazy(() => import("./case-studies/operation-av
 const AudanoteCaseStudy = lazy(() => import("./case-studies/audanote/Audanote"));
 const PintsYurtCaseStudy = lazy(() => import("./case-studies/pints-yurt/PintsYurt"));
 const CruciateCaseStudy = lazy(() => import("./case-studies/cruciate/Cruciate"));
-const AboutMe = lazy(() => import("./pages/about-me/AboutMe"));
-const Websites = lazy(() => import("./pages/Websites"));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -195,8 +197,9 @@ const RouteFallback = styled.div`
 // too (delay 0) -- keeping both in the same tick is what actually reads
 // as clean rather than glitchy; staggering an instant content swap
 // against a delayed chrome toggle was the flicker.
-const MORPH_CHROMELESS_PREFIXES = ["/about-me"];
+const MORPH_CHROMELESS_PREFIXES = [];
 const CHROMELESS_PREFIXES = [
+  "/about-me",
   "/pints-yurt",
   "/cruciate",
   "/kropt",
@@ -208,7 +211,7 @@ const CHROMELESS_PREFIXES = [
   "/websites",
   ...MORPH_CHROMELESS_PREFIXES,
 ];
-// The showcase homepage brings its own header/menu/footer (see Showcase.jsx).
+// Work, About and Websites bring their own header/menu (see Shell.jsx).
 const shouldHideChrome = (pathname) =>
   pathname === "/" || CHROMELESS_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 const isMorphRoute = (pathname) =>
@@ -287,8 +290,21 @@ export default function App() {
           <Main id="main-content" tabIndex={-1}>
             <HomeMorphIntentProvider>
             <AnimatePresence mode="popLayout" initial={false}>
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<HomeAnimatedPage><Home /></HomeAnimatedPage>} />
+              {/* Work, About and Websites share one key, so moving between
+                  them keeps the shared frame (Shell) mounted and only its
+                  own content slides -- see Shell.jsx */}
+              <Routes location={location} key={isShellPage(location.pathname) ? "shell" : location.pathname}>
+                <Route
+                  element={
+                    <HomeAnimatedPage>
+                      <Shell />
+                    </HomeAnimatedPage>
+                  }
+                >
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about-me" element={<About />} />
+                  <Route path="/websites" element={<Websites />} />
+                </Route>
                 <Route
                   path="/orthovive"
                   element={
@@ -365,26 +381,6 @@ export default function App() {
                     <AnimatedPage>
                       <Suspense fallback={<RouteFallback />}>
                         <CruciateCaseStudy />
-                      </Suspense>
-                    </AnimatedPage>
-                  }
-                />
-                <Route
-                  path="/about-me"
-                  element={
-                    <MorphAnimatedPage>
-                      <Suspense fallback={<RouteFallback />}>
-                        <AboutMe />
-                      </Suspense>
-                    </MorphAnimatedPage>
-                  }
-                />
-                <Route
-                  path="/websites"
-                  element={
-                    <AnimatedPage>
-                      <Suspense fallback={<RouteFallback />}>
-                        <Websites />
                       </Suspense>
                     </AnimatedPage>
                   }

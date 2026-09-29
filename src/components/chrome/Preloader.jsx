@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { ease, dur, reveal } from "../../styles/motion";
 
-// First visit of a session only. It opens on a single shot:
-//   load   a black screen with a thin loading line bottom-left and a counter
-//          bottom-right, filling while the carousel's images decode
-//   frame  the line and counter fade; the black becomes a window in the exact
-//          shape of the focused card (still black inside, so nothing changes)
+// First visit only (remembered in this browser). It opens on a single shot:
+//   load   a blank screen in the page colour with just "Dara · Phillips"
+//          centred, while the carousel's images decode
+//   frame  the name fades; the screen becomes a window in the exact
+//          shape of the focused card (still plain inside, so nothing changes)
 //   shot   the card fades up inside that window on its own, like the first
 //          shot of a film, pushing in gently as it comes (the homepage's
 //          settle, cropped by the window)
@@ -17,12 +17,20 @@ import { ease, dur, reveal } from "../../styles/motion";
 // It tells the homepage three moments: the shot starting (onStart -- its
 // settle begins), the window opening far enough for the side cards to move
 // (onReveal), and the end (onDone). getFrame supplies the focused card's box
-// and corner radius. Coming back to the homepage later in the same session
-// skips it; with reduced motion it simply clears.
+// and corner radius. Every later visit skips it, in this tab or a new one;
+// with reduced motion it simply clears. To see it again, clear the site's
+// data (or `localStorage.removeItem("preloaded")` in the console).
 
 const SEEN_KEY = "preloaded";
-// long enough to read as a loader rather than a flicker
-const MIN_MS = 700;
+// TEMPORARY, for testing: play on every fresh page load (still skipped when
+// coming back to the homepage within the site). Set to false before
+// deploying so it's first visit only again.
+const EVERY_LOAD = true;
+let seenThisLoad = false;
+// long enough for the name to arrive in full and be read, however fast
+// the images load: it's fully in at ARRIVE_S, then holds
+const ARRIVE_S = 0.6;
+const MIN_MS = 1200;
 
 // the details clear first, then the shot fades up
 const FADE_S = dur.fast * 0.8;
@@ -38,32 +46,22 @@ const Screen = styled.div`
   position: fixed;
   inset: 0;
   z-index: 7000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  font-size: 0.9rem; /* same as the homepage footer it gives way to */
-  gap: 24px;
-  padding: 56px 88px; /* the footer's own padding, so the count sits where it will */
-  /* solid while loading; after that the window's surround is the black */
-  background: ${({ $phase }) => ($phase === "load" ? "#000" : "transparent")};
-  color: #fff;
+  display: grid;
+  place-items: center;
+  /* solid while loading, in the page's own colour (light or dark) so the
+     window opens onto more of the same; after that the window's surround
+     covers the page */
+  background: ${({ $phase, theme }) => ($phase === "load" ? theme.body : "transparent")};
+  color: ${({ theme }) => theme.text};
   pointer-events: ${({ $phase }) => ($phase === "open" ? "none" : "auto")};
-
-  @media (max-width: 1024px) {
-    padding: 24px 40px;
-  }
-
-  @media (max-width: 640px) {
-    padding: 20px 16px;
-  }
 `;
 
 // The window onto the page: the card's box, with everything around it
-// blacked out by a spread shadow big enough to cover any screen.
+// covered by a spread shadow big enough to cover any screen.
 const Window = styled.div`
   position: fixed;
-  box-shadow: 0 0 0 200vmax #000;
-  background: #000;
+  box-shadow: 0 0 0 200vmax ${({ theme }) => theme.body};
+  background: ${({ theme }) => theme.body};
   pointer-events: none;
 
   ${({ $phase }) =>
@@ -87,7 +85,7 @@ const Window = styled.div`
 
 // the details fade and drift down a touch as the shot begins
 const Details = styled.div`
-  position: relative; /* above the window's black */
+  position: relative; /* above the window's cover */
   transition:
     opacity ${FADE_S}s ${ease.out},
     transform ${FADE_S}s ${ease.out};
@@ -100,26 +98,31 @@ const Details = styled.div`
     `}
 `;
 
-const Line = styled(Details)`
-  /* level with the middle of the counter's text */
-  margin-bottom: 0.65em;
-  width: clamp(120px, 16vw, 220px);
-  height: 1px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.18);
+// the name, centred, its initials in bold: it arrives with a slow fade, then
+// clears as the shot begins
+const arrive = keyframes`
+  from { opacity: 0; }
 `;
 
-const Fill = styled.div`
-  height: 100%;
-  background: #fff;
-  transform-origin: left;
-`;
+const Name = styled(Details)`
+  font-size: clamp(1.125rem, 1.8vw, 1.5rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  animation: ${arrive} ${ARRIVE_S}s ${ease.out} backwards;
 
-const Counter = styled(Details)`
-  line-height: 1.3;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
+  strong {
+    font-weight: 600;
+  }
+
+  /* the spacer: a middle dot with room either side */
+  span {
+    margin: 0 0.5em;
+    opacity: 0.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 // whether this visit will show the preloader (the homepage holds its
@@ -128,9 +131,17 @@ export function willPreload() {
   return !alreadySeen();
 }
 
+// The loading screen only ever opens the site: a visit that starts on
+// another page (About, Websites) counts as seen, so it can't play later
+// in the middle of a page change.
+export function skipPreload() {
+  seenThisLoad = true;
+}
+
 function alreadySeen() {
+  if (EVERY_LOAD) return seenThisLoad;
   try {
-    return sessionStorage.getItem(SEEN_KEY) === "1";
+    return localStorage.getItem(SEEN_KEY) === "1";
   } catch {
     return false;
   }
@@ -159,8 +170,6 @@ export default function Preloader({ sources, reduced, onStart, onReveal, onDone,
   // load | frame | shot | open
   const [phase, setPhase] = useState("load");
   const [frame, setFrame] = useState(null);
-  const [pct, setPct] = useState(0);
-  const fillRef = useRef(null);
   // latest callbacks, without restarting the sequence on re-renders
   const cb = useRef({ onStart, onReveal, onDone, getFrame });
   cb.current = { onStart, onReveal, onDone, getFrame };
@@ -177,16 +186,16 @@ export default function Preloader({ sources, reduced, onStart, onReveal, onDone,
     // the count eases toward what has actually loaded, and never outruns
     // the minimum display time
     const tick = (now) => {
-      const real = loaded / total;
+      // nothing to wait for counts as loaded, not as never loading
+      const real = sources.length ? loaded / total : 1;
       const timeCap = Math.min((now - start) / MIN_MS, 1);
       shown += (Math.min(real, timeCap) - shown) * 0.2;
       if (Math.min(real, timeCap) === 1 && shown > 0.995) shown = 1;
-      if (fillRef.current) fillRef.current.style.transform = `scaleX(${shown})`;
-      setPct(Math.round(shown * 100));
       if (shown >= 1) {
         setDone(true);
+        seenThisLoad = true;
         try {
-          sessionStorage.setItem(SEEN_KEY, "1");
+          localStorage.setItem(SEEN_KEY, "1");
         } catch {
           // storage blocked -- they'll just see it again next time
         }
@@ -225,7 +234,7 @@ export default function Preloader({ sources, reduced, onStart, onReveal, onDone,
 
     const timers = [];
     const at = (s, fn) => timers.push(setTimeout(fn, s * 1000));
-    // two frames: the black window is painted before its fill starts to clear
+    // two frames: the covered window is painted before its fill starts to clear
     let raf = requestAnimationFrame(() => {
       raf = requestAnimationFrame(() => {
         at(SHOT_AT, () => {
@@ -252,12 +261,11 @@ export default function Preloader({ sources, reduced, onStart, onReveal, onDone,
   return (
     <Screen $phase={phase} role="status" aria-label={done ? "Loaded" : "Loading"}>
       {phase !== "load" && <Window $phase={phase} style={frameStyle(frame, phase === "open")} aria-hidden="true" />}
-      <Line $done={done} aria-hidden="true">
-        <Fill ref={fillRef} style={{ transform: "scaleX(0)" }} />
-      </Line>
-      <Counter $done={done} aria-hidden="true">
-        {pct}%
-      </Counter>
+      <Name $done={done} aria-hidden="true">
+        <strong>D</strong>ara
+        <span>·</span>
+        <strong>P</strong>hillips
+      </Name>
     </Screen>
   );
 }

@@ -8,10 +8,9 @@ import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { ease, dur } from "../../styles/motion";
 import { COVER_INSET, COVER_RADIUS, COVER_PHONE_QUERY } from "../showcase/coverFrame";
 import { useExpandTransition } from "../showcase/ExpandTransition";
-import { lightTheme } from "../../styles/theme";
 
 // Opener for a case study: a large framed card -- inset from the screen
-// edges with rounded corners, on the case study's light page background --
+// edges with rounded corners, on the page's own background --
 // showing the same media as the project's carousel card, at exactly the
 // size the card scales up to when it's opened (see ExpandTransition and
 // coverFrame). The card hands off to this without a visible seam, then the
@@ -45,9 +44,9 @@ const Cover = styled.section`
   height: 100vh;
   height: 100dvh; /* the visible height, as the transition measures it */
   padding: ${COVER_INSET.default}px;
-  /* the same light page as the card transition's curtain, so the handoff
-     between them can't show */
-  background: ${lightTheme.body};
+  /* the same page as the card transition's curtain, so the handoff between
+     them can't show */
+  background: ${({ theme }) => theme.body};
 
   @media ${COVER_PHONE_QUERY} {
     padding: ${COVER_INSET.phone}px;
@@ -62,18 +61,27 @@ const Frame = styled.div`
   overflow: hidden;
   isolation: isolate;
   border-radius: ${COVER_RADIUS.default}px;
+  /* The rounded corners as an explicit clip too, as on the carousel card:
+     overflow + radius alone can stop clipping media on its own layer (a
+     video, or the frame mid-pull), and the corners flash square -- most
+     visibly as the card transition clears over this frame. */
+  clip-path: inset(0 round ${COVER_RADIUS.default}px);
   background: #000;
   color: #fff;
 
   @media ${COVER_PHONE_QUERY} {
     border-radius: ${COVER_RADIUS.phone}px;
+    clip-path: inset(0 round ${COVER_RADIUS.phone}px);
   }
 `;
 
+// Its own stacking context: media that layers itself with z-index (the
+// avocado rig goes up to 4) stays inside it, under the scrim and the text,
+// instead of competing with them.
 const Media = styled.div`
   position: absolute;
   inset: 0;
-  will-change: transform;
+  isolation: isolate;
 `;
 
 // keeps the text legible whatever the media is: dark at the bottom where
@@ -192,7 +200,6 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
   const { reduced } = useMotionPreference();
   const { coverReady, coverStartTime, returnFrom } = useExpandTransition();
   const navigate = useNavigate();
-  const mediaRef = useRef(null);
   const coverRef = useRef(null);
   const frameRef = useRef(null);
 
@@ -293,24 +300,6 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
     };
   }, [goHome]);
 
-  // gentle parallax: the media drifts up slower than the page scrolls
-  useEffect(() => {
-    if (reduced) return undefined;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const y = Math.min(window.scrollY, window.innerHeight);
-        if (mediaRef.current) mediaRef.current.style.transform = `translate3d(0, ${y * 0.3}px, 0)`;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [reduced]);
-
   const setRefs = (el) => {
     coverRef.current = el;
     if (typeof ref === "function") ref(el);
@@ -326,7 +315,7 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
   return (
     <Cover ref={setRefs} aria-label={project.title}>
       <Frame ref={frameRef}>
-      <Media ref={mediaRef}>
+      <Media>
         {/* tells the card transition when it's safe to hand over, and starts
             a video on the same frame the transition was showing */}
         <ProjectMedia project={project} onReady={coverReady} startTime={coverStartTime} />

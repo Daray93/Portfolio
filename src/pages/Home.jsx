@@ -1,5 +1,6 @@
 import React from "react";
 import Showcase from "../components/showcase/Showcase";
+import projects from "../data/projects";
 
 export default function Home() {
   return (
@@ -16,7 +17,7 @@ export default function Home() {
       <meta property="og:url" content="https://daraphillips.com" />
       <meta property="og:image" content="https://daraphillips.com/preview.jpg" />
 
-      <Showcase />
+      <Showcase items={projects} kind="work" label="Selected work" />
     </>
   );
 }

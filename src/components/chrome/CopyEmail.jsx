@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
-import { FiMail } from "react-icons/fi";
 import { EMAIL } from "../../data/contact";
 import { ease, dur } from "../../styles/motion";
 
@@ -49,7 +48,13 @@ const IconSlot = styled.span`
   }
 `;
 
-const Mail = styled(FiMail)`
+// Feather's mail icon
+const Mail = styled.svg`
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   opacity: ${({ $hide }) => ($hide ? 0 : 1)};
   transform: scale(${({ $hide }) => ($hide ? 0.6 : 1)});
   transition:
@@ -137,7 +142,10 @@ export default function CopyEmail() {
         aria-label={`Copy email address ${EMAIL}`}
       >
         <IconSlot aria-hidden="true">
-          <Mail $hide={copied} />
+          <Mail viewBox="0 0 24 24" $hide={copied}>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <path d="M22 6l-10 7L2 6" />
+          </Mail>
           <Tick viewBox="0 0 24 24" $on={copied}>
             <path d="M5 12.5l4.5 4.5L19 7.5" />
           </Tick>

@@ -12,8 +12,8 @@ import {
 } from "../../components/case-study/Prose";
 import OtherProjects from "../../components/shared/OtherProjects";
 
-// Draft: written from what the shipped app does. The why, screens and real
-// outcomes still to add.
+// Draft: written from what the shipped app does. Screens and real outcomes
+// still to add.
 
 export default function Cruciate() {
   return (
@@ -23,6 +23,7 @@ export default function Cruciate() {
         { id: "why", label: "Why" },
         { id: "journey", label: "The journey" },
         { id: "progress", label: "Progress" },
+        { id: "options", label: "Options" },
         { id: "safety", label: "Safety" },
         { id: "outcomes", label: "Outcomes" },
       ]}
@@ -47,10 +48,39 @@ export default function Cruciate() {
         </CaseStudySection>
 
         <CaseStudySection id="why" title="Why" tldrVisible>
-          <Callout>
-            [Add why you built it: who it&apos;s for, what was missing from the rehab tools or
-            printouts people get now, and anything personal behind it.]
-          </Callout>
+          <Paragraph>
+            Earlier this year I tore my anterior cruciate ligament (ACL), one of the main ligaments
+            holding the knee together, and my meniscus, the cartilage that cushions the joint.
+          </Paragraph>
+          <Paragraph>
+            The diagnosis was clear. An X-ray and an MRI told me exactly what was wrong.
+          </Paragraph>
+          <Paragraph>
+            What came next wasn&apos;t. With no health insurance, I faced a long public waiting list
+            for surgery. Nobody explained what the operation involved, how to prepare, or what to do
+            with my knee in the meantime.
+          </Paragraph>
+          <Paragraph>
+            Nobody mentioned my options either. I only found out later about the EU Cross-Border
+            Healthcare Directive, which can let Irish patients get treatment in another EU country and
+            be reimbursed by the HSE. That&apos;s when I realised the problem was bigger than my knee.
+          </Paragraph>
+          <Paragraph>
+            The gap is in the months before and after surgery. People need a plan, and they need the
+            information that should come with a diagnosis. Physiotherapy provides some of that, but
+            only for people who can afford it or get access to it.
+          </Paragraph>
+          <Paragraph>So I framed the problem as three questions:</Paragraph>
+          <List>
+            <li>
+              How might we give people a clear plan for the months before and after surgery, without
+              needing a physio?
+            </li>
+            <li>
+              How might we keep them going day to day, when progress is slow and motivation fades?
+            </li>
+            <li>How might we make sure they know their treatment options from the start?</li>
+          </List>
         </CaseStudySection>
 
         <CaseStudySection id="journey" title="The journey">
@@ -90,6 +120,19 @@ export default function Cruciate() {
           <MediaRow>
             <MediaPlaceholder>Range-of-motion logging: add screenshot</MediaPlaceholder>
             <MediaPlaceholder>Progress chart: add screenshot</MediaPlaceholder>
+          </MediaRow>
+        </CaseStudySection>
+
+        <CaseStudySection id="options" title="Options">
+          <Paragraph>
+            Onboarding asks one extra question: have you heard of the EU Cross-Border Healthcare
+            Directive? If the answer is no, a short plain-English explainer follows, with a link to
+            the HSE&apos;s own page. The app points to the official source rather than giving advice
+            itself.
+          </Paragraph>
+          <MediaRow>
+            <MediaPlaceholder>Directive question: add screenshot</MediaPlaceholder>
+            <MediaPlaceholder>Explainer: add screenshot</MediaPlaceholder>
           </MediaRow>
         </CaseStudySection>
 
