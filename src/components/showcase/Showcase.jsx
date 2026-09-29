@@ -976,17 +976,32 @@ export default function Showcase({ items, kind = "work", label = "Selected work"
   }, [covered, leavingId, returning, setChrome]);
   useEffect(() => () => setChrome({ overIntro: false, away: false }), [setChrome]);
 
-  // the way back: once the carousel has laid out, shrink the project's media
-  // from full screen into its card
+  // the way back: once the carousel has laid out and the card's picture has
+  // loaded (the shrink is measured from its size), shrink the project's
+  // media from full screen into its card
   useEffect(() => {
     if (!embla || !returning) return undefined;
-    const raf = requestAnimationFrame(() => {
-      const el = cardRefs.current[startIndex];
-      const started =
-        el && collapse(items[startIndex], el, () => setReturning(false));
-      if (!started) setReturning(false);
-    });
-    return () => cancelAnimationFrame(raf);
+    let cancelled = false;
+    let raf = 0;
+    const start = () => {
+      if (cancelled) return;
+      raf = requestAnimationFrame(() => {
+        const el = cardRefs.current[startIndex];
+        const started =
+          el && collapse(items[startIndex], el, () => setReturning(false));
+        if (!started) setReturning(false);
+      });
+    };
+    const img = cardRefs.current[startIndex]?.querySelector("img");
+    if (img && !(img.complete && img.naturalWidth)) {
+      (img.decode ? img.decode() : Promise.reject()).catch(() => {}).then(start);
+    } else {
+      start();
+    }
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
   }, [embla, returning, collapse, startIndex, items]);
 
   // Coming back from a project, the carousel ignores input while the card

@@ -45,6 +45,8 @@ import { coverFrame } from "./coverFrame";
 //            the browser's back button), until the homepage has measured the
 //            card
 //   shrink   the frame shrinks into the card
+//   fade     the homepage never measured its card in time: the frame fades
+//            out over it rather than vanishing
 //
 // Only a clip, transforms and opacity animate, never layout. Lives above the
 // routes (see App.jsx) so it outlives the page that started it.
@@ -55,8 +57,10 @@ const OPEN_S = 1.05;
 const HANDOFF_S = dur.fast * 1.4;
 const CLOSE_S = 0.95;
 
-// the longest each waiting phase may hold before moving on regardless
-const WAIT_MS = { prep: 300, arrive: 900, leave: 300, hold: 1500 };
+// The longest each waiting phase may hold before moving on regardless.
+// arrive and hold wait behind a copy that looks exactly like what's coming,
+// so a long wait is invisible, while giving up early shows as a cut.
+const WAIT_MS = { prep: 300, arrive: 2500, leave: 300, hold: 2500 };
 
 // Which project was opened from the carousel. Set on opening; read when
 // the homepage comes back into view to decide whether to play the way back.
@@ -75,11 +79,14 @@ const Overlay = styled(motion.div)`
   will-change: clip-path;
 `;
 
-// the media, sized to the final frame (its inset is set from coverFrame)
+// The media, sized to the final frame (its inset is set from coverFrame).
+// No will-change: transform -- with it the browser draws the layer once at
+// the scale it starts at and stretches that, so opening from the card
+// (small) grew a blurry copy that snapped sharp at the handoff. Without it,
+// the picture is redrawn at each size, sharp the whole way up.
 const Media = styled(motion.div)`
   position: absolute;
   transform-origin: 50% 50%;
-  will-change: transform;
 `;
 
 // The page background, behind the card while it's out of the carousel, in
@@ -140,10 +147,30 @@ function framing(cardEl) {
   const el = cardEl.querySelector("img, video");
   const iw = el?.naturalWidth || el?.videoWidth || 0;
   const ih = el?.naturalHeight || el?.videoHeight || 0;
-  const cover = el && el.dataset.fit !== "contain" && iw && ih;
-  const scale = cover
-    ? Math.max(box.width / iw, box.height / ih) / Math.max(fw / iw, fh / ih)
-    : Math.max(box.width / fw, box.height / fh);
+  const contain = el?.dataset.fit === "contain";
+  let scale;
+  let bleed;
+  if (el && iw && ih && contain) {
+    // Contained media sits inside padding that's a share of the width, so
+    // it grows in step with the box: the card's padding as drawn, and the
+    // frame's the same share of the frame's width.
+    const boxEl = cardEl.firstElementChild ?? cardEl;
+    const drawnBox = box.width / (boxEl.offsetWidth || box.width) || 1;
+    const pad = (parseFloat(getComputedStyle(el).paddingLeft) || 0) * drawnBox;
+    const framePad = (pad * fw) / box.width;
+    scale =
+      Math.min((box.width - 2 * pad) / iw, (box.height - 2 * pad) / ih) /
+      Math.min((fw - 2 * framePad) / iw, (fh - 2 * framePad) / ih);
+  } else if (el && iw && ih) {
+    const toFrame = Math.max(fw / iw, fh / ih);
+    scale = Math.max(box.width / iw, box.height / ih) / toFrame;
+    // The whole picture at its frame size, uncropped: when the card's
+    // shape differs from the frame's, the frame scaled down to the card is
+    // narrower or shorter than it, and the card shows picture there.
+    bleed = { width: iw * toFrame, height: ih * toFrame };
+  } else {
+    scale = Math.max(box.width / fw, box.height / fh);
+  }
 
   return {
     ...frame,
@@ -153,6 +180,7 @@ function framing(cardEl) {
       y: box.top + box.height / 2 - vh / 2,
       scale,
     },
+    bleed,
     videoTime: el?.tagName === "VIDEO" ? el.currentTime : undefined,
   };
 }
@@ -275,7 +303,7 @@ export function ExpandTransitionProvider({ children }) {
       const video = overlayRef.current?.querySelector("video");
       navigate(a.project.to);
       toPhase("grow", "arrive", { coverTime: video ? video.currentTime : undefined });
-    } else if (a.phase === "handoff" || a.phase === "shrink") {
+    } else if (a.phase === "handoff" || a.phase === "shrink" || a.phase === "fade") {
       finishedRef.current = a;
       a.onDone?.();
       setActive(null);
@@ -293,9 +321,9 @@ export function ExpandTransitionProvider({ children }) {
     if (phase === "prep") t = setTimeout(() => toPhase("prep", "grow"), WAIT_MS.prep);
     else if (phase === "arrive") t = setTimeout(() => toPhase("arrive", "handoff"), WAIT_MS.arrive);
     else if (phase === "leave") t = setTimeout(commitReturn, WAIT_MS.leave);
-    else if (phase === "hold") t = setTimeout(() => toPhase("hold", "shrink"), WAIT_MS.hold);
+    else if (phase === "hold") t = setTimeout(() => toPhase("hold", "fade"), WAIT_MS.hold);
     else {
-      const lengthS = { grow: OPEN_S, handoff: HANDOFF_S, shrink: CLOSE_S }[phase];
+      const lengthS = { grow: OPEN_S, handoff: HANDOFF_S, shrink: CLOSE_S, fade: HANDOFF_S }[phase];
       t = setTimeout(() => completeRef.current(), (lengthS + 0.5) * 1000);
     }
     return () => clearTimeout(t);
@@ -338,10 +366,14 @@ export function ExpandTransitionProvider({ children }) {
     const { from, phase } = active;
     const back = phase === "shrink";
     const leaving = phase === "leave";
+    const fading = phase === "fade";
     overlay = {
       initial: { clipPath: from.startClip, opacity: leaving ? 0 : 1 },
-      animate: { clipPath: back ? from.clip : from.startClip, opacity: leaving ? 0 : 1 },
-      transition: { clipPath: { duration: CLOSE_S, ease: EASE }, opacity: { duration: 0 } },
+      animate: { clipPath: back ? from.clip : from.startClip, opacity: leaving || fading ? 0 : 1 },
+      transition: {
+        clipPath: { duration: CLOSE_S, ease: EASE },
+        opacity: fading ? { duration: HANDOFF_S, ease: easeArr.out } : { duration: 0 },
+      },
     };
     media = {
       initial: from.startMedia,
@@ -353,8 +385,12 @@ export function ExpandTransitionProvider({ children }) {
     // returns
     curtain = {
       initial: { opacity: leaving ? 0 : 1 },
-      animate: { opacity: back || leaving ? 0 : 1 },
-      transition: back ? { duration: CLOSE_S * 0.9, ease: EASE } : { duration: 0 },
+      animate: { opacity: back || leaving || fading ? 0 : 1 },
+      transition: back
+        ? { duration: CLOSE_S * 0.9, ease: EASE }
+        : fading
+          ? { duration: HANDOFF_S, ease: easeArr.out }
+          : { duration: 0 },
     };
   }
 
@@ -387,6 +423,9 @@ export function ExpandTransitionProvider({ children }) {
               aria-hidden="true"
               {...overlay}
               onAnimationComplete={() => completeRef.current()}
+              // the card's own colour behind the media, so any of the clip
+              // the scaled-down frame doesn't reach is the card, not a gap
+              style={{ background: active.project.panel }}
             >
               <Media
                 {...media}
@@ -400,6 +439,7 @@ export function ExpandTransitionProvider({ children }) {
                 <ProjectMedia
                   project={active.project}
                   startTime={active.from.videoTime}
+                  bleed={active.from.bleed}
                   onReady={opening ? onCopyReady : active.phase === "leave" ? commitReturn : undefined}
                 />
               </Media>

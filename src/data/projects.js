@@ -29,11 +29,11 @@
 import oaIcon from "../case-studies/operation-avocado/assets/Mobile-Logo-OA.png";
 import orthoviveLogo from "../case-studies/orthovive/assets/OrthoVive.png";
 import orthoviveRender from "../case-studies/orthovive/assets/render.png";
-import pintsCard from "../case-studies/pints-yurt/assets/PintsYurt.svg";
-import pintsCardPhone from "../case-studies/pints-yurt/assets/PintsYurt-phone.svg";
+import pintsCard from "../case-studies/pints-yurt/assets/PintsYurt.webp";
+import pintsCardPhone from "../case-studies/pints-yurt/assets/PintsYurt-phone.webp";
 import pintsIcon from "../case-studies/pints-yurt/assets/pints-icon.png";
 import cruciateLogo from "../case-studies/cruciate/assets/cruciate-logo.svg";
-import cruciateCard from "../case-studies/cruciate/assets/Cruciate.svg";
+import cruciateCard from "../case-studies/cruciate/assets/Cruciate.webp";
 
 const projects = [
   {
@@ -60,9 +60,11 @@ const projects = [
     // the live avocado rig (the hero video, OA-Hero.mp4, is still in the
     // case study's assets)
     media: { type: "avocado" },
+    // the rig's stage green (see ProjectMedia)
+    panel: "#7bae45",
     icon: { src: oaIcon, fill: true },
-    // the avocado's own greens: its skin, then its card
-    backdrop: ["#456b24", "#7bae45", "#070d04"],
+    // a deep forest green behind the caption, then the avocado's card green
+    backdrop: ["#182b1c", "#7bae45", "#070d04"],
   },
   {
     id: "pints-yurt",
@@ -73,7 +75,9 @@ const projects = [
     to: "/pints-yurt",
     // three phones, tilted: the whole set on wide cards; on phones the same
     // drawing framed on the leaderboard (PintsYurt-phone.svg: only its
-    // viewBox differs), whole, with its neighbours peeking in
+    // viewBox differs), whole, with its neighbours peeking in. The cards use
+    // 2x WebP renders of the SVGs: scaling the SVGs' embedded screenshots
+    // (and Cruciate's blurred shadows) full screen stutters the transition
     media: { type: "image", src: pintsCard, mobileSrc: pintsCardPhone, fit: "contain", mobileFit: "cover" },
     panel: "#16100b",
     icon: { src: pintsIcon, fill: true },

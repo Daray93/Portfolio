@@ -28,12 +28,31 @@ import { analyticsReady } from "./firebase";
 // studies' code even though a visitor might only ever view the grid.
 const Kropt = lazy(() => import("./case-studies/kropt/Kropt"));
 const Neuroloop = lazy(() => import("./case-studies/neuroloop/Neuroloop"));
-const OrthoViveCaseStudy = lazy(() => import("./case-studies/orthovive/OrthoVive"));
+const loadOrthoVive = () => import("./case-studies/orthovive/OrthoVive");
+const loadOperationAvocado = () => import("./case-studies/operation-avocado/OperationAvocado");
+const loadPintsYurt = () => import("./case-studies/pints-yurt/PintsYurt");
+const loadCruciate = () => import("./case-studies/cruciate/Cruciate");
+const OrthoViveCaseStudy = lazy(loadOrthoVive);
 const IbhfCaseStudy = lazy(() => import("./case-studies/ibhf/Ibhf"));
-const OperationAvocadoCaseStudy = lazy(() => import("./case-studies/operation-avocado/OperationAvocado"));
+const OperationAvocadoCaseStudy = lazy(loadOperationAvocado);
 const AudanoteCaseStudy = lazy(() => import("./case-studies/audanote/Audanote"));
-const PintsYurtCaseStudy = lazy(() => import("./case-studies/pints-yurt/PintsYurt"));
-const CruciateCaseStudy = lazy(() => import("./case-studies/cruciate/Cruciate"));
+const PintsYurtCaseStudy = lazy(loadPintsYurt);
+const CruciateCaseStudy = lazy(loadCruciate);
+
+// The carousel's case studies, fetched once the page is idle: a card's
+// open transition hands off to its page's cover, and a page still
+// downloading when the card lands made the handoff give up and cut.
+const CAROUSEL_PAGES = [loadCruciate, loadOperationAvocado, loadPintsYurt, loadOrthoVive];
+
+function PrefetchCarouselPages() {
+  React.useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 1500));
+    const cancel = window.cancelIdleCallback ?? clearTimeout;
+    const id = idle(() => CAROUSEL_PAGES.forEach((load) => load().catch(() => {})));
+    return () => cancel(id);
+  }, []);
+  return null;
+}
 
 const AppWrapper = styled.div`
   display: flex;
@@ -271,6 +290,7 @@ export default function App() {
         <GlobalStyle />
         <ScrollToTopOnRouteChange />
         <AnalyticsPageview />
+        <PrefetchCarouselPages />
 
         <SkipLink href="#main-content">Skip to content</SkipLink>
 

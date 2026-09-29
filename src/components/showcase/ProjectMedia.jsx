@@ -278,7 +278,22 @@ const Wordmark = styled.span`
   }
 `;
 
-export default function ProjectMedia({ project, className, onReady, startTime }) {
+// `bleed` ({ width, height }) shows a cover picture whole at that size,
+// centred, instead of cropped to the box -- for the card transition's copy,
+// which is clipped from outside (see ExpandTransition).
+const bleedStyle = (bleed) =>
+  bleed && {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    width: bleed.width,
+    height: bleed.height,
+    marginLeft: -bleed.width / 2,
+    marginTop: -bleed.height / 2,
+    objectFit: "fill",
+  };
+
+export default function ProjectMedia({ project, className, onReady, startTime, bleed }) {
   const { media, panel } = project;
   // how the picture sits in the card (see Cover)
   const phone = typeof window !== "undefined" && window.matchMedia(PHONE_QUERY).matches;
@@ -321,9 +336,22 @@ export default function ProjectMedia({ project, className, onReady, startTime })
   }, [startTime]);
 
   return (
-    <Fill ref={fillRef} className={className} $panel={panel}>
+    <Fill
+      ref={fillRef}
+      className={className}
+      $panel={panel}
+      style={bleed ? { overflow: "visible" } : undefined}
+    >
       {media.type === "video" ? (
-        <CoverVideo src={media.src} autoPlay loop muted playsInline draggable={false} />
+        <CoverVideo
+          src={media.src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          draggable={false}
+          style={bleedStyle(bleed)}
+        />
       ) : media.type === "avocado" ? (
         // the live avocado: blinks, watches the cursor, jumps on hover
         <AvocadoStage>
@@ -349,6 +377,7 @@ export default function ProjectMedia({ project, className, onReady, startTime })
             $position={media.position}
             $fit={fit}
             data-fit={fit === "contain" ? "contain" : undefined}
+            style={fit === "contain" ? undefined : bleedStyle(bleed)}
           />
         </picture>
       )}
