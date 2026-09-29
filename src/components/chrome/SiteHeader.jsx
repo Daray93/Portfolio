@@ -15,6 +15,11 @@ import logo from "../../assets/shared/dp-logo.png";
 //                   view
 // A light/dark toggle sits at the far right at every size. Sits above the
 // full-screen menu so its buttons can close it.
+//
+// On a page that scrolls under it (a case study), `docked` makes it compact
+// and gives it a glass backing so text passing beneath doesn't show through
+// the logo; `current` marks a page as current when the URL isn't one of the
+// three (a case study belongs to Work).
 
 const DESKTOP = "(min-width: 1025px)";
 
@@ -76,6 +81,41 @@ const Bar = styled.header`
   @media (max-height: 520px) and (orientation: landscape) {
     padding: 8px 24px;
   }
+
+  ${({ $docked, theme }) =>
+    $docked &&
+    css`
+      padding: 14px 32px;
+      background: color-mix(in srgb, ${theme.body} 78%, transparent);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      backdrop-filter: blur(20px) saturate(1.4);
+      box-shadow: 0 1px 0 ${theme.mode === "dark" ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)"};
+      transition:
+        opacity ${dur.base}s ${ease.out},
+        transform ${dur.slow}s ${ease.out},
+        visibility 0s linear;
+
+      @media ${DESKTOP} {
+        padding: 14px 40px;
+      }
+
+      @media (max-width: 640px) {
+        padding: 10px 16px;
+      }
+
+      /* away, it isn't drawn at all once it has slid off -- nothing of it
+         over the cover while a card transition plays there */
+      ${({ $away }) =>
+        $away &&
+        css`
+          transform: translateY(-100%);
+          visibility: hidden;
+          transition:
+            opacity ${dur.base}s ${ease.out},
+            transform ${dur.slow}s ${ease.out},
+            visibility 0s linear ${dur.slow}s;
+        `}
+    `}
 `;
 
 // The logo's shape used as a mask, filled with the theme's text colour, so
@@ -266,8 +306,9 @@ const MenuButton = styled.button`
   }
 `;
 
-function PillNav({ hidden }) {
+function PillNav({ hidden, current: currentPath }) {
   const { pathname } = useLocation();
+  const here = currentPath ?? pathname;
   const { reduced } = useMotionPreference();
   const [hovered, setHovered] = useState(null);
   const slide = reduced
@@ -281,7 +322,7 @@ function PillNav({ hidden }) {
       onMouseLeave={() => setHovered(null)}
     >
       {PAGES.map((p) => {
-        const current = pathname === p.to;
+        const current = here === p.to;
         return (
           <Pill
             key={p.to}
@@ -325,14 +366,16 @@ export default function SiteHeader({
   onMenuToggle,
   overIntro = false,
   away = false,
+  current,
+  docked = false,
 }) {
   return (
-    <Bar $overIntro={overIntro} $away={away}>
+    <Bar $overIntro={overIntro} $away={away} $docked={docked}>
       <Logo to="/" aria-label="Dara Phillips, home">
         <span aria-hidden="true" />
       </Logo>
       <Controls>
-        <PillNav hidden={menuOpen} />
+        <PillNav hidden={menuOpen} current={current} />
         <ThemeToggle />
         <MenuButton
           type="button"

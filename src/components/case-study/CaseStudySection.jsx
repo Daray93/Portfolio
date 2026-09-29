@@ -50,6 +50,13 @@ const Title = styled.h2`
   }
 `;
 
+// the section's place in a numbered case study, before its title
+const SectionNumber = styled.span`
+  font-variant-numeric: tabular-nums;
+  color: ${({ theme }) => theme.text};
+  margin-right: 0.6em;
+`;
+
 // Separator under the heading
 const Separator = styled.div`
   width: 100%;
@@ -102,7 +109,8 @@ export default function CaseStudySection({
   tldrMedia,
   ...props
 }) {
-  const { view } = useCaseStudyView();
+  const { view, numberOf } = useCaseStudyView();
+  const number = numberOf?.(id);
 
   // TL;DR mode shortens every section rather than removing it -- the
   // overview/hero section (tldrVisible) is exempt since it's already
@@ -119,7 +127,12 @@ export default function CaseStudySection({
         <TitleWrapper>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <TitleSquare />
-            <Title>{title}</Title>
+            <Title>
+              <span>
+                {number && <SectionNumber>{number}</SectionNumber>}
+                {title}
+              </span>
+            </Title>
           </div>
           <Separator />
         </TitleWrapper>
