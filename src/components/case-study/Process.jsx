@@ -35,6 +35,14 @@ import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 //                                                set large, each linking to
 //                                                the sub-sections that answer
 //                                                it
+//   <Steps items={[{ title, body, inApp }]} />
+//                                               an ordered sequence as numbered
+//                                                cards, each with a bar showing
+//                                                how far along it sits
+//   <Sources items={[{ finding, cite, href, inApp }]} />
+//                                               published research: what it
+//                                                found, the paper (linked),
+//                                                and where the app follows it
 //   <Closing outcome learned next />          the page's last three parts
 
 // ---- Evidence or Hypothesis
@@ -617,5 +625,203 @@ export function Questions({ items }) {
         </Question>
       ))}
     </QuestionList>
+  );
+}
+
+// ---- published research
+const SourceList = styled.ol`
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+const Source = styled.li`
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid ${({ theme }) => theme.border};
+
+  &:last-child {
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+  }
+`;
+
+const Finding = styled.p`
+  margin: 0;
+  max-width: 65ch;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.text};
+
+  @media (max-width: 640px) {
+    font-size: 0.95rem;
+  }
+`;
+
+const SourceMeta = styled.div`
+  display: grid;
+  gap: 0.25rem;
+  max-width: 65ch;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.textSecondary};
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: ${({ theme }) => theme.border};
+    text-underline-offset: 0.2em;
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+
+  a:hover {
+    color: ${({ theme }) => theme.text};
+    text-decoration-color: currentColor;
+  }
+
+  a:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.text};
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  strong {
+    font-weight: 500;
+    color: ${({ theme }) => theme.text};
+  }
+`;
+
+export function Sources({ items }) {
+  return (
+    <SourceList>
+      {items.map(({ finding, cite, href, inApp }) => (
+        <Source key={cite}>
+          <Finding>{finding}</Finding>
+          <SourceMeta>
+            <span>
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {cite}
+              </a>
+            </span>
+            {inApp && (
+              <span>
+                <strong>In the app:</strong> {inApp}
+              </span>
+            )}
+          </SourceMeta>
+        </Source>
+      ))}
+    </SourceList>
+  );
+}
+
+// ---- an ordered sequence
+const StepGrid = styled.ol`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+`;
+
+const Step = styled.li`
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  background: ${({ theme }) => theme.cardInset};
+`;
+
+// how far through the sequence this step sits: a hairline track, filled
+// up to this step
+const Progress = styled.span`
+  position: relative;
+  display: block;
+  height: 3px;
+  margin-bottom: 0.4rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.border};
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: ${({ $fill }) => $fill}%;
+    border-radius: inherit;
+    background: ${({ theme }) => theme.text};
+  }
+`;
+
+const StepNumber = styled.span`
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: ${({ theme }) => theme.textSecondary};
+`;
+
+const StepTitle = styled.h4`
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: ${({ theme }) => theme.text};
+`;
+
+const StepBody = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.text};
+`;
+
+const StepApp = styled.p`
+  margin: auto 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px dashed ${({ theme }) => theme.border};
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: ${({ theme }) => theme.textSecondary};
+
+  strong {
+    font-weight: 500;
+    color: ${({ theme }) => theme.text};
+  }
+`;
+
+export function Steps({ items, appLabel = "In Cruciate" }) {
+  return (
+    <StepGrid>
+      {items.map(({ title, body, inApp }, i) => (
+        <Step key={title}>
+          <Progress $fill={((i + 1) / items.length) * 100} aria-hidden="true" />
+          <StepNumber>{String(i + 1).padStart(2, "0")}</StepNumber>
+          <StepTitle>{title}</StepTitle>
+          {body && <StepBody>{body}</StepBody>}
+          {inApp && (
+            <StepApp>
+              <strong>{appLabel}:</strong> {inApp}
+            </StepApp>
+          )}
+        </Step>
+      ))}
+    </StepGrid>
   );
 }

@@ -4,46 +4,48 @@ Branch: `redesign/showcase` (on GitHub), started from the `bento-version` tag. C
 
 The Bento version is saved in the `bento-version` tag on GitHub and in `Desktop/Portfolio/my-portfolio-BENTO-VERSION.zip`.
 
-**Start with to-do 1, the case study template.**
+**Start with "Cruciate: what's left" below.** Parked on 30 Sep 2026 with the page nearly done.
 
-## Current focus: the Cruciate case study only
+## Current focus: finishing the Cruciate case study
 
-Decided 29 Sep 2026: work on Cruciate alone until it's done, restructured to the eight-section plan in `CASE-STUDY-PLAN.md` (read its Cruciate section). The other case studies wait.
+Decided 29 Sep 2026: work on Cruciate alone until it's done. The other case studies wait.
 
-**Known so far (from Dara):**
-- Research done, beyond the personal injury story: physio advice, other ACL patients, a review of other rehab apps, and published rehab protocols.
-- The exercises and phases come from a mix of those sources.
-- Nobody else has tested it yet. Dara can get a physio (and people who've had ACL surgery) to review it.
-- The app was iterated in code with Claude Code; there are no sketches or Figma files from the time.
+### Where Cruciate stands (30 Sep 2026)
 
-**Honesty rule for artefacts:** don't present sketches or Figma made now as the original process. Real options instead:
-- the Cruciate repo's git history: earlier versions of key screens, before and after
-- design the Cross-Border onboarding step in sketches and Figma first, for real, before building it
-- any new Figma mapping labelled as done afterwards, to find gaps
+The page (`src/case-studies/cruciate/Cruciate.jsx`) follows the eight-section plan in `CASE-STUDY-PLAN.md`, about 1,300 words (roughly 8 minutes on the toggle), with a TL;DR for every section.
 
-**What Claude needs from Dara, most urgent first:**
+- **01 Overview:** what an ACL is, then what Cruciate is and Dara's role.
+- **02 The problem:** the real story (tag rugby, no insurance, told at the hospital it wasn't the ACL, a private MRI a month later, asking the GP for a referral, finding the Cross-Border Directive later), a stated problem, and the three "How might we" questions, which link to the challenges that answer them. The TL;DR repeats the questions.
+- **03 Research:** "I'm not a physio… Cruciate curates it into one place." 03.01 Reddit and Instagram: six priorities in recovery order, as step cards. 03.02 Curovate, the closest app. 03.03 where the exercises come from (Jeremy Burnham MD's guide, The [P]rehab Guys, Brigham and Women's protocol, as named in the app's migration 011). 03.04 seven papers, each checked on PubMed (details, DOI and abstract): Grant 2005, Shaarani 2013, Failla 2016, Shelbourne & Nitz 1990, Adams 2012, Ardern 2014, Grindem 2016. The page says they were checked before publishing, not that the exercises were chosen from them.
+- **04 Insights:** five rows, each marked Evidence or Hypothesis.
+- **05 Exploration:** from the app's git history and Claude Code session images. 05.01 the knee diagram's four versions (real images from 29 Sep sessions). 05.02 the symptom check and 05.03 the home screen: "after" screens in, "before" still placeholders.
+- **06 The solution:** four challenges, with 21 real screenshots across them.
+- **07 Validation:** not tested yet, not released because of legal concerns; five success criteria and the plan.
+- **08 Outcomes and learnings:** outcome, what I learned, next steps.
 
-*Unblocks the Research and Insights sections (a few lines each):*
-1. Physio advice: what did they tell you that shaped the app?
-2. Other ACL patients: where did you hear from them (Reddit, friends, forums), and what came up repeatedly?
-3. Other apps: which ones, and what did each get wrong or leave out?
-4. Protocols: which ones (hospital names are fine), and what did you take from them?
+Screenshots: cropped (status bar off), renamed and in `src/case-studies/cruciate/assets/screens`; Dara's originals are in `SideProjects/cruciate/design/screenshots/originals`. The ROM trend was retaken after deleting a mis-logged 13 Sep reading in Supabase.
 
-*A decision:* design the case study layout yourself first (Figma or a sketch) for Claude to build, or have Claude build a first version from the eight-section structure for you to react to?
+### Cruciate: what's left
 
-*Validation, over the next week or two:*
-5. Physio review with four set tasks: find today's exercises, log a range-of-motion reading, read the trend chart, respond to a red flag. Note what confused them and what they'd change, then change at least one thing and screenshot before and after. Claude can write a one-page session script for it.
-6. Optional but strong: two or three people who've had ACL surgery doing the same tasks.
+*From Dara:*
+1. **A locked exercise** screenshot for 06.04 (load clearance off in Profile, then Today's rehab in a phase with loaded exercises). The last missing screen.
+2. **The two old "before" screens** (optional): the always-visible red-flag checklist (commit `989e38c`) and the one long home screen (`a6f64cb`). Running old versions failed: sign-in returns to the live site. If they can't be got, turn 05.02 and 05.03 into short written notes with the current screen only.
+3. **Whether Dara uses the app themselves, and since when:** a line for Outcomes, if true.
+4. **Validation wording:** keep "a physio review" as the first planned step, or lead with people who've had ACL surgery? Dara said "without the physio interview for now" for Research.
+5. **Check the wording Claude wrote in Dara's voice:** the "why" of each Exploration iteration, the step-card explanations for "Reduce the swelling" and "Load it without fear", and "progress so slow it was hard to tell whether any of it was working" in the story.
 
-*Exploration:*
-7. The go-ahead to mine the Cruciate repo's git history for before-and-after screens, and its location (it isn't at `Desktop/cruciate`).
-8. Sketch and Figma the Cross-Border onboarding step before building it.
+*For Claude:*
+6. Wire in the locked-exercise screen, and resolve 05.02 and 05.03 either way.
+7. A full read in both modes (full and TL;DR) with Dara, desktop and phone, then commit.
 
-*For the page:*
-9. 6–10 phone screenshots of the current app: onboarding, today's rehab, a completed session, range-of-motion logging, the progress chart, history, the symptom check-in, a warning state and a locked exercise.
-10. Anything else that's true, such as whether you use it daily yourself, and for how long.
+*Ideas raised, not decided:*
+- **Home: "compared with last week" and a consistency measure.** Dara considered adding yesterday's reading and a day streak. Claude's advice: compare with last week or a 7-day average (daily readings are noisy), and use weekly consistency ("5 of 7 days") or a streak that forgives red-flag and rest days, since a plain streak punishes the pauses the safety design asks for. If built, sketch the options first: it would be real exploration from the time, for 05.
+- **Check-in readings on the trend chart:** the chart mixes careful session readings with "a rough guess is fine" check-in sliders. Worth separating or marking.
 
-Items 1–4 and the layout decision unblock the next session; the rest can come in as it's ready.
+### Tidy-up from 30 Sep
+
+- `SideProjects/cruciate-old` (a checkout of `989e38c` for the "before" screens): the server has stopped; the folder can be deleted.
+- Supabase Redirect URLs added for it (`http://192.168.1.26:5174/**`, `http://localhost:5174/**`), if Dara added them: remove.
 
 ## Where it stands
 
@@ -73,13 +75,9 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 ## To do, in order
 
-1. **Case study template.** Read `CASE-STUDY-PLAN.md` first: after interview feedback, every case study is being restructured to show process (problem → research → insights → exploration → solution → validation → outcomes), not a feature walkthrough. It has the shared eight-section structure, the components the template needs, a per-project mapping, and the questions Dara needs to answer for each. Below the cover, every case study still uses the old layout, and the title is repeated under the cover. Build the template with Cruciate first. Bring the new header and menu onto these pages.
-2. **Screenshots for Pints Yurt and Cruciate** (6–10 phone screens each, into a `screenshots` folder in each Desktop project folder). Then:
-   - build 16:9 and 4:5 mockup card images to replace the current cards
-   - fill the dashed image slots in both case studies
-3. **Case study copy gaps** (marked with brackets on the pages):
-   - Cruciate: the Why is written (personal story, then three "How might we" questions that map to Journey, Progress and a new Options section). Still to do: a Research section between Why and The journey, and Outcomes (not released publicly yet because of legal concerns; say so honestly, and suggest a private usability test or physio review for feedback). Options describes the Cross-Border Directive onboarding step, which isn't built yet: Dara is building it in `Desktop/cruciate` from `CROSS-BORDER-ONBOARDING.md` there. Don't publish Options until it's built and its two screenshots are in.
-   - Pints Yurt: real numbers (pubs, prices reported, users)
+1. **Finish Cruciate** (see "Cruciate: what's left" above). The shared template is built: `CaseStudySection`, and the process blocks in `src/components/case-study/Process.jsx` (`SubSection`, `Challenge`, `BeforeAfter`, `Insights`, `Criteria`, `Questions`, `Steps`, `Sources`, `Closing`). Rules for spacing, numbering (06.01) and TL;DRs are in `CASE-STUDY-PLAN.md`.
+2. **Then the other case studies** in the same structure: Pints Yurt, Operation Avocado, OrthoVive. Pints Yurt needs 6–10 phone screenshots and real numbers (pubs, prices reported, users). Then build 16:9 and 4:5 mockup card images for the carousel.
+3. **Covers for Operation Avocado and Pints Yurt.** Every cover now centres its title on phones, like Cruciate's, so these two need pictures with nothing important in the middle (the avocado and the phone fan sit there now). Dara is testing images. Operation Avocado's cover is the live 3D rig, not a picture. Pints Yurt: drop `fit: "contain"` for a picture that fills the frame.
 4. **MISE:** fold into the Operation Avocado case study as a "what I did differently the second time" section.
 5. **Homepage on tablets:** make more of the carousel and the space around it at tablet sizes (roughly 641–1024px, portrait and landscape). The card track should feel like the focus rather than a desktop layout scaled down: bigger cards, better use of the tall portrait screen, and check the pager, caption and footer positions around it. Decide the direction with Dara before building.
 6. **OrthoVive content.** The lock works (sign-in lasts until the browser closes, `src/firebase.js`), but the page's text and brief image ship in the public build (`dist/assets/OrthoVive-*.js`, `OrthoVive-Brief-*.png`), so the password only hides them. Decided: move the content into Firebase Storage `protected/orthovive/` (loaded after sign-in via `useProtectedAsset`), later; Claude prepares files and code, Dara uploads or approves the upload. Also decide whether OrthoVive leaves the carousel until the project has more work. Its card picture (`render.png`, 510×330) is soft full screen; a bigger render would help.
@@ -94,12 +92,16 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 - **Font:** Poppins only (400–700, self-hosted via @fontsource), set once as `--font-sans` in `src/styles/GlobalStyle.jsx`.
 - **Theme:** one theme for the whole site. Follows the visitor's device until they pick with the toggle; the pick is remembered in the browser. Set in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The transition's page-colour layer uses the current theme.
 - **Corners:** one radius scale for both themes (`radius` in `src/styles/theme.js`). Dark mode used to square off every corner; decided 30 Sep 2026 to use the light-mode radius in both.
+- **Case study cover on phones:** title and tagline centred on every cover; "Read the case study" is a glass pill at the bottom (like "Visit app"), 48px tall. The per-cover `coverCaption` option was removed.
+- **Case study numbering:** sections 01–08; a section's peer parts are numbered sub-sections (06.01), numbered from the section automatically; `Subheading` is never numbered.
+- **Case study honesty:** evidence or hypothesis on every insight; papers verified before they go on the page; screenshots are the real app with real data (fix bad data in the app, never edit the image).
+- **LinkedIn hover:** the whole label turns LinkedIn blue (text and icon), in the menu and on About.
 - **Cursor:** the normal system cursor. The custom glass cursor was removed for good. On the carousel, the focused card shows a small glass circle top right on hover (expand icon, or a padlock on OrthoVive), and glass arrow buttons at the screen edges move to the side cards.
 - **Buttons:** one outlined pill style, `src/components/chrome/pill.js` (menu email and LinkedIn, About's actions).
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing. Reduced motion follows the visitor's system setting only (live, in `MotionPreferenceContext.jsx`).
 - **Background:** "ambient" mode (`MODE` in `Backdrop.jsx`, dark theme only; light is the plain page colour). A card with a screenshot blurs its picture into the background; the others get two soft pools from `backdrop: [key, floor, base]` in `projects.js`. The key pool (upper left) sits behind the caption's white text, so it stays deep enough for 4.5:1; brighter colours go in the second pool. Operation Avocado's key is `#182b1c`.
 - **Card pictures:** Cruciate and Pints Yurt cards are 2x WebP renders of their SVGs (the SVGs are kept as sources). Scaling the SVGs' embedded screenshots and blurred shadows full screen made the transition stutter, so re-export the WebP when a card SVG changes.
-- **LinkedIn hover:** LinkedIn blue, `theme.linkedin` (`#0A66C2` on light, `#70B5F9` on dark). Used by the menu's LinkedIn link and the footer's "Get in touch."
+- **LinkedIn blue:** `theme.linkedin` (`#0A66C2` on light, `#70B5F9` on dark). Used by the menu's LinkedIn link, About's, and the footer's "Get in touch."
 - **Card size (desktop):** `--vw: 38vw`. The carousel's vertical position is `padding-block: 136px 132px` on `Stage` in `Showcase.jsx`.
 - **Header and footer on desktop:** 56px from the top and bottom, 88px from the sides. The intro screen's counter matches.
 - **Case study cover frame:** 24px margin (12px on phones), 20px corners (24px on phones), set in `src/components/showcase/coverFrame.js`. The transition and the cover both read it.

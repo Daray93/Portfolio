@@ -19,9 +19,29 @@ import {
   Closing,
   SubSection,
   Questions,
+  Sources,
+  Steps,
 } from "../../components/case-study/Process";
 import MoreWork from "../../components/case-study/MoreWork";
 import ViewToggle from "../../components/case-study/ViewToggle";
+import onboardingSurgery from "./assets/screens/onboarding-surgery.jpg?w=720&format=webp&quality=85";
+import todaysRehab from "./assets/screens/todays-rehab.jpg?w=720&format=webp&quality=85";
+import romTrend from "./assets/screens/rom-trend.jpg?w=720&format=webp&quality=85";
+import calendarScreen from "./assets/screens/calendar.jpg?w=720&format=webp&quality=85";
+import sessionCelebration from "./assets/screens/session-celebration.jpg?w=720&format=webp&quality=85";
+import romLogged from "./assets/screens/rom-logged.jpg?w=720&format=webp&quality=85";
+import checkinQ1 from "./assets/screens/checkin-q1.jpg?w=720&format=webp&quality=85";
+import checkinQ2 from "./assets/screens/checkin-q2.jpg?w=720&format=webp&quality=85";
+import checkinQ3 from "./assets/screens/checkin-q3.jpg?w=720&format=webp&quality=85";
+import romExtension from "./assets/screens/rom-extension.jpg?w=720&format=webp&quality=85";
+import romFlexion from "./assets/screens/rom-flexion.jpg?w=720&format=webp&quality=85";
+import homeScreen from "./assets/screens/home.jpg?w=720&format=webp&quality=85";
+import checkInComplete from "./assets/screens/check-in-complete.jpg?w=720&format=webp&quality=85";
+import phasesScreen from "./assets/screens/phases.jpg?w=720&format=webp&quality=85";
+import symptomsQuestion from "./assets/screens/symptoms-question.jpg?w=720&format=webp&quality=85";
+import symptomsWhich from "./assets/screens/symptoms-which.jpg?w=720&format=webp&quality=85";
+import symptomsPaused from "./assets/screens/symptoms-paused.jpg?w=720&format=webp&quality=85";
+import waiverScreen from "./assets/screens/waiver.jpg?w=720&format=webp&quality=85";
 import cbdQuestion from "./assets/screens/cbd-question-light.png?w=720&format=webp&quality=85";
 import kneeHinge from "./assets/process/knee-1-hinge.png?w=1200&format=webp&quality=85";
 import kneeFirst from "./assets/process/knee-2-first-illustration.png?w=1200&format=webp&quality=85";
@@ -97,32 +117,40 @@ export default function Cruciate() {
           tldr={
             <>
               <Paragraph>
-                After tearing my ACL, I found that recovery depends on guidance most people only get
-                from a physio. Without private care, I was left waiting for surgery without a plan,
-                without a clear sense of progress, and without knowing my options.
+                I tore my ACL playing tag rugby, with no health insurance, and had to find every next
+                step myself: the MRI, the referral, and later my treatment options. Recovery depends
+                on guidance most people only get from a physio. Without it, I was left without a
+                plan, without a clear sense of progress, and without knowing my options.
               </Paragraph>
               <Questions items={questions} />
             </>
           }
         >
-          <Paragraph>In 2026, I tore my ACL and meniscus.</Paragraph>
+          <Paragraph>In 2026, I tore my ACL playing tag rugby. I didn&apos;t have health insurance.</Paragraph>
           <Paragraph>
-            The diagnosis was clear. An X-ray and MRI showed exactly what was wrong. What came next
-            wasn&apos;t.
+            At the hospital, with a swollen knee, I had an X-ray and some manual tests, and was told
+            it wasn&apos;t my ACL.
           </Paragraph>
           <Paragraph>
-            The obvious answer is a physio. But without private health insurance, I faced a long
-            wait for surgery, and paying privately for regular physio across months of recovery adds
-            up fast. I was left with little guidance on how to prepare, what my options were, or
-            what to do in the meantime, and progress so slow it was hard to tell whether any of it
-            was working.
+            A month later, I paid for an MRI at a private clinic. The report showed I&apos;d fully
+            torn my ACL and damaged my meniscus.
           </Paragraph>
           <Paragraph>
-            Then I discovered the EU Cross-Border Healthcare Directive, which can allow Irish
-            patients to have treatment elsewhere in the EU and claim the cost back from the HSE.
+            Then nothing. The report didn&apos;t come with a next step. I went to my GP and asked for
+            a referral for surgery myself, and joined a long wait.
           </Paragraph>
           <Paragraph>
-            That made me realise the gap wasn&apos;t just access to surgery. It was everything around
+            The obvious answer is a physio. But paying privately for regular physio across months of
+            recovery adds up fast. I was left with little guidance on how to prepare or what to do in
+            the meantime, and progress so slow it was hard to tell whether any of it was working.
+          </Paragraph>
+          <Paragraph>
+            Only later did I find out about the EU Cross-Border Healthcare Directive, which can allow
+            Irish patients to have treatment elsewhere in the EU and claim the cost back from the HSE.
+          </Paragraph>
+          <Paragraph>
+            Every next step, I&apos;d had to find myself. That made me realise the gap wasn&apos;t
+            just access to surgery. It was everything around
             it: a plan to follow, guidance between appointments, and enough information to
             understand the options.
           </Paragraph>
@@ -142,155 +170,222 @@ export default function Cruciate() {
         <CaseStudySection
           id="research"
           title="Research"
-          tldr="Desk research and conversations rather than formal interviews: advice from a physio, other ACL patients, a review of other rehab apps, and published rehab protocols."
+          tldr="I'm not a physio, but ACL rehab is well documented, just scattered. People who'd been through surgery kept naming the same six priorities, in order: prehab, reducing the swelling, range of motion, walking properly, strength, and loading without fear. Curovate, the closest app, is a paid clinical programme that doesn't cover getting treatment. Seven published studies back the approach."
         >
           <Paragraph>
-            I didn&apos;t run formal interviews. The research came from four places, alongside my own
-            recovery.
+            I&apos;m not a physio. But ACL injuries are common, and their rehab is well documented.
+            The information exists. It&apos;s just scattered. Cruciate curates it into one place.
           </Paragraph>
-          <List>
-            <li>
-              <strong>Physio advice.</strong> [What they told you that shaped the app.]
-            </li>
-            <li>
-              <strong>Other ACL patients.</strong> [Where you heard from them, and what kept coming
-              up.]
-            </li>
-            <li>
-              <strong>Other rehab apps.</strong> [Which ones, and what each got wrong or left out.]
-            </li>
-            <li>
-              <strong>Published rehab protocols.</strong> The phases, the criteria for moving between
-              them and the exercise library all come from published ACL protocols. [Which ones.]
-            </li>
-          </List>
+
+          <SubSection number={1} title="People who've been through it">
+            <Paragraph>
+              On Reddit and Instagram, people who&apos;d had ACL surgery shared what got them back and
+              what they&apos;d do differently. Six things came up again and again, in the order
+              recovery happens:
+            </Paragraph>
+            <Steps
+              items={[
+                {
+                  title: "Do prehab",
+                  body: "Get the knee as strong and mobile as you can before surgery.",
+                  inApp: "a prehab track for the wait before surgery.",
+                },
+                {
+                  title: "Reduce the swelling",
+                  body: "Swelling holds everything else back, so it comes first.",
+                  inApp: "ankle pumps from day one, and controlled swelling as a milestone.",
+                },
+                {
+                  title: "Restore range of motion",
+                  body: "Straightening the knee fully (extension), then bending it (flexion).",
+                  inApp: "extension exercises first, and range of motion logged after sessions.",
+                },
+                {
+                  title: "Walk properly",
+                  body: "Heel to toe, with a normal gait and no limp.",
+                  inApp: "walking without a limp is a milestone before you move on.",
+                },
+                {
+                  title: "Build strength",
+                  body: "In the muscles around the knee, mostly the quads, to protect it.",
+                  inApp: "from quad sets to single-leg work, phase by phase.",
+                },
+                {
+                  title: "Load it without fear",
+                  body: "Trusting the knee again is as hard as strengthening it.",
+                  inApp: "load unlocked step by step, so you know when it's safe.",
+                },
+              ]}
+            />
+            <Paragraph>
+              None of it was new. It was just spread across posts and videos, in no order, with
+              nothing to say what to do today.
+            </Paragraph>
+          </SubSection>
+
+          <SubSection number={2} title="An existing app: Curovate">
+            <Paragraph>
+              Curovate, the closest app, is a full clinical programme built by a physical therapist,
+              and its phone-based range-of-motion measurement beats anything in Cruciate. But
+              it&apos;s a subscription ($12.99 a month), physio sessions cost extra, and it
+              doesn&apos;t cover how to get treatment. So Cruciate went narrower: free, a plan and a
+              tracker, plus the Irish treatment options.
+            </Paragraph>
+          </SubSection>
+
+          <SubSection number={3} title="Where the exercises come from">
+            <Paragraph>
+              Every exercise comes from published rehab guidance, adapted to Cruciate&apos;s nine
+              phases: Jeremy Burnham MD&apos;s phase-by-phase ACL rehab guide, The [P]rehab
+              Guys&apos; pre-surgery exercise guide, and Brigham and Women&apos;s Hospital&apos;s ACL
+              reconstruction protocol.
+            </Paragraph>
+          </SubSection>
+
+          <SubSection
+            number={4}
+            title="Checking the approach against the research"
+            summary="Before publishing, I checked the app's main decisions against published studies."
+          >
+            <Sources
+              items={[
+                {
+                  finding:
+                    "A structured home programme with few physio sessions got more people to acceptable range of motion in the first three months than standard physio.",
+                  cite: "Grant et al. (2005), American Journal of Sports Medicine",
+                  href: "https://doi.org/10.1177/0363546504273051",
+                  inApp: "a daily plan to follow at home.",
+                },
+                {
+                  finding:
+                    "Six weeks of prehab improved knee function, still there 12 weeks after surgery.",
+                  cite: "Shaarani et al. (2013), American Journal of Sports Medicine",
+                  href: "https://doi.org/10.1177/0363546513493594",
+                  inApp: "the prehab phases.",
+                },
+                {
+                  finding:
+                    "Extra prehab meant better function two years on, and more people back in sport (72% against 63%).",
+                  cite: "Failla et al. (2016), American Journal of Sports Medicine",
+                  href: "https://doi.org/10.1177/0363546516652594",
+                  inApp: "the prehab track.",
+                },
+                {
+                  finding:
+                    "Full extension from day one helps avoid stiffness and a lasting loss of extension.",
+                  cite: "Shelbourne & Nitz (1990), American Journal of Sports Medicine",
+                  href: "https://doi.org/10.1177/036354659001800313",
+                  inApp: "extension first, as the first milestone.",
+                },
+                {
+                  finding:
+                    "Move on when you meet measurable criteria, not after a set number of weeks.",
+                  cite: "Adams et al. (2012), Journal of Orthopaedic & Sports Physical Therapy",
+                  href: "https://doi.org/10.2519/jospt.2012.3871",
+                  inApp: "milestone check-ins.",
+                },
+                {
+                  finding:
+                    "Across 7,556 people, only 65% got back to their pre-injury level of sport. A positive psychological response helped.",
+                  cite: "Ardern et al. (2014), British Journal of Sports Medicine",
+                  href: "https://doi.org/10.1136/bjsports-2013-093398",
+                  inApp: "load unlocked step by step, and a last phase for confidence.",
+                },
+                {
+                  finding:
+                    "Reinjury risk roughly halved for each month return to sport was delayed, up to nine months.",
+                  cite: "Grindem et al. (2016), British Journal of Sports Medicine",
+                  href: "https://doi.org/10.1136/bjsports-2016-096031",
+                  inApp: "the app never clears you to play.",
+                },
+              ]}
+            />
+          </SubSection>
+
           <Paragraph>
-            <strong>Where more research is needed:</strong> nobody else has used the app yet, so
-            everything I learned about other people&apos;s recovery is second-hand. Validation below
-            sets out how that changes.
+            <strong>Where more research is needed:</strong> nobody else has used the app yet, and
+            what I learned about other people&apos;s recovery is second-hand. Validation below sets
+            out how that changes.
           </Paragraph>
         </CaseStudySection>
 
         <CaseStudySection
           id="insights"
           title="Insights"
-          tldr="Five insights shaped the design: people need today's step, not the whole protocol; progress is measured by milestones, not weeks; slow progress needs to be made visible; a self-guided app has to know when to stop you; and treatment options matter most at diagnosis."
+          tldr={
+            <>
+              <Paragraph>Five insights, each turned into a design decision:</Paragraph>
+              <List>
+                <li>
+                  <strong>People need today&apos;s step, not the whole protocol.</strong> A daily
+                  checklist inside a phase roadmap.
+                </li>
+                <li>
+                  <strong>People know what matters, but not the order, or when they&apos;re
+                  ready.</strong> Phases in recovery order, with milestone check-ins.
+                </li>
+                <li>
+                  <strong>Slow progress needs to be visible.</strong> Range-of-motion logging and
+                  trend charts.
+                </li>
+                <li>
+                  <strong>A self-guided app has to know when to stop you.</strong> A symptom check,
+                  and load unlocked only once you&apos;re cleared.
+                </li>
+                <li>
+                  <strong>Treatment options matter most at diagnosis.</strong> The Cross-Border
+                  Directive in onboarding.
+                </li>
+              </List>
+            </>
+          }
         >
           <Paragraph>
-            Each insight is marked as evidence, where it came from research or my own recovery, or
-            as a hypothesis, where it came from my own reasoning and still needs testing.
+            Each is marked evidence (from research or my own recovery) or hypothesis (my own
+            reasoning, still to test).
           </Paragraph>
           <Insights
             rows={[
               {
                 tag: "evidence",
                 source: "My own recovery",
-                finding: (
-                  <p>
-                    After diagnosis I had a surgery date and a long wait, but no plan for the weeks in
-                    between.
-                  </p>
-                ),
-                insight: (
-                  <p>
-                    People don&apos;t need the whole protocol at once. They need to know what to do
-                    today, and where it leads.
-                  </p>
-                ),
-                response: (
-                  <p>
-                    Recovery is built around the surgery date: a phase roadmap for the long view, and
-                    a checklist for today.
-                  </p>
-                ),
+                finding: <p>My MRI came with a diagnosis but no next step, and no plan for the wait.</p>,
+                insight: <p>People need today&apos;s step and where it leads, not the whole protocol.</p>,
+                response: <p>A phase roadmap for the long view, and a checklist for today.</p>,
               },
               {
                 tag: "evidence",
-                source: "Published rehab protocols",
+                source: "Reddit and Instagram, the clinical guides, Adams et al. (2012)",
                 finding: (
-                  <p>
-                    Protocols move you on when you meet criteria, like flexion past 120° or a straight
-                    leg raise with no lag, not after a set number of weeks.
-                  </p>
+                  <p>People agree on what matters, and protocols move you on by milestones, not weeks.</p>
                 ),
-                insight: (
-                  <p>
-                    Progress in rehab means meeting milestones, so people need a way to measure
-                    themselves against them.
-                  </p>
-                ),
-                response: (
-                  <p>
-                    Range-of-motion logging, and milestone check-ins that ask the protocol&apos;s own
-                    questions before you move phase.
-                  </p>
-                ),
+                insight: <p>What&apos;s missing is the order, and a way to know when you&apos;re ready.</p>,
+                response: <p>Phases in recovery order, with milestone check-ins to move on.</p>,
               },
               {
                 tag: "hypothesis",
-                source: "[Other ACL patients, if they backed this up]",
-                finding: (
-                  <p>
-                    Knee range of motion improves by a few degrees at a time, too slowly to notice
-                    day to day.
-                  </p>
-                ),
-                insight: (
-                  <p>
-                    When progress is invisible, motivation fades, and repetitive exercises are the
-                    first thing to go.
-                  </p>
-                ),
-                response: (
-                  <p>
-                    Trend charts, a comparison with your last reading after each session, a session
-                    history, and a moment of celebration when you log a session.
-                  </p>
-                ),
+                source: "My own recovery",
+                finding: <p>Range of motion improves a few degrees at a time, too slowly to notice.</p>,
+                insight: <p>When progress is invisible, motivation fades.</p>,
+                response: <p>Range-of-motion logging, trend charts and a session history.</p>,
               },
               {
                 tag: "hypothesis",
-                source: "[Physio advice, if it backed this up]",
+                source: "My own reasoning",
                 finding: (
-                  <p>
-                    After surgery, some symptoms mean stop and call your care team, and loaded
-                    exercises are only safe once you&apos;re cleared for them.
-                  </p>
+                  <p>Some symptoms after surgery mean stop, and load is only safe once you&apos;re cleared.</p>
                 ),
-                insight: (
-                  <p>
-                    A self-guided app has to know when to say no. It supports clinical advice, it
-                    can&apos;t replace it.
-                  </p>
-                ),
+                insight: <p>A self-guided app has to know when to say no.</p>,
                 response: (
-                  <p>
-                    A symptom check before each session, loaded exercises locked until you&apos;re
-                    cleared, and a waiver before you start.
-                  </p>
+                  <p>A symptom check before each session, and load locked until you&apos;re cleared.</p>
                 ),
               },
               {
                 tag: "evidence",
                 source: "My own recovery",
-                finding: (
-                  <p>
-                    I only found out about the Cross-Border Healthcare Directive after I&apos;d
-                    already started waiting.
-                  </p>
-                ),
-                insight: (
-                  <p>
-                    Treatment options matter most at diagnosis, when the wait begins, not months
-                    later.
-                  </p>
-                ),
-                response: (
-                  <p>
-                    One onboarding question about the Directive, and a plain-English explainer that
-                    links to the HSE&apos;s own page.
-                  </p>
-                ),
+                finding: <p>I only found the Cross-Border Directive after I&apos;d started waiting.</p>,
+                insight: <p>Treatment options matter most at diagnosis.</p>,
+                response: <p>One onboarding question, and an explainer linking to the HSE.</p>,
               },
             ]}
           />
@@ -299,19 +394,16 @@ export default function Cruciate() {
         <CaseStudySection
           id="exploration"
           title="Exploration"
-          tldr="Cruciate was designed in code, so its version history shows the real iterations: range of motion moved from number inputs to sliders with a live knee diagram, the symptom checklist became a single question, and one long home screen split into tabs."
+          tldr="Designed in code, so the version history shows the real iterations: the knee diagram went from a stick figure to an illustrated body, the symptom checklist became one question, and one long home screen split into tabs."
         >
           <Paragraph>
-            I designed Cruciate in code, iterating with Claude Code, so there are no sketches from
-            the time. The app&apos;s version history shows the real iterations instead. Three changed
-            the design the most.
+            I designed Cruciate in code, so there are no sketches from the time. Its version history
+            shows the real iterations instead.
           </Paragraph>
           <SubSection number={1} title="The knee diagram">
             <Paragraph>
-              The first version of range-of-motion logging asked for two plain numbers, with nothing
-              to show what they meant. It became two sliders limited to realistic clinical ranges,
-              each with a knee diagram that bends as you drag, positioned the way you take the
-              reading. The diagram went through four versions.
+              Range of motion started as two plain number inputs. It became sliders with a knee
+              diagram that bends as you drag, and the diagram went through four versions.
             </Paragraph>
             <Figures columns={2} phoneColumns={1}>
               <Figure
@@ -340,22 +432,22 @@ export default function Cruciate() {
               />
             </Figures>
             <Paragraph>
-              Building it exposed a real error. The chart treated a higher extension number as
-              better, but extension is measured as a deficit: 0° means fully straight, which is the
-              goal. The chart now flips that line, so up means better on both.
+              Building it exposed a real error: the chart treated a higher extension number as
+              better, but 0° (fully straight) is the goal. The chart now flips that line.
             </Paragraph>
           </SubSection>
           <BeforeAfter
             number={2}
             title="The symptom check"
             before="Always-visible red-flag checklist: add screenshot"
-            after="One yes/no question: add screenshot"
+            after={{
+              src: symptomsQuestion,
+              alt: "Today's rehab opens with one question: any symptoms today?",
+            }}
             note={
               <p>
-                The red-flag checklist was always on screen above the exercises. It became one
-                question, &ldquo;Any symptoms today?&rdquo;, and the list only appears if the answer
-                is yes. On most days the answer is no, and the check no longer stands between you and
-                your exercises.
+                The always-visible red-flag checklist became one question. The list only appears if
+                you answer yes, so on most days it&apos;s out of the way.
               </p>
             }
           />
@@ -363,71 +455,101 @@ export default function Cruciate() {
             number={3}
             title="The home screen"
             before="One long scrolling home: add screenshot"
-            after="Home with the phase card: add screenshot"
+            after={{
+              src: homeScreen,
+              alt: "Home: complete today's rehab, then the current phase and what it takes to move on",
+            }}
             note={
               <p>
-                Everything started on one long scrolling screen. It split into separate screens,
-                then a tab bar: Home, Phases, Progress and Settings. Home now leads with where you
-                are: your phase, how close you are to the next one, and the button to start
-                today&apos;s rehab, above the fold.
+                One long scrolling screen split into four tabs. Home now leads with your phase, how
+                close you are to the next, and today&apos;s rehab.
               </p>
             }
           />
-          <SubSection number={4} title="Also dropped">
-            <List>
-              <li>
-                <strong>Weight, reps and effort inputs on every exercise.</strong> Replaced by ticking
-                exercises off, with timers for holds.
-              </li>
-              <li>
-                <strong>A button to override a failed milestone check-in.</strong> Replaced by a
-                single Continue. You can still change phase from the Phases tab, as a deliberate
-                choice.
-              </li>
-              <li>
-                <strong>A daily &ldquo;cleared for loading&rdquo; checkbox.</strong> Clearance comes
-                from your surgeon or physio once, not every day, so it moved to your profile.
-              </li>
-            </List>
-          </SubSection>
         </CaseStudySection>
 
         <CaseStudySection
           id="solution"
           title="The solution"
-          tldr="Four design challenges: making a long recovery feel manageable, turning a rehab plan into a daily action, making gradual progress visible, and designing for safety when there's no clinician in the room."
+          tldr={
+            <>
+              <List>
+                <li>
+                  <strong>A long recovery made manageable (06.01):</strong> onboarding sets your
+                  timeline, and Home shows your phase and what it takes to move on.
+                </li>
+                <li>
+                  <strong>A plan turned into a daily action (06.02):</strong> today&apos;s exercises
+                  as a checklist, with timers for holds.
+                </li>
+                <li>
+                  <strong>Progress made visible (06.03):</strong> range-of-motion logging and trend
+                  charts.
+                </li>
+                <li>
+                  <strong>Safety without a clinician (06.04):</strong> a symptom check before every
+                  session, and load unlocked only once you&apos;re cleared.
+                </li>
+              </List>
+              <Figures columns={4}>
+                <Figure src={homeScreen} alt="Home: today's rehab, and the current phase" caption="Home" />
+                <Figure
+                  src={todaysRehab}
+                  alt="Today's rehab: each exercise with sets to tick off or a hold timer"
+                  caption="Today's rehab"
+                />
+                <Figure
+                  src={romTrend}
+                  alt="Range-of-motion trend: extension and flexion both improved over six weeks"
+                  caption="Progress"
+                />
+                <Figure
+                  src={symptomsQuestion}
+                  alt="Any symptoms today? No or yes"
+                  caption="The symptom check"
+                />
+              </Figures>
+            </>
+          }
         >
           <Challenge
             number={1}
             title="Making a long recovery feel manageable"
             summary="A recovery of nine months or more, broken into phases you can see the end of."
-            tag="evidence"
-            insight={<p>People need today&apos;s step and where it leads, not the whole protocol.</p>}
             work={
-              <>
-                <p>
-                  Onboarding asks where you are: waiting for surgery, or recovering from it. That
-                  puts you on one of two tracks, four prehab phases before surgery or five rehab
-                  phases after, and your surgery date sets the weeks since.
-                </p>
-                <p>
-                  Home shows your current phase, how far through it you are, and what you need to
-                  do to move on. The Phases tab is the roadmap: every phase, its exercises and
-                  equipment, and where you are on it.
-                </p>
-              </>
+              <p>
+                Onboarding puts you on a prehab or rehab track, timed from your surgery date. Home
+                shows your phase and what it takes to move on, and the Phases tab is the roadmap.
+              </p>
             }
           >
-            <MediaRow>
-              <MediaPlaceholder>Onboarding: add screenshot</MediaPlaceholder>
-              <MediaPlaceholder>Home and the Phases roadmap: add screenshot</MediaPlaceholder>
-            </MediaRow>
+            <Figures columns={4}>
+              <Figure
+                src={onboardingSurgery}
+                alt="Onboarding: is surgery on the calendar? Scheduled, still deciding or no date yet, with a date picker"
+                caption="Onboarding sets the timeline"
+              />
+              <Figure
+                src={checkInComplete}
+                alt="Check-in complete: you're starting at Phase 1, ROM restoration, with what it takes to move on"
+                caption="A check-in places you in a phase"
+              />
+              <Figure
+                src={homeScreen}
+                alt="Home: complete today's rehab, then the current phase with its milestones, days until surgery, weeks since injury, and what it takes to move on"
+                caption="Home: where you are, and what's next"
+              />
+              <Figure
+                src={phasesScreen}
+                alt="The Phases tab: a roadmap of four prehab phases, each with its goal to move on"
+                caption="The roadmap, phase by phase"
+              />
+            </Figures>
             <Subheading>Your options, from day one</Subheading>
             <Paragraph>
-              Before surgery, onboarding asks one more question: have you heard of the Cross-Border
-              Healthcare Directive? If not, a short explainer follows, with the National Treatment
-              Purchase Fund as a second option. The app links to the HSE and NTPF&apos;s own pages
-              rather than giving advice itself, and it stays available from your profile.
+              Before surgery, onboarding asks whether you&apos;ve heard of the Cross-Border
+              Healthcare Directive. If not, it explains it and the NTPF, linking to the official
+              pages rather than giving advice.
             </Paragraph>
             <Figures columns={2}>
               <Figure
@@ -447,91 +569,136 @@ export default function Cruciate() {
             number={2}
             title="Turning a rehab plan into a daily action"
             summary="Open the app, do today's exercises, log them, done."
-            tag="evidence"
-            insight={<p>A plan only helps if it tells you what to do today.</p>}
             work={
-              <>
-                <p>
-                  Today&apos;s rehab starts with a quick symptom check, then lists the phase&apos;s
-                  exercises in one stack, mobility and strength. Each has instructions and cues, and
-                  holds like quad sets get a built-in timer. Tick them off one by one or mark them
-                  all done.
-                </p>
-                <p>
-                  Logging the session is marked with a short celebration, then leads straight into a
-                  range-of-motion check.
-                </p>
-              </>
+              <p>
+                A quick symptom check, then the phase&apos;s exercises in one list, with cues and
+                timers for holds. Logging the session ends with a short celebration and a
+                range-of-motion check.
+              </p>
             }
           >
-            <MediaRow>
-              <MediaPlaceholder>Today&apos;s rehab: add screenshot</MediaPlaceholder>
-              <MediaPlaceholder>Completed session: add screenshot</MediaPlaceholder>
-            </MediaRow>
+            <Figures columns={3}>
+              <Figure
+                src={todaysRehab}
+                alt="Today's rehab: no symptoms today, 0 of 9 complete, each exercise with sets to tick off or a hold timer, Mark all done, and Log session"
+                caption="Today's exercises: tick sets off, or time the holds"
+              />
+              <Figure
+                src={sessionCelebration}
+                alt="Logging the session: a full-card celebration reading Consistency wins!"
+                caption="Logging the session is celebrated"
+              />
+              <Figure
+                src={romLogged}
+                alt="Range of motion logged, with a link to your progress and a prompt: ready to check your progress? Answer a quick check-in to see if you're ready to advance"
+                caption="Then a reading, and a nudge to check in"
+              />
+            </Figures>
           </Challenge>
 
           <Challenge
             number={3}
             title="Making gradual progress visible"
             summary="A few degrees a week is real progress, if you can see it."
-            tag="hypothesis"
-            insight={<p>When progress is invisible, motivation fades.</p>}
             work={
-              <>
-                <p>
-                  Range of motion is the number that matters most, so it gets its own flow. Sliders
-                  with a live knee diagram show how to take each reading, and the result is compared
-                  with your last one straight away.
-                </p>
-                <p>
-                  Trend charts show extension and flexion over time, both drawn so up means better.
-                  A calendar and history keep a record of every session.
-                </p>
-              </>
+              <p>
+                Sliders with a live knee diagram show how to take each reading. Progress opens in
+                plain words (&ldquo;Flexion has improved 15° since 6 weeks ago&rdquo;), then charts
+                where up always means better, and a calendar of every session.
+              </p>
             }
           >
-            <MediaRow>
-              <MediaPlaceholder>Range-of-motion logging: add screenshot</MediaPlaceholder>
-              <MediaPlaceholder>Progress chart: add screenshot</MediaPlaceholder>
-              <MediaPlaceholder>History: add screenshot</MediaPlaceholder>
-            </MediaRow>
+            <Figures columns={4}>
+              <Figure
+                src={romExtension}
+                alt="How much can you straighten your knee right now? An illustration lying flat above a slider reading 0 degrees from straight"
+                caption="Logging extension: lying flat, in degrees from straight"
+              />
+              <Figure
+                src={romFlexion}
+                alt="How far can you bend your knee right now? An illustration of a heel slide above a slider reading 120 degrees bend"
+                caption="Logging flexion: the diagram bends with the slider"
+              />
+              <Figure
+                src={romTrend}
+                alt="Range-of-motion trend: extension has improved 4 degrees and flexion 15 degrees since six weeks ago, with a chart for each where up means better"
+                caption="Progress in plain words, then the trend"
+              />
+              <Figure
+                src={calendarScreen}
+                alt="A calendar of the month: rounds done each day, missed days, and today's round in progress"
+                caption="Every session, day by day"
+              />
+            </Figures>
+            <Subheading>Knowing when you&apos;re ready</Subheading>
+            <Paragraph>
+              Progress also means knowing when to move on. A milestone check-in asks the
+              phase&apos;s own criteria, one question at a time, and explains what counts, so a
+              yes means something.
+            </Paragraph>
+            <Figures columns={3}>
+              <Figure
+                src={checkinQ1}
+                alt="Milestone check-in, question 1 of 3: can you do a straight leg raise without lag? With an explanation of what lag looks like"
+                caption="1. A straight leg raise, without lag"
+              />
+              <Figure
+                src={checkinQ2}
+                alt="Question 2 of 3: can you hold a quad set for 10 seconds with a visible contraction? With what visible means"
+                caption="2. A 10-second quad set"
+              />
+              <Figure
+                src={checkinQ3}
+                alt="Question 3 of 3: does your swelling stay controlled during and after these exercises?"
+                caption="3. Swelling that stays controlled"
+              />
+            </Figures>
           </Challenge>
 
           <Challenge
             number={4}
             title="Designing for safety without a clinician in the room"
             summary="An app giving exercises after surgery has to be careful about when it says yes."
-            tag="hypothesis"
-            insight={<p>A self-guided app supports clinical advice. It can&apos;t replace it.</p>}
             work={
-              <>
-                <p>
-                  You read and agree to a waiver before you start. Each session begins with
-                  &ldquo;Any symptoms today?&rdquo; Flag something concerning, such as chest pain or
-                  a wound that looks infected, and that day&apos;s exercises pause with a prompt to
-                  contact your care team.
-                </p>
-                <p>
-                  Loaded exercises stay locked until you mark yourself cleared in your profile, with
-                  a link there from the locked exercise. Milestone check-ins ask the protocol&apos;s
-                  own questions before you move on, and the last phase says plainly that the app
-                  doesn&apos;t clear you to play: that call is your surgeon&apos;s or physio&apos;s.
-                </p>
-              </>
+              <p>
+                A waiver before you start, and &ldquo;Any symptoms today?&rdquo; before every
+                session: a red flag pauses the day. Loaded exercises stay locked until you&apos;re
+                cleared, and the app never clears you to play. That&apos;s your surgeon&apos;s call.
+              </p>
             }
           >
-            <MediaRow>
-              <MediaPlaceholder>Symptom check-in: add screenshot</MediaPlaceholder>
-              <MediaPlaceholder>Red-flag warning: add screenshot</MediaPlaceholder>
+            <Figures columns={3}>
+              <Figure
+                src={symptomsQuestion}
+                alt="Today's rehab opens with one question: any symptoms today? No or yes"
+                caption="1. One question before each session"
+              />
+              <Figure
+                src={symptomsWhich}
+                alt="Which of these? Fever, calf pain or swelling, chest pain or shortness of breath, sudden severe pain, a wound that's red, warm, swollen or draining, can't bear weight"
+                caption="2. The list, only if you answer yes"
+              />
+              <Figure
+                src={symptomsPaused}
+                alt="Contact your care team before continuing: today's exercises are paused"
+                caption="3. A red flag pauses the day"
+              />
+            </Figures>
+            <Figures columns={3}>
+              <Figure
+                src={waiverScreen}
+                alt="Before you start: Cruciate is a self-tracking tool, not medical care, with a waiver to agree to"
+                caption="A waiver before you start"
+              />
               <MediaPlaceholder>Locked exercise: add screenshot</MediaPlaceholder>
-            </MediaRow>
+            </Figures>
           </Challenge>
         </CaseStudySection>
 
         <CaseStudySection
           id="validation"
           title="Validation"
-          tldr="Not tested with other people yet: Cruciate isn't released publicly because of legal concerns. A physio review with four set tasks comes first, then people who've had ACL surgery."
+          tldr="Not tested with anyone else yet, and not released publicly because of legal concerns. Five success criteria are set: a physio review comes first, then people who've had ACL surgery."
         >
           <Paragraph>
             Cruciate isn&apos;t released publicly yet, because of legal concerns about giving
@@ -576,7 +743,7 @@ export default function Cruciate() {
         <CaseStudySection
           id="outcomes"
           title="Outcomes and learnings"
-          tldr="A working app, not yet released. Designing in code surfaced a real logic error a mockup wouldn't have, but left no record of the alternatives. Next: the physio review, then patient testing."
+          tldr="A working app, not yet released publicly. Designing in code caught a real error a mockup wouldn't have, but left no record of the alternatives. Next: a physio review, testing with people who've had ACL surgery, and a legal review before release."
         >
           <Closing
             outcome={

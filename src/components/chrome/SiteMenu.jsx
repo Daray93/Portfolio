@@ -122,8 +122,17 @@ const Row = styled.div`
   }
 `;
 
+// LinkedIn blue on hover, text and icon together (the icon follows the
+// text colour). Tripled to outrank the pill's own hover colour
 const Social = styled.a`
-  &:hover svg {
+  &&& {
+    transition:
+      color ${dur.fast}s ${ease.out},
+      border-color ${dur.fast}s ${ease.out},
+      background-color ${dur.fast}s ${ease.out};
+  }
+
+  &&&:hover {
     color: ${({ theme }) => theme.linkedin};
   }
 `;
