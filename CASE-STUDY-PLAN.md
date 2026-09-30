@@ -36,6 +36,53 @@ Every case study uses these sections in this order. A smaller project can merge 
 
 Then next/previous project links and the contact footer.
 
+### Consistency rules (every case study)
+
+Every case study is built from the same shared pieces, in the same order, so spacing and type match without any page setting its own. If a page needs something these don't cover, add it to the shared components, not to the page.
+
+**Page order**
+
+1. The cover (`ProjectCover`, automatic for projects in `projects.js`)
+2. The TL;DR / Full length toggle (`ViewToggle`)
+3. Numbered sections (`CaseStudySection`, with `numbered` on `CaseStudyLayout`), starting with **Overview**: a short paragraph, then the `Facts` row (Role, Year, Sector, Team, Tools)
+4. The live app link (`LiveLink`) at the end of the last section, if there is one
+5. More work (`MoreWork`)
+
+**Components to use** (from `components/case-study/`)
+
+| For | Use |
+| --- | --- |
+| Body text | `Paragraph` |
+| Lists | `List` |
+| A heading inside a section | `Subheading` |
+| A worked example or key point | `Callout` |
+| Project facts | `Facts` |
+| A screenshot, image or video (click an image to see it large) | `Figure` (`size="phone"` or `"wide"`, or `video`) |
+| Screenshots side by side | `Figures` (`columns={2}` or `3`; two across on phones) |
+| A stand-in for a screen not captured yet | `MediaPlaceholder`, in a `MediaRow` |
+| The live app | `LiveLink` |
+
+Not on the page: tag pills (the facts row replaces them), the old `CaseStudyHero` (the cover already shows the title), or page-local styled text.
+
+**Every section has a `tldr`**: a one or two sentence summary, shown in TL;DR mode. Without one, TL;DR mode shows a placeholder. Only Overview is exempt (`tldrVisible`).
+
+**Spacing and type** (set once, in the shared components; don't override on a page)
+
+| | Desktop | Phones |
+| --- | --- | --- |
+| Cover to first section, and last section to More work (`--cover-gap`) | 8rem (7rem up to 1100px) | 6rem |
+| Toggle to Overview | 3rem | 2.75rem |
+| Between sections | 6rem | 4rem |
+| Section heading to its content | 1.75rem | 1.25rem |
+| Between paragraphs and blocks in a section | 1.25rem | 1rem |
+| Section heading | ~2rem, weight 600, normal case, number above | 1.6rem, weight 500 |
+| Subheading | 1.15rem, weight 600 | same |
+| Body text | 1.05rem | 1rem |
+| Side margins | 3rem (2rem up to 1100px) | 1rem |
+| Divider line above each section | yes | no |
+
+**Motion:** every section fades in once as it scrolls into view (an 8px lift, 0.6s), from `CaseStudySection`; nothing moves with reduced motion.
+
 ### Writing style: short, labelled chunks
 
 Borrowed from a strong reference case study (a design-system role at Fresha): keep the eight-section structure, but write every section in short, labelled chunks a hiring manager can skim in a minute, not long paragraphs. Its format alone isn't enough for us: it has no problem, research, insight or validation, and its outcomes are unevidenced claims. So it's the style, inside our structure.

@@ -4,18 +4,23 @@ import styled from "styled-components";
 // a live-site link, and clearly labelled stand-ins for screens that haven't
 // been captured yet.
 
+// body text: a touch smaller on phones, for more words to a line
 export const Paragraph = styled.p`
   font-size: 1.05rem;
   line-height: 1.6;
   margin: 0;
   max-width: 65ch;
   color: ${({ theme }) => theme.text};
+
+  @media (max-width: 640px) {
+    font-size: 1rem;
+  }
 `;
 
 // a heading within a section (the section's own title is the h2)
 export const Subheading = styled.h3`
-  margin: 0.75rem 0 0;
-  font-size: 1.2rem;
+  margin: 1rem 0 0;
+  font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -39,16 +44,15 @@ const FactsList = styled.dl`
   }
 
   dt {
-    margin: 0 0 0.35rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    margin: 0 0 0.3rem;
+    font-size: 0.85rem;
     color: ${({ theme }) => theme.textSecondary};
   }
 
   dd {
     margin: 0;
     font-size: 1rem;
+    font-weight: 500;
     line-height: 1.45;
     color: ${({ theme }) => theme.text};
   }
@@ -79,6 +83,10 @@ export const List = styled.ul`
 
   strong {
     font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 1rem;
   }
 `;
 
@@ -126,6 +134,14 @@ export const LiveLink = styled.a`
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.text};
     outline-offset: 3px;
+  }
+
+  /* phones: a full-width button, easy to hit with a thumb */
+  @media (max-width: 640px) {
+    align-self: stretch;
+    width: 100%;
+    justify-content: center;
+    padding: 0.9rem 1.2rem;
   }
 `;
 

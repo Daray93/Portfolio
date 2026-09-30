@@ -3,14 +3,14 @@ import { CaseStudyLayout, CaseStudyPage, CaseStudySection } from "../../componen
 import {
   Paragraph,
   List,
-  PillRow,
-  Pill,
+  Facts,
   Callout,
   LiveLink,
   MediaPlaceholder,
   MediaRow,
 } from "../../components/case-study/Prose";
-import OtherProjects from "../../components/shared/OtherProjects";
+import MoreWork from "../../components/case-study/MoreWork";
+import ViewToggle from "../../components/case-study/ViewToggle";
 
 // Draft: written from the project's own product brief (Plan.txt) and what
 // the shipped app does. Screens and real numbers still to add.
@@ -18,6 +18,7 @@ import OtherProjects from "../../components/shared/OtherProjects";
 export default function PintsYurt() {
   return (
     <CaseStudyLayout
+      numbered
       sections={[
         { id: "overview", label: "Overview" },
         { id: "question", label: "The question" },
@@ -28,23 +29,30 @@ export default function PintsYurt() {
       ]}
     >
       <CaseStudyPage>
+        <ViewToggle />
+
         <CaseStudySection id="overview" title="Overview" tldrVisible>
           <Paragraph>
             Pints Yurt is a community-powered map of pint prices across Limerick. Open it and the
             cheapest pints nearby are right there on the map, reported and confirmed by the people
             drinking them.
           </Paragraph>
-          <PillRow>
-            <Pill>Product design</Pill>
-            <Pill>Mobile-first web app</Pill>
-            <Pill>React + TypeScript</Pill>
-            <Pill>Firebase</Pill>
-            <Pill>Maps</Pill>
-            <Pill>Claude Code</Pill>
-          </PillRow>
+          <Facts
+            items={[
+              ["Role", "Design & Development"],
+              ["Year", "2026"],
+              ["Sector", "Consumer, hospitality"],
+              ["Team", "Solo"],
+              ["Tools", "React, TypeScript, Firebase, Mapbox, Claude Code"],
+            ]}
+          />
         </CaseStudySection>
 
-        <CaseStudySection id="question" title="The question" tldrVisible>
+        <CaseStudySection
+          id="question"
+          title="The question"
+          tldr="One question drives the product: where's the cheapest pint near me? Two targets came before any design: find it in under 5 seconds, and report a price in under 10."
+        >
           <Paragraph>
             The whole product answers one question: where can I get the cheapest pint near me? The
             person asking is usually already out, or deciding where to go, with a phone in one hand.
@@ -61,7 +69,11 @@ export default function PintsYurt() {
           </List>
         </CaseStudySection>
 
-        <CaseStudySection id="principles" title="Principles">
+        <CaseStudySection
+          id="principles"
+          title="Principles"
+          tldr="Price first, map first, community verified, prices that show their age, and browsing without signing in."
+        >
           <List>
             <li>
               <strong>Price first.</strong> The price is the headline everywhere, not the pub name.
@@ -88,7 +100,11 @@ export default function PintsYurt() {
           </MediaRow>
         </CaseStudySection>
 
-        <CaseStudySection id="price" title="Community price">
+        <CaseStudySection
+          id="price"
+          title="Community price"
+          tldr="Each pub's price is worked out from all its reports, weighted by how recent they are, how many agree and how far out an odd one sits, so one bad report can't move it."
+        >
           <Paragraph>
             Crowdsourced data only works if one bad report can't wreck it. Each pub&apos;s displayed
             price is a community price, calculated from all of its reports and weighted by how recent
@@ -105,7 +121,11 @@ export default function PintsYurt() {
           <MediaPlaceholder>Price submission flow: add screenshots</MediaPlaceholder>
         </CaseStudySection>
 
-        <CaseStudySection id="build" title="Building it">
+        <CaseStudySection
+          id="build"
+          title="Building it"
+          tldr="Planned before any code, then built with Claude Code in sprints, with trust and moderation early. It grew around nights out: votes, live music, how-busy reports, pub lists and games."
+        >
           <Paragraph>
             I planned the product and UX before any code, then built it with Claude Code in sprints:
             foundation, the map, prices, discovery, trust and moderation, and polish. Trust came early. Pubs added by
@@ -124,7 +144,11 @@ export default function PintsYurt() {
           </MediaRow>
         </CaseStudySection>
 
-        <CaseStudySection id="outcomes" title="Outcomes">
+        <CaseStudySection
+          id="outcomes"
+          title="Outcomes"
+          tldr="Real numbers still to add: pubs listed, prices reported and people using it."
+        >
           <Callout>
             [Add real numbers: pubs listed, prices reported, people using it, and anything you learned
             from how they used it.]
@@ -135,7 +159,7 @@ export default function PintsYurt() {
         </CaseStudySection>
       </CaseStudyPage>
 
-      <OtherProjects currentProjectId="pints-yurt" />
+      <MoreWork currentProjectId="pints-yurt" />
     </CaseStudyLayout>
   );
 }

@@ -28,22 +28,26 @@ const Shell = styled.div`
 `;
 
 // max-width caps the whole column -- text, images, and captions alike --
-// at one comfortable reading measure. Top padding clears the fixed header
-// with room to breathe.
+// at one comfortable reading measure. --cover-gap is the space above the
+// first section (below the cover, clearing the fixed header); the end of
+// the page (MoreWork) uses the same, so the page opens and closes evenly.
 const Frame = styled.div`
+  --cover-gap: 8rem;
   width: 100%;
   max-width: 900px;
   min-height: 100vh;
   position: relative;
-  padding: 8rem 3rem 5rem;
+  padding: var(--cover-gap) 3rem 5rem;
   margin: 0 auto;
 
   @media (max-width: 1100px) {
-    padding: 7rem 2rem 4rem;
+    --cover-gap: 7rem;
+    padding: var(--cover-gap) 2rem 4rem;
   }
 
   @media (max-width: 900px) {
-    padding: 6rem 1rem 3rem;
+    --cover-gap: 6rem;
+    padding: var(--cover-gap) 1rem 3rem;
   }
 `;
 
