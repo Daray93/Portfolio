@@ -115,12 +115,42 @@ const Frame = styled.div`
      visibly as the card transition clears over this frame. */
   clip-path: inset(0 round ${COVER_RADIUS.default}px);
   background: #000;
-  color: #fff;
   transition: transform ${dur.slow}s ${ease.out};
+
+  /* The cover's ink (see projects.js coverInk): white on a dark picture,
+     near-black on a light one, and the glass under the buttons to match --
+     so text reads on the picture itself, with no shade laid over it. White
+     text gets a soft glow behind its letters for busy pictures. */
+  --ink: #fff;
+  --ink-soft: rgba(255, 255, 255, 0.9);
+  --glass: rgba(0, 0, 0, 0.36);
+  --glass-hover: rgba(0, 0, 0, 0.5);
+  --glass-edge: rgba(255, 255, 255, 0.22);
+  /* a tight edge and a soft spread, barely there as a shadow, lifting the
+     letters off a busy picture */
+  --glow: 0 0 1px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 18px rgba(0, 0, 0, 0.35);
+  color: var(--ink);
+
+  &[data-ink="dark"] {
+    --ink: #111;
+    --ink-soft: rgba(17, 17, 17, 0.82);
+    --glass: rgba(255, 255, 255, 0.58);
+    --glass-hover: rgba(255, 255, 255, 0.74);
+    --glass-edge: rgba(0, 0, 0, 0.1);
+    --glow: 0 0 1px rgba(255, 255, 255, 0.5), 0 1px 3px rgba(255, 255, 255, 0.35), 0 2px 18px rgba(255, 255, 255, 0.4);
+  }
 
   @media ${COVER_PHONE_QUERY} {
     border-radius: ${COVER_RADIUS.phone}px;
     clip-path: inset(0 round ${COVER_RADIUS.phone}px);
+  }
+
+  /* Arriving from a card: the shade, text and buttons wait (their fade-ins
+     paused at the start, so unseen) until the card transition has cleared
+     off this frame, then fade in -- the handoff itself is picture to
+     identical picture, and the rest reads as the landing, not a flash. */
+  &[data-held] [data-intro] {
+    animation-play-state: paused;
   }
 
   /* Hovering "All work" previews the way back: exactly the start of a pull
@@ -139,35 +169,29 @@ const Frame = styled.div`
 // Its own stacking context: media that layers itself with z-index (the
 // avocado rig goes up to 4) stays inside it, under the scrim and the text,
 // instead of competing with them.
+const settle = keyframes`
+  from { transform: scale(1.12); }
+  to   { transform: none; }
+`;
+
+// On a direct visit (a link, a reload), the picture settles into place:
+// from a touch closer to its resting size over 1.8s. Not when a card has
+// just grown into it -- that has to land exactly as the card left it.
 const Media = styled.div`
   position: absolute;
   inset: 0;
   isolation: isolate;
+
+  &[data-settle] {
+    animation: ${settle} 1.8s ${ease.out} both;
+  }
 `;
 
-const fadeIn = keyframes`
+const hazeIn = keyframes`
   from { opacity: 0; }
   to   { opacity: 1; }
 `;
 
-// Keeps the title legible whatever the media is: a shade low down, only
-// behind the text (the top needs none -- "All work" and "Visit app" carry
-// their own glass). It fades in with the title rather than being there
-// when the card lands, so the cover first looks exactly like the card it
-// grew from, and the shade reads as part of the title arriving.
-const Scrim = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 26%, transparent 46%);
-  pointer-events: none;
-  animation: ${fadeIn} ${dur.slow}s ${EASE} 0.2s both;
-
-  /* narrow screens: the title and details wrap onto more lines, so the
-     shade reaches higher */
-  @media (max-width: 900px) {
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 36%, transparent 58%);
-  }
-`;
 
 // "All work", its arrow in a ring that fills as the visitor pulls back
 // (--pull, 0 to 1, set by the gesture; data-pull="on" while pulling,
@@ -186,11 +210,21 @@ const TopBar = styled.div`
   }
 `;
 
+// one glass pill: the ring (and its arrow) and the label together, so the
+// label always has its backing, whatever the picture behind
 const Back = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   position: relative;
+  height: 48px;
+  padding-right: 18px;
+  border-radius: 999px;
+  background: var(--glass);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: background-color ${dur.fast}s ${EASE};
 
   /* extra hover room all round: hovering shrinks the frame and carries the
      button a little way inward (see Frame), and the pointer should still
@@ -202,16 +236,20 @@ const Back = styled(Link)`
   }
   font-size: 0.95rem;
   font-weight: 500;
-  color: #fff;
+  color: var(--ink);
 
   &:hover {
-    color: #fff;
+    color: var(--ink);
+    background: var(--glass-hover);
+  }
+
+  [data-pull="full"] & {
+    background: var(--glass-hover);
   }
 
   &:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--ink);
     outline-offset: 4px;
-    border-radius: 999px;
   }
 `;
 
@@ -222,10 +260,7 @@ const Ring = styled.span`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.18);
-  transition:
-    transform ${dur.base}s ${EASE},
-    background-color ${dur.fast}s ${EASE};
+  transition: transform ${dur.base}s ${EASE};
 
   > svg.pull,
   > svg.back {
@@ -263,13 +298,13 @@ const Ring = styled.span`
 
   /* the track: a faint hairline always, so the ring reads as a button */
   circle:first-child {
-    stroke: rgba(255, 255, 255, 0.3);
+    stroke: color-mix(in srgb, currentColor 30%, transparent);
   }
 
   /* the fill, driven every frame by the gesture (no CSS transition: the
      gesture code smooths it) */
   circle:last-child {
-    stroke: #fff;
+    stroke: currentColor;
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: calc(100 - var(--pull) * 100);
@@ -281,7 +316,7 @@ const Ring = styled.span`
      for pointers that hover, not with reduced motion, and never while a
      pull is drawing the real fill. */
   circle.hint {
-    stroke: rgba(255, 255, 255, 0.75);
+    stroke: color-mix(in srgb, currentColor 75%, transparent);
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
@@ -303,14 +338,9 @@ const Ring = styled.span`
     opacity: 0;
   }
 
-  ${Back}:hover & {
-    background: rgba(0, 0, 0, 0.3);
-  }
-
   /* full: a small lift, so "let go now" is felt */
   [data-pull="full"] & {
     transform: scale(1.1);
-    background: rgba(0, 0, 0, 0.36);
   }
 `;
 
@@ -325,10 +355,11 @@ const PullHint = styled.span`
   left: 0;
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.85);
+  background: var(--glass);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--ink);
   font-size: 0.8rem;
   font-weight: 400;
   white-space: nowrap;
@@ -354,9 +385,11 @@ const Visit = styled.a`
   height: 48px;
   padding: 0 18px 0 20px;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
-  background: rgba(0, 0, 0, 0.18);
-  color: #fff;
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--ink);
   font-size: 0.95rem;
   font-weight: 500;
   animation: ${fadeUp} ${dur.slow}s ${EASE} 0.2s both;
@@ -369,8 +402,8 @@ const Visit = styled.a`
   }
 
   &:hover {
-    color: #fff;
-    background: rgba(0, 0, 0, 0.3);
+    color: var(--ink);
+    background: var(--glass-hover);
   }
 
   &:hover svg {
@@ -378,7 +411,7 @@ const Visit = styled.a`
   }
 
   &:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--ink);
     outline-offset: 4px;
   }
 
@@ -389,6 +422,7 @@ const Visit = styled.a`
   }
 `;
 
+
 const Caption = styled.div`
   position: absolute;
   left: 40px;
@@ -397,11 +431,27 @@ const Caption = styled.div`
   display: grid;
   /* two groups: the name with its tagline, then the details */
   gap: 32px;
-  animation: ${fadeUp} ${dur.slow}s ${EASE} 0.2s both;
+  text-shadow: var(--glow);
 
+  /* phones: the name and tagline centred in the cover, the details line
+     hidden, and "Read the case study" at the bottom */
   @media (max-width: 640px) {
-    bottom: 24px;
-    gap: 22px;
+    top: 0;
+    bottom: 0;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+  }
+
+  /* a cover with a figure in the middle (coverCaption "bottom" in
+     projects.js): on phones the words sit low, under its feet, above "Read
+     the case study" */
+  @media (max-width: 640px) {
+    [data-caption="bottom"] > & {
+      top: auto;
+      bottom: 64px;
+      align-content: end;
+    }
   }
 
   @media (max-width: 640px) {
@@ -410,10 +460,37 @@ const Caption = styled.div`
   }
 `;
 
+const rise = keyframes`
+  from { transform: translateY(110%); }
+  to   { transform: none; }
+`;
+
+// heavier on wider screens, where it's set large over the picture. The name
+// rises into place out of a line (masked), then the tagline and details
+// follow (see Lede, Meta).
 const Title = styled.p`
   margin: 0;
+  /* a long name wraps onto two lines ("Operation / Avocado") rather than
+     running across the middle of the picture, where a cover's subject
+     usually stands */
+  max-width: 6.5em;
+  overflow: hidden;
+  /* room for descenders and the tight tracking, so the mask doesn't clip */
+  padding: 0 0.06em 0.08em;
+  margin: 0 -0.06em -0.08em;
+
+  > span {
+    display: block;
+    animation: ${rise} 0.75s ${ease.out} 0.25s both;
+  }
+
   font-size: clamp(2.5rem, 7vw, 6.5rem);
-  font-weight: 500;
+  font-weight: 600;
+
+  @media (max-width: 640px) {
+    font-weight: 500;
+  }
+
   letter-spacing: -0.04em;
   line-height: 1;
   text-wrap: balance;
@@ -432,44 +509,72 @@ const Heading = styled.div`
 const Lede = styled.p`
   margin: 0;
   max-width: 32ch;
+  animation: ${fadeUp} ${dur.slow}s ${EASE} 0.45s both;
+
+  @media (max-width: 640px) {
+    margin-inline: auto;
+  }
+
   font-size: clamp(1.1rem, 1.9vw, 1.6rem);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.25;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--ink-soft);
   text-wrap: balance;
 `;
 
 const Meta = styled.div`
+  animation: ${fadeUp} ${dur.slow}s ${EASE} 0.6s both;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px 32px;
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--ink-soft);
 
   strong {
     font-weight: 600;
-    color: #fff;
+    color: var(--ink);
   }
 
   @media (max-width: 640px) {
     font-size: 0.9rem;
+    /* nothing left in the row but the pinned "Read the case study", so it
+       takes no room and the name sits exactly in the middle */
+    display: contents;
+  }
+`;
+
+// role and year -- hidden on phones, where the cover keeps to the name
+const Details = styled.span`
+  @media (max-width: 640px) {
+    display: none;
   }
 `;
 
 const ScrollCue = styled.button`
+  /* phones: pinned to the bottom, out of the details row, so it fades in
+     on its own (with the details' timing) */
+  @media (max-width: 640px) {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: ${hazeIn} ${dur.slow}s ${EASE} 0.6s both;
+  }
+
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 0;
   border: 0;
   background: none;
-  color: #fff;
+  color: var(--ink);
   font: inherit;
   font-weight: 500;
   cursor: pointer;
+  text-shadow: var(--glow);
 
   svg {
     transition: transform ${dur.base}s ${EASE};
@@ -480,20 +585,22 @@ const ScrollCue = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--ink);
     outline-offset: 4px;
   }
 `;
 
 const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
   const { reduced } = useMotionPreference();
-  const { coverReady, coverStartTime, returnFrom } = useExpandTransition();
+  const { coverReady, coverStartTime, coverHeld, returnFrom } = useExpandTransition();
   const navigate = useNavigate();
   const coverRef = useRef(null);
   const frameRef = useRef(null);
   const barRef = useRef(null);
   // shown on this cover only if it's the first of the visit
   const [pullHint] = useState(() => firstPullHint(reduced));
+  // a direct visit: no card grew into this, so the picture settles in
+  const [settles] = useState(() => !coverHeld && !reduced);
   useEffect(() => {
     if (!pullHint) return;
     try {
@@ -667,15 +774,19 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
 
   return (
     <Cover ref={setRefs} aria-label={project.title}>
-      <Frame ref={frameRef}>
-      <Media>
+      <Frame
+        ref={frameRef}
+        data-held={coverHeld ? "" : undefined}
+        data-ink={project.coverInk || "light"}
+        data-caption={project.coverCaption}
+      >
+      <Media data-settle={settles ? "" : undefined}>
         {/* tells the card transition when it's safe to hand over, and starts
             a video on the same frame the transition was showing */}
         <ProjectMedia project={project} onReady={coverReady} startTime={coverStartTime} />
       </Media>
-      <Scrim />
 
-      <TopBar ref={barRef}>
+      <TopBar ref={barRef} data-intro="">
         <Back
           to="/"
           aria-label="Back to all work"
@@ -698,14 +809,14 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
           <RollText hover="All work">All work</RollText>
         </Back>
         {pullHint && (
-          <PullHint aria-hidden="true">
+          <PullHint aria-hidden="true" data-intro="">
             or scroll up
           </PullHint>
         )}
       </TopBar>
 
       {project.live && (
-        <Visit href={project.live} target="_blank" rel="noopener noreferrer">
+        <Visit href={project.live} target="_blank" rel="noopener noreferrer" data-intro="">
           Visit app
           <FiArrowUpRight aria-hidden="true" />
           <span className="sr-only"> (opens in a new tab)</span>
@@ -714,13 +825,15 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
 
       <Caption>
         <Heading>
-          <Title>{project.title}</Title>
-          <Lede>
+          <Title>
+            <span data-intro="">{project.title}</span>
+          </Title>
+          <Lede data-intro="">
             <Tagline project={project} />
           </Lede>
         </Heading>
-        <Meta>
-          <span>
+        <Meta data-intro="">
+          <Details>
             {project.role}
             {project.years && (
               <>
@@ -728,8 +841,8 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
                 <strong>{project.years}</strong>
               </>
             )}
-          </span>
-          <ScrollCue type="button" onClick={scrollToContent}>
+          </Details>
+          <ScrollCue type="button" onClick={scrollToContent} data-intro="">
             <RollText hover="Scroll to read">Read the case study</RollText>
             <FiArrowDown aria-hidden="true" />
           </ScrollCue>

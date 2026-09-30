@@ -19,7 +19,9 @@
 //            to fit differently on phones), or
 //            { type: "logo", src } for a mark centred on the `panel` colour,
 //            or { type: "avocado" } for Operation Avocado's live rig.
-//            Images can add `mobileSrc`, a tall portrait (about 3:5) version for phones.
+//            Images can add `mobileSrc`, a tall portrait (about 3:5) version for phones,
+//            and `srcSet` / `mobileSrcSet`: the same picture at several widths
+//            (an imagetools import), sized to the screen.
 // backdrop:  [key, floor, base]. Only the floor colour shows at the
 //            moment: a subtle strip of light under the pager, on the design
 //            system's own page colour (light or dark). Pick a mid-tone of the
@@ -31,17 +33,24 @@
 //            false for bare marks on transparent.
 // live:      the live app's URL, if there is one -- "Visit app" on the case
 //            study's cover, top right
+// coverCaption: "bottom" when a figure stands in the middle of the cover:
+//            on phones the title sits low instead of centred
+// coverInk:  "dark" for a light cover picture (dark text and light glass
+//            on the case study cover); white text by default
 // locked:    password-protected (see ProtectedGate) -- the card asks for the
 //            password instead of opening, until the visitor has unlocked.
 
 import oaIcon from "../case-studies/operation-avocado/assets/Mobile-Logo-OA.png";
 import orthoviveLogo from "../case-studies/orthovive/assets/OrthoVive.png";
 import orthoviveRender from "../case-studies/orthovive/assets/render.png";
-import pintsCard from "../case-studies/pints-yurt/assets/PintsYurt.webp";
-import pintsCardPhone from "../case-studies/pints-yurt/assets/PintsYurt-phone.webp";
+import pintsCard from "../case-studies/pints-yurt/assets/py-cover.webp";
+// the same pictures at several widths, for the browser to pick the one
+// that suits the screen (made at build time: see vite.config.js)
+import pintsCardSet from "../case-studies/pints-yurt/assets/py-cover.webp?w=1280;1920;2560&format=webp&quality=75&as=srcset";
 import pintsIcon from "../case-studies/pints-yurt/assets/pints-icon.png";
 import cruciateLogo from "../case-studies/cruciate/assets/cruciate-logo.svg";
 import cruciateCard from "../case-studies/cruciate/assets/Cruciate.webp";
+import cruciateCardSet from "../case-studies/cruciate/assets/Cruciate.webp?w=1280;1920;2560&format=webp&quality=75&as=srcset";
 
 const projects = [
   {
@@ -55,7 +64,7 @@ const projects = [
     live: "https://cruciate.vercel.app/",
     // a wall of app screens on the diagonal, bleeding off every edge on a
     // deep teal -- it fills the card at every size
-    media: { type: "image", src: cruciateCard },
+    media: { type: "image", src: cruciateCard, srcSet: cruciateCardSet },
     panel: "#0c3d39",
     icon: { src: cruciateLogo, fill: false },
     backdrop: ["#0a6e66", "#3fb8a8", "#020606"],
@@ -73,6 +82,10 @@ const projects = [
     media: { type: "avocado" },
     // the rig's stage green (see ProjectMedia)
     panel: "#7bae45",
+    // a light cover: dark text and frosted glass on it (see ProjectCover)
+    coverInk: "dark",
+    // the avocado stands in the middle: on phones the words go under it
+    coverCaption: "bottom",
     icon: { src: oaIcon, fill: true },
     // a deep forest green behind the caption, then the avocado's card green
     backdrop: ["#182b1c", "#7bae45", "#070d04"],
@@ -85,12 +98,14 @@ const projects = [
     years: "2026",
     to: "/pints-yurt",
     live: "https://pints-yurt.web.app/",
-    // three phones, tilted: the whole set on wide cards; on phones the same
-    // drawing framed on the leaderboard (PintsYurt-phone.svg: only its
-    // viewBox differs), whole, with its neighbours peeking in. The cards use
-    // 2x WebP renders of the SVGs: scaling the SVGs' embedded screenshots
-    // (and Cruciate's blurred shadows) full screen stutters the transition
-    media: { type: "image", src: pintsCard, mobileSrc: pintsCardPhone, fit: "contain", mobileFit: "cover" },
+    // four phones fanned on the diagonal (py-cover.svg), shown whole on the
+    // card's brown at every size. The card uses a 2x WebP render of the SVG:
+    // scaling an SVG's embedded screenshots full screen stutters the
+    // transition, so re-render py-cover.webp if the SVG changes
+    media: { type: "image", src: pintsCard, srcSet: pintsCardSet, fit: "contain" },
+    // the fan runs from the top left down to the right, so on phones the
+    // words sit under it rather than over it
+    coverCaption: "bottom",
     panel: "#16100b",
     icon: { src: pintsIcon, fill: true },
     // the card's own stout: a deep brown a step lighter than the card, and a
@@ -109,6 +124,7 @@ const projects = [
     // a 3D render of the knee implant, on its own soft grey
     media: { type: "image", src: orthoviveRender },
     panel: "#bebebe",
+    coverInk: "dark",
     icon: { src: orthoviveLogo, fill: false },
     backdrop: ["#1f4fb8", "#6f9ee8", "#020409"],
   },

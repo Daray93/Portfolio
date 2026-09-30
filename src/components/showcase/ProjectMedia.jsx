@@ -368,10 +368,17 @@ export default function ProjectMedia({ project, className, onReady, startTime, b
       ) : media.type === "logo" ? (
         <Logo src={media.src} alt="" draggable={false} data-fit="contain" />
       ) : (
+        // sizes="100vw" everywhere, card included: the card, the transition's
+        // copy and the cover all pick the same file (the one for the full
+        // screen), so nothing new has to load or decode as the card grows
         <picture>
-          {media.mobileSrc && <source media={PHONE_QUERY} srcSet={media.mobileSrc} />}
+          {media.mobileSrc && (
+            <source media={PHONE_QUERY} srcSet={media.mobileSrcSet || media.mobileSrc} sizes="100vw" />
+          )}
           <Cover
             src={media.src}
+            srcSet={media.srcSet}
+            sizes={media.srcSet ? "100vw" : undefined}
             alt=""
             draggable={false}
             $position={media.position}

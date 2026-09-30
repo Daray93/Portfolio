@@ -118,31 +118,75 @@ const Bar = styled.header`
     `}
 `;
 
-// The logo's shape used as a mask, filled with the theme's text colour, so
-// it's off-white on dark and near-black on light like the rest of the header.
+// Home: the logo in a circle, and beside it the name and what I do -- so
+// anyone landing knows whose work this is before looking at a card. The
+// role line shows from tablets up; phones keep the name.
 const Logo = styled(Link)`
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   color: inherit;
-  transition: opacity ${dur.fast}s ${ease.out};
 
-  /* masked on a child, so the link's own focus ring isn't masked away */
-  span {
-    display: block;
-    width: 36px;
+  &:hover {
+    color: inherit;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+`;
+
+// the circle, in the same frosted surface as the pill nav
+const Mark = styled.span`
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.navSurface};
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: inset 0 0 0 1px
+    ${({ theme }) => (theme.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)")};
+  transition: background-color ${dur.fast}s ${ease.out};
+
+  /* the logo's shape as a mask, filled with the text colour, so it's
+     off-white on dark and near-black on light like the rest of the header */
+  &::after {
+    content: "";
+    width: 22px;
     aspect-ratio: 128 / 123;
     background: currentColor;
     -webkit-mask: url(${logo}) center / contain no-repeat;
     mask: url(${logo}) center / contain no-repeat;
   }
 
-  &:hover {
-    color: inherit;
-    opacity: 0.7;
+  ${Logo}:hover & {
+    background: ${({ theme }) => theme.buttonGhostHoverBg};
   }
+`;
 
-  &:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 4px;
+const Who = styled.span`
+  display: grid;
+  gap: 1px;
+  line-height: 1.2;
+`;
+
+const Name = styled.span`
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+`;
+
+const Role = styled.span`
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.textSecondary};
+
+  @media (max-width: 640px) {
+    display: none;
   }
 `;
 
@@ -371,8 +415,12 @@ export default function SiteHeader({
 }) {
   return (
     <Bar $overIntro={overIntro} $away={away} $docked={docked}>
-      <Logo to="/" aria-label="Dara Phillips, home">
-        <span aria-hidden="true" />
+      <Logo to="/">
+        <Mark aria-hidden="true" />
+        <Who>
+          <Name>Dara Phillips</Name>
+          <Role>Product designer &amp; developer</Role>
+        </Who>
       </Logo>
       <Controls>
         <PillNav hidden={menuOpen} current={current} />
