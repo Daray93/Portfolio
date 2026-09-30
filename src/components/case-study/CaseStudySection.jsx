@@ -1,7 +1,7 @@
-import { Children } from "react";
+import { Children, isValidElement } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-import { useCaseStudyView } from "./CaseStudyViewContext";
+import { useCaseStudyView, SectionNumberContext } from "./CaseStudyViewContext";
 import { Paragraph } from "./Prose";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { easeArr } from "../../styles/motion";
@@ -74,8 +74,23 @@ const Body = styled.div`
   gap: 1.25rem;
   width: 100%;
 
+  /* a numbered sub-section (06.01, see SubSection in Process.jsx) stands
+     apart from what's before it: 3.5rem in all (2.5rem on phones), except
+     when it opens the section */
+  > * > [data-subsection] {
+    margin-top: 2.25rem;
+  }
+
+  > *:first-child > [data-subsection] {
+    margin-top: 0;
+  }
+
   @media (max-width: 900px) {
     gap: 1rem;
+
+    > * > [data-subsection] {
+      margin-top: 1.5rem;
+    }
   }
 `;
 
@@ -103,6 +118,21 @@ const TldrBody = styled.div`
   gap: 1.25rem;
   width: 100%;
 `;
+
+// the words in a TL;DR, whether it's plain text or blocks (Paragraph,
+// Questions...), for the reading times on the toggle
+function wordsIn(node) {
+  if (node == null || typeof node === "boolean") return 0;
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node).trim().split(/\s+/).filter(Boolean).length;
+  }
+  if (Array.isArray(node)) return node.reduce((n, child) => n + wordsIn(child), 0);
+  if (isValidElement(node)) {
+    const { children, items } = node.props;
+    return wordsIn(children) + wordsIn(items);
+  }
+  return 0;
+}
 
 // ---- the play-in
 const EASE = easeArr.out;
@@ -165,47 +195,52 @@ export default function CaseStudySection({
       };
 
   return (
-    <Row
-      id={id}
-      variants={section}
-      // for the reading times on the TL;DR toggle (see ViewToggle)
-      data-case-section=""
-      data-tldr-visible={tldrVisible ? "" : undefined}
-      data-tldr-words={typeof tldr === "string" ? tldr.trim().split(/\s+/).length : undefined}
-      {...play}
-      {...props}
-    >
-      {heading && (
-        <Head as={motion.div} variants={head}>
-          {sectionNumber && <SectionNumber variants={number}>{sectionNumber}</SectionNumber>}
-          <Title variants={title}>{heading}</Title>
-        </Head>
-      )}
-      <Body as={motion.div} variants={body}>
-        {isShortened ? (
-          <Piece variants={piece}>
-            <TldrBody>
-              {tldrMedia}
-              {tldr ? (
-                <TldrText>{tldr}</TldrText>
-              ) : (
-                <TldrPlaceholder>
-                  {heading
-                    ? `TL;DR placeholder — a shortened summary of "${heading}" goes here.`
-                    : "TL;DR placeholder — a shortened summary goes here."}
-                </TldrPlaceholder>
-              )}
-            </TldrBody>
-          </Piece>
-        ) : (
-          Children.toArray(children).map((child, i) => (
-            <Piece key={child?.key ?? i} variants={piece}>
-              {child}
-            </Piece>
-          ))
+    <SectionNumberContext.Provider value={sectionNumber || null}>
+      <Row
+        id={id}
+        variants={section}
+        // for the reading times on the TL;DR toggle (see ViewToggle)
+        data-case-section=""
+        data-tldr-visible={tldrVisible ? "" : undefined}
+        data-tldr-words={tldr ? wordsIn(tldr) : undefined}
+        {...play}
+        {...props}
+      >
+        {heading && (
+          <Head as={motion.div} variants={head}>
+            {sectionNumber && <SectionNumber variants={number}>{sectionNumber}</SectionNumber>}
+            <Title variants={title}>{heading}</Title>
+          </Head>
         )}
-      </Body>
-      {!isShortened && full && <Full>{full}</Full>}
-    </Row>
+        <Body as={motion.div} variants={body}>
+          {isShortened ? (
+            <Piece variants={piece}>
+              <TldrBody>
+                {tldrMedia}
+                {/* plain text is one paragraph; blocks render as they are */}
+                {tldr && typeof tldr === "string" ? (
+                  <TldrText>{tldr}</TldrText>
+                ) : tldr ? (
+                  tldr
+                ) : (
+                  <TldrPlaceholder>
+                    {heading
+                      ? `TL;DR placeholder — a shortened summary of "${heading}" goes here.`
+                      : "TL;DR placeholder — a shortened summary goes here."}
+                  </TldrPlaceholder>
+                )}
+              </TldrBody>
+            </Piece>
+          ) : (
+            Children.toArray(children).map((child, i) => (
+              <Piece key={child?.key ?? i} variants={piece}>
+                {child}
+              </Piece>
+            ))
+          )}
+        </Body>
+        {!isShortened && full && <Full>{full}</Full>}
+      </Row>
+    </SectionNumberContext.Provider>
   );
 }

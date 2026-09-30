@@ -438,25 +438,11 @@ const Caption = styled.div`
   @media (max-width: 640px) {
     top: 0;
     bottom: 0;
+    left: 16px;
+    right: 16px;
     align-content: center;
     justify-items: center;
     text-align: center;
-  }
-
-  /* a cover with a figure in the middle (coverCaption "bottom" in
-     projects.js): on phones the words sit low, under its feet, above "Read
-     the case study" */
-  @media (max-width: 640px) {
-    [data-caption="bottom"] > & {
-      top: auto;
-      bottom: 64px;
-      align-content: end;
-    }
-  }
-
-  @media (max-width: 640px) {
-    left: 16px;
-    right: 16px;
   }
 `;
 
@@ -554,16 +540,6 @@ const Details = styled.span`
 `;
 
 const ScrollCue = styled.button`
-  /* phones: pinned to the bottom, out of the details row, so it fades in
-     on its own (with the details' timing) */
-  @media (max-width: 640px) {
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: ${hazeIn} ${dur.slow}s ${EASE} 0.6s both;
-  }
-
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -587,6 +563,31 @@ const ScrollCue = styled.button`
   &:focus-visible {
     outline: 2px solid var(--ink);
     outline-offset: 4px;
+  }
+
+  /* phones: pinned to the bottom, out of the details row, so it fades in
+     on its own (with the details' timing). A glass pill like "Visit app",
+     so it reads over any picture and is a full-size tap target */
+  @media (max-width: 640px) {
+    position: absolute;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    animation: ${hazeIn} ${dur.slow}s ${EASE} 0.6s both;
+    height: 48px;
+    padding: 0 18px 0 20px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--glass-edge);
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    white-space: nowrap;
+    text-shadow: none;
+    transition: background-color ${dur.fast}s ${EASE};
+
+    &:hover {
+      background: var(--glass-hover);
+    }
   }
 `;
 
@@ -778,7 +779,6 @@ const ProjectCover = forwardRef(function ProjectCover({ project }, ref) {
         ref={frameRef}
         data-held={coverHeld ? "" : undefined}
         data-ink={project.coverInk || "light"}
-        data-caption={project.coverCaption}
       >
       <Media data-settle={settles ? "" : undefined}>
         {/* tells the card transition when it's safe to hand over, and starts

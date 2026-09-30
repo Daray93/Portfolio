@@ -12,28 +12,9 @@ const radius = {
   xs: "clamp(4px, 0.5vw, 6px)", // pills/chips
   // Flat (non-responsive) -- the actual <Button>/form-control radius
   // used everywhere, as opposed to `sm`'s smaller ghost/icon-button one.
-  // Was hardcoded "12px" (and Button.jsx's own "sm" size at "10px",
-  // folded in here too -- a 2px difference in a button's OWN corner
-  // radius between its two sizes was never a deliberate distinction)
-  // scattered across a dozen call sites rather than ever routed through
-  // this scale, which is the actual reason it didn't respond to dark
-  // mode's flattened radius until now.
   btn: "12px",
 };
-
-// Dark mode's own radius scale -- same keys as `radius` above (every
-// `theme.radius.x` usage across the app just reads whichever scale is
-// active), all flattened to square corners instead of light mode's
-// clamped curves.
-const radiusFlat = {
-  xxl: "0",
-  xl: "0",
-  lg: "0",
-  md: "0",
-  sm: "0",
-  xs: "0",
-  btn: "0",
-};
+// one radius scale for both themes: corners don't change with the mode
 
 const space = {
   0: "0",
@@ -217,7 +198,7 @@ export const darkTheme = {
     )
   `,
 
-  radius: radiusFlat,
+  radius,
   space,
 };
 

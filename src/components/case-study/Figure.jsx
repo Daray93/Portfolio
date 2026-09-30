@@ -14,6 +14,8 @@ import { dur, ease } from "../../styles/motion";
 //                                               full column
 //   <Figures columns={2|3}>…</Figures>        side by side: up to `columns`
 //                                               across, two on phones
+//                                               (`phoneColumns={1}` stacks
+//                                               wide images instead)
 //
 // Clicking an image opens it large (Escape, the close button or a click
 // outside closes it, and focus goes back to the image). Videos just play.
@@ -27,13 +29,17 @@ const Row = styled.div`
   width: 100%;
 
   @media (max-width: 640px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(${({ $phoneColumns }) => $phoneColumns}, minmax(0, 1fr));
     gap: 1.25rem 0.75rem;
   }
 `;
 
-export function Figures({ columns = 2, children }) {
-  return <Row $columns={columns}>{children}</Row>;
+export function Figures({ columns = 2, phoneColumns = 2, children }) {
+  return (
+    <Row $columns={columns} $phoneColumns={phoneColumns}>
+      {children}
+    </Row>
+  );
 }
 
 const Frame = styled.figure`

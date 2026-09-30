@@ -54,7 +54,13 @@ Every case study is built from the same shared pieces, in the same order, so spa
 | --- | --- |
 | Body text | `Paragraph` |
 | Lists | `List` |
-| A heading inside a section | `Subheading` |
+| A numbered part of a section (06.01), e.g. one iteration in Exploration | `SubSection` (`Process.jsx`) |
+| A design challenge in The solution (numbered like a sub-section) | `Challenge` |
+| An iteration: two screens and what changed (numbered like a sub-section) | `BeforeAfter` |
+| Finding → Insight → Design response rows | `Insights` |
+| Success criteria table | `Criteria` |
+| Outcome / What I learned / Next steps | `Closing` |
+| A small heading inside running text (never numbered) | `Subheading` |
 | A worked example or key point | `Callout` |
 | Project facts | `Facts` |
 | A screenshot, image or video (click an image to see it large) | `Figure` (`size="phone"` or `"wide"`, or `video`) |
@@ -64,7 +70,7 @@ Every case study is built from the same shared pieces, in the same order, so spa
 
 Not on the page: tag pills (the facts row replaces them), the old `CaseStudyHero` (the cover already shows the title), or page-local styled text.
 
-**Every section has a `tldr`**: a one or two sentence summary, shown in TL;DR mode. Without one, TL;DR mode shows a placeholder. Only Overview is exempt (`tldrVisible`).
+**Every section has a `tldr`**: a one or two sentence summary, shown in TL;DR mode. Without one, TL;DR mode shows a placeholder. Only Overview is exempt (`tldrVisible`). A TL;DR is usually plain text, but it can be blocks when the section has something a skim reader must see: The problem's TL;DR is one paragraph plus the `Questions` block, since the questions are what the rest of the page answers.
 
 **Spacing and type** (set once, in the shared components; don't override on a page)
 
@@ -75,11 +81,15 @@ Not on the page: tag pills (the facts row replaces them), the old `CaseStudyHero
 | Between sections | 6rem | 4rem |
 | Section heading to its content | 1.75rem | 1.25rem |
 | Between paragraphs and blocks in a section | 1.25rem | 1rem |
+| Above a numbered sub-section (none when it opens the section) | 3.5rem | 2.5rem |
+| Sub-section heading to its content | 1rem | same |
 | Section heading | ~2rem, weight 600, normal case, number above | 1.6rem, weight 500 |
 | Subheading | 1.15rem, weight 600 | same |
 | Body text | 1.05rem | 1rem |
 | Side margins | 3rem (2rem up to 1100px) | 1rem |
 | Divider line above each section | yes | no |
+
+**Numbering:** sections are 01–08. A section made of peer parts (the challenges in The solution, the iterations in Exploration) numbers them as sub-sections, 06.01, 06.02, with the number worked out from the section it's in. Every sub-section gets a number; a small heading within running text (`Subheading`) never does. No third level.
 
 **Motion:** every section fades in once as it scrolls into view (an 8px lift, 0.6s), from `CaseStudySection`; nothing moves with reduced motion.
 

@@ -93,6 +93,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 - **Font:** Poppins only (400–700, self-hosted via @fontsource), set once as `--font-sans` in `src/styles/GlobalStyle.jsx`.
 - **Theme:** one theme for the whole site. Follows the visitor's device until they pick with the toggle; the pick is remembered in the browser. Set in `ThemeModeContext.jsx`; `index.html` paints the same choice before the app loads. The transition's page-colour layer uses the current theme.
+- **Corners:** one radius scale for both themes (`radius` in `src/styles/theme.js`). Dark mode used to square off every corner; decided 30 Sep 2026 to use the light-mode radius in both.
 - **Cursor:** the normal system cursor. The custom glass cursor was removed for good. On the carousel, the focused card shows a small glass circle top right on hover (expand icon, or a padlock on OrthoVive), and glass arrow buttons at the screen edges move to the side cards.
 - **Buttons:** one outlined pill style, `src/components/chrome/pill.js` (menu email and LinkedIn, About's actions).
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing. Reduced motion follows the visitor's system setting only (live, in `MotionPreferenceContext.jsx`).

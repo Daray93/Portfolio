@@ -33,8 +33,6 @@
 //            false for bare marks on transparent.
 // live:      the live app's URL, if there is one -- "Visit app" on the case
 //            study's cover, top right
-// coverCaption: "bottom" when a figure stands in the middle of the cover:
-//            on phones the title sits low instead of centred
 // coverInk:  "dark" for a light cover picture (dark text and light glass
 //            on the case study cover); white text by default
 // locked:    password-protected (see ProtectedGate) -- the card asks for the
@@ -85,8 +83,6 @@ const projects = [
     panel: "#7bae45",
     // a light cover: dark text and frosted glass on it (see ProjectCover)
     coverInk: "dark",
-    // the avocado stands in the middle: on phones the words go under it
-    coverCaption: "bottom",
     icon: { src: oaIcon, fill: true },
     // a deep forest green behind the caption, then the avocado's card green
     backdrop: ["#182b1c", "#7bae45", "#070d04"],
@@ -104,9 +100,6 @@ const projects = [
     // scaling an SVG's embedded screenshots full screen stutters the
     // transition, so re-render py-cover.webp if the SVG changes
     media: { type: "image", src: pintsCard, srcSet: pintsCardSet, fit: "contain" },
-    // the fan runs from the top left down to the right, so on phones the
-    // words sit under it rather than over it
-    coverCaption: "bottom",
     panel: "#16100b",
     icon: { src: pintsIcon, fill: true },
     // the card's own stout: a deep brown a step lighter than the card, and a

@@ -14,3 +14,10 @@ export const CaseStudyViewContext = createContext({
 });
 
 export const useCaseStudyView = () => useContext(CaseStudyViewContext);
+
+// The number of the section a piece of content sits in ("06"), so its
+// numbered sub-sections can follow on from it ("06.01"). CaseStudySection
+// is the provider; null outside a numbered section.
+export const SectionNumberContext = createContext(null);
+
+export const useSectionNumber = () => useContext(SectionNumberContext);
