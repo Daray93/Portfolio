@@ -49,8 +49,8 @@ import pintsCard from "../case-studies/pints-yurt/assets/py-cover.webp";
 import pintsCardSet from "../case-studies/pints-yurt/assets/py-cover.webp?w=1280;1920;2560&format=webp&quality=75&as=srcset";
 import pintsIcon from "../case-studies/pints-yurt/assets/pints-icon.png";
 import cruciateLogo from "../case-studies/cruciate/assets/cruciate-logo.svg";
-import cruciateCard from "../case-studies/cruciate/assets/Cruciate.webp";
-import cruciateCardSet from "../case-studies/cruciate/assets/Cruciate.webp?w=1280;1920;2560&format=webp&quality=75&as=srcset";
+import cruciateCard from "../case-studies/cruciate/assets/cruciate-cover.png?w=2880&format=webp&quality=88";
+import cruciateCardSet from "../case-studies/cruciate/assets/cruciate-cover.png?w=1920;2560;2880;3840;5120&format=webp&quality=88&as=srcset";
 
 const projects = [
   {
@@ -63,9 +63,10 @@ const projects = [
     to: "/cruciate",
     live: "https://cruciate.vercel.app/",
     // a wall of app screens on the diagonal, bleeding off every edge on a
-    // deep teal -- it fills the card at every size
+    // grey teal -- it fills the card at every size. Made straight from the
+    // PNG at build time (one compression, not two) so the screens stay crisp
     media: { type: "image", src: cruciateCard, srcSet: cruciateCardSet },
-    panel: "#0c3d39",
+    panel: "#6e898c",
     icon: { src: cruciateLogo, fill: false },
     backdrop: ["#0a6e66", "#3fb8a8", "#020606"],
   },
