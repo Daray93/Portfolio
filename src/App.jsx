@@ -19,6 +19,8 @@ import Websites from "./pages/Websites";
 import NotFound from "./pages/NotFound";
 import Shell from "./components/shell/Shell";
 import { isShellPage } from "./components/shell/context";
+import projects from "./data/projects";
+import { PHONE_QUERY } from "./components/showcase/ProjectMedia";
 
 import { logEvent } from "firebase/analytics";
 import { analyticsReady } from "./firebase";
@@ -44,11 +46,42 @@ const CruciateCaseStudy = lazy(loadCruciate);
 // downloading when the card lands made the handoff give up and cut.
 const CAROUSEL_PAGES = [loadCruciate, loadOperationAvocado, loadPintsYurt, loadOrthoVive];
 
+// The card pictures, decoded at full size ahead of time: the open
+// transition waits for its full-size copy of the picture, and a large one
+// (Cruciate's is 3200px) decoding for the first time took long enough to
+// start the grow before it was ready -- it flashed in instead of growing.
+// Held here so the browser keeps them decoded.
+const warmed = [];
+function warmCardPictures() {
+  const phone = window.matchMedia(PHONE_QUERY).matches;
+  projects.forEach(({ media }) => {
+    if (media?.type !== "image") return;
+    // the same file the card will use: its sizes for the full screen
+    const img = new Image();
+    const set = phone && media.mobileSrc ? media.mobileSrcSet : media.srcSet;
+    if (set) {
+      img.sizes = "100vw";
+      img.srcset = set;
+    }
+    img.src = (phone && media.mobileSrc) || media.src;
+    img.decode?.().catch(() => {});
+    warmed.push(img);
+  });
+}
+
 function PrefetchCarouselPages() {
   React.useEffect(() => {
     const idle = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 1500));
     const cancel = window.cancelIdleCallback ?? clearTimeout;
-    const id = idle(() => CAROUSEL_PAGES.forEach((load) => load().catch(() => {})));
+    // within 2s regardless: the homepage's intro and drifting background
+    // can keep the browser from ever looking idle
+    const id = idle(
+      () => {
+        warmCardPictures();
+        CAROUSEL_PAGES.forEach((load) => load().catch(() => {}));
+      },
+      { timeout: 2000 }
+    );
     return () => cancel(id);
   }, []);
   return null;

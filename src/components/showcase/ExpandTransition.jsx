@@ -60,13 +60,21 @@ const CLOSE_S = 0.95;
 // The longest each waiting phase may hold before moving on regardless.
 // arrive and hold wait behind a copy that looks exactly like what's coming,
 // so a long wait is invisible, while giving up early shows as a cut.
-const WAIT_MS = { prep: 300, arrive: 2500, leave: 300, hold: 2500 };
+// prep waits behind an invisible copy that looks exactly like the card,
+// so it too can wait: starting the grow before the picture is ready is what
+// flashes.
+const WAIT_MS = { prep: 1200, arrive: 2500, leave: 300, hold: 2500 };
 
 // Which project was opened from the carousel. Set on opening; read when
 // the homepage comes back into view to decide whether to play the way back.
 export const RETURN_KEY = "expanded-project";
 // the carousel's remembered card (read by the homepage on arrival)
 export const SLIDE_KEY = "showcase-slide";
+
+// Touch screens go straight back to the carousel -- "All work" or the
+// phone's own back gesture -- with no way-back animation: nothing is
+// remembered for one to play. The card still opens with its transition.
+const touchOnly = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
 const ExpandContext = createContext(null);
 
@@ -215,21 +223,38 @@ export function ExpandTransitionProvider({ children }) {
     setActive((a) => (a && a.phase === from ? { ...a, ...extra, phase: to } : a));
   }, []);
 
+  // Busy from the instant a transition starts until it's cleared -- set
+  // straight away, not on the next render, so even two clicks in the same
+  // frame can't start two. Only one transition ever runs.
+  const busyRef = useRef(false);
+  const begin = useCallback((next) => {
+    busyRef.current = true;
+    setActive(next);
+  }, []);
+  useEffect(() => {
+    if (!active) busyRef.current = false;
+  }, [active]);
+
+  // "All work" (or a pull) while a card is still landing: kept, and played
+  // the moment the landing finishes, rather than cutting into it
+  const pendingReturn = useRef(null);
+
   // ---- opening
   const expand = useCallback(
     (project, cardEl) => {
       try {
-        sessionStorage.setItem(RETURN_KEY, project.id);
+        if (!touchOnly()) sessionStorage.setItem(RETURN_KEY, project.id);
       } catch {
         // storage blocked -- there just won't be a way-back animation
       }
+      if (busyRef.current) return;
       if (reduced || !cardEl) {
         navigate(project.to);
         return;
       }
-      setActive({ project, from: framing(cardEl), phase: "prep" });
+      begin({ project, from: framing(cardEl), phase: "prep" });
     },
-    [navigate, reduced]
+    [navigate, reduced, begin]
   );
 
   // the copy's media is ready to be seen: show it and start scaling
@@ -241,21 +266,39 @@ export function ExpandTransitionProvider({ children }) {
   // ---- the way back, started from the cover (see ProjectCover)
   const returnFrom = useCallback(
     (project, snapshot) => {
+      if (busyRef.current) {
+        const a = activeRef.current;
+        if (a && ["arrive", "handoff"].includes(a.phase)) pendingReturn.current = { project, snapshot };
+        return;
+      }
+      const instant = touchOnly();
       try {
-        sessionStorage.setItem(RETURN_KEY, project.id);
+        if (instant) sessionStorage.removeItem(RETURN_KEY);
+        else sessionStorage.setItem(RETURN_KEY, project.id);
         const i = projects.findIndex((p) => p.id === project.id);
         if (i >= 0) sessionStorage.setItem(SLIDE_KEY, String(i));
       } catch {
         // storage blocked -- the homepage just won't play the way back
       }
-      if (reduced || !snapshot) {
+      if (reduced || instant || !snapshot) {
         navigate("/");
         return;
       }
-      setActive({ project, from: fromCover(snapshot), phase: "leave" });
+      begin({ project, from: fromCover(snapshot), phase: "leave" });
     },
-    [navigate, reduced]
+    [navigate, reduced, begin]
   );
+
+  // a way back asked for during the landing: play it once the landing is done
+  const returnRef = useRef(returnFrom);
+  returnRef.current = returnFrom;
+  useEffect(() => {
+    if (active || !pendingReturn.current) return undefined;
+    const { project, snapshot } = pendingReturn.current;
+    pendingReturn.current = null;
+    const raf = requestAnimationFrame(() => returnRef.current(project, snapshot));
+    return () => cancelAnimationFrame(raf);
+  }, [active]);
 
   // the copy over the cover is ready: take over from it and go home
   const commitReturn = useCallback(() => {
@@ -276,21 +319,40 @@ export function ExpandTransitionProvider({ children }) {
     if (activeRef.current?.phase === "hold") return;
     const project = id && projects.find((p) => p.id === id);
     if (!project || reduced) return;
-    setActive({ project, from: frameOnly(), phase: "hold" });
-  }, [pathname, reduced]);
+    pendingReturn.current = null;
+    begin({ project, from: frameOnly(), phase: "hold" });
+  }, [pathname, reduced, begin]);
+
+  // Somewhere else entirely mid-transition (the menu, a link, the browser's
+  // back or forward): let it go cleanly -- no overlay left up, no card left
+  // hidden. Arriving back on the homepage is handled above instead.
+  useEffect(() => {
+    const a = activeRef.current;
+    if (!a) return;
+    const onPage = ["arrive", "handoff", "leave"].includes(a.phase);
+    const expected = onPage ? a.project.to : "/";
+    if (pathname === expected || pathname === "/") return;
+    pendingReturn.current = null;
+    a.onDone?.();
+    setActive(null);
+  }, [pathname]);
 
   // Returns false when there's nothing to play (reduced motion), so the
   // caller shows its card straight away.
   const collapse = useCallback(
     (project, cardEl, onDone) => {
+      // only takes over from the homepage's hold (or its fade), never from
+      // a transition still under way
+      const a = activeRef.current;
+      if (a && !["hold", "fade"].includes(a.phase)) return false;
       if (reduced || !cardEl) {
         setActive(null);
         return false;
       }
-      setActive({ project, from: framing(cardEl), phase: "shrink", onDone });
+      begin({ project, from: framing(cardEl), phase: "shrink", onDone });
       return true;
     },
-    [reduced]
+    [reduced, begin]
   );
 
   // ---- phase endings
@@ -402,6 +464,9 @@ export function ExpandTransitionProvider({ children }) {
       returnFrom,
       // where the cover's video should start, to match the copy
       coverStartTime: active?.phase === "arrive" ? active.coverTime : undefined,
+      // the cover holds its text and shade until the copy has cleared off
+      // it, so the handoff is picture to identical picture (see ProjectCover)
+      coverHeld: Boolean(active && ["arrive", "handoff"].includes(active.phase)),
       // the carousel steps back while a card is on its way out
       leavingId: active && ["prep", "grow"].includes(active.phase) ? active.project.id : null,
     }),

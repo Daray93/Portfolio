@@ -1070,6 +1070,22 @@ export default function Showcase({ items, kind = "work", label = "Selected work"
 
   const isLocked = useCallback((p) => p.locked && !isUnlocked, [isUnlocked]);
 
+  // Whether the track is still gliding (after a drag, a scroll or a click
+  // on a side card). The open transition measures the card, so a click on
+  // it while it's moving waits for it to come to rest.
+  const movingRef = useRef(false);
+  useEffect(() => {
+    if (!embla) return undefined;
+    const onScroll = () => (movingRef.current = true);
+    const onSettle = () => (movingRef.current = false);
+    embla.on("scroll", onScroll);
+    embla.on("settle", onSettle);
+    return () => {
+      embla.off("scroll", onScroll);
+      embla.off("settle", onSettle);
+    };
+  }, [embla]);
+
   const onSlideClick = (e, i) => {
     // modified clicks (new tab etc.) behave like any normal link
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
@@ -1090,8 +1106,24 @@ export default function Showcase({ items, kind = "work", label = "Selected work"
       setGateFor(project);
       return;
     }
-    const card = cardRefs.current[i];
-    expand(project, card);
+    // mid-transition (a card opening or on its way back): nothing to do
+    if (leavingId || returning) return;
+    const open = () => expand(project, cardRefs.current[i]);
+    if (!movingRef.current) {
+      open();
+      return;
+    }
+    // still gliding: open once it's at rest (or shortly regardless)
+    let done = false;
+    const go = () => {
+      if (done) return;
+      done = true;
+      embla.off("settle", go);
+      // only if it came to rest on this card, not one either side
+      if (embla.selectedScrollSnap() === i) open();
+    };
+    embla.on("settle", go);
+    setTimeout(go, 700);
   };
 
   const closeGate = () => {

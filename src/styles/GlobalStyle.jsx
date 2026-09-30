@@ -146,6 +146,19 @@ const GlobalStyle = createGlobalStyle`
   }
 
   /* ---------------- Misc ---------------- */
+  /* No page scrollbar. On Windows it takes up width: the homepage has
+     none, a case study does, so the page reflowed narrower the instant a
+     card handed over to its cover -- the whole screen jumped as the
+     transition cleared. The page still scrolls by wheel, trackpad, keys
+     and touch. (Inner scroll areas keep theirs, below.) */
+  html {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
   }
