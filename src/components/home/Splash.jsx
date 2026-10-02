@@ -27,7 +27,7 @@ import HoverCardCV from "./HoverCardCV";
 import HoverCard from "./HoverCard";
 import ScreenshotPanCard from "./ScreenshotPanCard";
 import ProtectedGate from "../shared/ProtectedGate";
-import MePhoto from "./assets/Me.png";
+import MePhoto from "../../assets/profile-photo.png";
 import neuroloopHero from "../../case-studies/neuroloop/assets/NeuroloopHero.png";
 import AvocadoJumpingJack from "../../case-studies/operation-avocado/AvocadoJumpingJack";
 import OrthoViveLogo from "../../case-studies/orthovive/assets/OrthoVive.png";

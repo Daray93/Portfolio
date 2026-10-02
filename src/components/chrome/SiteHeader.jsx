@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled, { css } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,28 +6,42 @@ import { FiMoon, FiSun } from "react-icons/fi";
 import { ease, easeArr, dur } from "../../styles/motion";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { useThemeMode } from "../../styles/ThemeModeContext";
+import AboutCard from "./AboutCard";
 import logo from "../../assets/shared/dp-logo.png";
 
 // Minimal top bar: the logo (home) on the left, the page's centre left to
 // the content.
 //   phones/tablets  a menu button on the right opens the full-screen menu
-//   desktop         the three pages as a pill nav on the right, always in
-//                   view
+//                   (Case studies, Websites and About)
+//   desktop         Case studies and Websites as a pill nav on the right,
+//                   always in view. About isn't in it: hovering (or
+//                   focusing) the name and logo unfolds the About card from
+//                   under them. A desktop-width screen with no hover (a big
+//                   tablet) gets an About pill instead.
 // A light/dark toggle sits at the far right at every size. Sits above the
 // full-screen menu so its buttons can close it.
 //
 // On a page that scrolls under it (a case study), `docked` makes it compact
 // and gives it a glass backing so text passing beneath doesn't show through
 // the logo; `current` marks a page as current when the URL isn't one of the
-// three (a case study belongs to Work).
+// nav's own (a case study belongs to Case studies).
 
 const DESKTOP = "(min-width: 1025px)";
 
+// a pointer that can hover: where the About card unfolds from the logo
+const HOVERS = "(hover: hover) and (pointer: fine)";
+
+// `touchOnly`: a pill only where the logo's About card can't be hovered open
 const PAGES = [
-  { to: "/", label: "Work" },
-  { to: "/about-me", label: "About" },
+  { to: "/", label: "Case studies" },
   { to: "/websites", label: "Websites" },
+  { to: "/about-me", label: "About", touchOnly: true },
 ];
+
+// a moment's pause before the card opens or closes, so brushing past the
+// logo doesn't flash it and the pointer can travel from the logo to the card
+const OPEN_MS = 90;
+const CLOSE_MS = 160;
 
 const Bar = styled.header`
   position: fixed;
@@ -190,6 +204,76 @@ const Role = styled.span`
   }
 `;
 
+// ---------------- The About card, from the logo ----------------
+
+// the logo and, under it, the card it unfolds
+const Home = styled.div`
+  position: relative;
+  display: inline-flex;
+`;
+
+// Only where a pointer can hover, at desktop width. The padding on top is
+// part of the hover area, so the pointer can cross from the logo to the
+// card without it closing.
+const Reveal = styled.div`
+  display: none;
+
+  @media ${DESKTOP} and ${HOVERS} {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    width: 384px;
+    padding-top: 14px;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s linear ${dur.base}s;
+
+    &[data-open] {
+      visibility: visible;
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+  }
+`;
+
+// The card's surface. It unfolds downwards from under the name: clipped to
+// nothing at its top edge, then opened out (the clip reaches past the edges
+// once open, so the shadow isn't cut off).
+const Sheet = styled.div`
+  padding: 24px;
+  border-radius: 24px;
+  background: ${({ theme }) => theme.body};
+  box-shadow:
+    inset 0 0 0 1px ${({ theme }) => theme.border},
+    0 24px 64px -24px rgba(0, 0, 0, ${({ theme }) => (theme.mode === "dark" ? 0.7 : 0.28)});
+  clip-path: inset(0 -64px 100% -64px);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    clip-path ${dur.base}s ${ease.out},
+    opacity ${dur.fast}s ${ease.out},
+    transform ${dur.base}s ${ease.out};
+
+  ${Reveal}[data-open] & {
+    clip-path: inset(-64px);
+    opacity: 1;
+    transform: none;
+    transition:
+      clip-path ${dur.slow}s ${ease.out},
+      opacity ${dur.fast}s ${ease.out},
+      transform ${dur.slow}s ${ease.out};
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    ${Reveal}[data-open] & {
+      transition: none;
+      transform: none;
+    }
+  }
+`;
+
 // ---------------- Desktop pill nav ----------------
 
 const PillTrack = styled.nav`
@@ -232,6 +316,15 @@ const Pill = styled(Link)`
     outline: 2px solid ${({ theme }) => theme.text};
     outline-offset: 2px;
   }
+
+  /* About: a pill only where the logo's card can't be hovered open */
+  ${({ $touchOnly }) =>
+    $touchOnly &&
+    css`
+      @media ${HOVERS} {
+        display: none;
+      }
+    `}
 `;
 
 // The current page's fill, and a softer highlight following the pointer
@@ -372,6 +465,7 @@ function PillNav({ hidden, current: currentPath }) {
             key={p.to}
             to={p.to}
             $current={current}
+            $touchOnly={p.touchOnly}
             aria-current={current ? "page" : undefined}
             onMouseEnter={() => setHovered(p.to)}
           >
@@ -413,15 +507,64 @@ export default function SiteHeader({
   current,
   docked = false,
 }) {
+  const { pathname } = useLocation();
+  // the About card under the logo (desktop, with a pointer that hovers)
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const timer = useRef(0);
+  const blocked = menuOpen || away || overIntro;
+
+  const openSoon = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setAboutOpen(true), OPEN_MS);
+  };
+  const closeSoon = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setAboutOpen(false), CLOSE_MS);
+  };
+  const closeNow = () => {
+    clearTimeout(timer.current);
+    setAboutOpen(false);
+  };
+
+  // closed on arriving anywhere new, and whenever the header steps aside
+  useEffect(() => {
+    clearTimeout(timer.current);
+    setAboutOpen(false);
+  }, [pathname, blocked]);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const showAbout = aboutOpen && !blocked;
+
   return (
     <Bar $overIntro={overIntro} $away={away} $docked={docked}>
-      <Logo to="/">
-        <Mark aria-hidden="true" />
-        <Who>
-          <Name>Dara Phillips</Name>
-          <Role>Product designer &amp; developer</Role>
-        </Who>
-      </Logo>
+      <Home
+        onMouseEnter={openSoon}
+        onMouseLeave={closeSoon}
+        // keyboard: focusing the logo opens the card, so Tab carries on into it
+        onFocus={() => {
+          clearTimeout(timer.current);
+          setAboutOpen(true);
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) closeNow();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") closeNow();
+        }}
+      >
+        <Logo to="/">
+          <Mark aria-hidden="true" />
+          <Who>
+            <Name>Dara Phillips</Name>
+            <Role>Product designer &amp; developer</Role>
+          </Who>
+        </Logo>
+        <Reveal data-open={showAbout ? "" : undefined} inert={!showAbout}>
+          <Sheet>
+            <AboutCard onNavigate={closeNow} />
+          </Sheet>
+        </Reveal>
+      </Home>
       <Controls>
         <PillNav hidden={menuOpen} current={current} />
         <ThemeToggle />

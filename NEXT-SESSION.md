@@ -53,7 +53,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 
 - **Projects, in order:** Cruciate, Operation Avocado, Pints Yurt, OrthoVive (password-locked). Set in `src/data/projects.js`, which is the single source for cards, colours, icons and captions.
 - **Removed from the carousel, but pages and files kept:** Audanote, Kropt, Neuroloop, IBHF. Their routes still work if you visit the URL directly.
-- **One shared frame:** Work (the homepage), About and Websites share one frame (`src/components/shell/Shell.jsx`). The background, header and menu stay put; only the page in the middle slides, following the header's pill nav.
+- **One shared frame:** Case studies (the homepage), Websites and About share one frame (`src/components/shell/Shell.jsx`). The background, header and menu stay put; only the page in the middle slides, following the header's pill nav.
 - **Card to project transition:** the card scales up into a large framed card (a margin all round, rounded corners) while the page behind settles to the plain page background. It lands on the case study's cover, which is that same frame. Fixed on 29 Sep 2026: corners stay rounded throughout, the picture stays sharp as it grows, and it no longer skips.
 - **The way back:**
   - Pulling back on the cover (scroll up at the top, or drag down on a phone) shrinks the frame slightly with the gesture, springing back if let go.
@@ -96,6 +96,7 @@ The homepage is done and working: a cinematic showcase carousel inspired by nial
 - **Case study numbering:** sections 01–08; a section's peer parts are numbered sub-sections (06.01), numbered from the section automatically; `Subheading` is never numbered.
 - **Case study honesty:** evidence or hypothesis on every insight; papers verified before they go on the page; screenshots are the real app with real data (fix bad data in the app, never edit the image).
 - **LinkedIn hover:** the whole label turns LinkedIn blue (text and icon), in the menu and on About.
+- **Nav and About (2 Oct 2026):** the nav is Case studies and Websites. About is one small card (`src/components/chrome/AboutCard.jsx`): photo, a few lines in Dara's voice, "What's next", and CV / LinkedIn / email. No dates, degree, years of experience or tool lists: the old page read like a CV and framed Dara as junior. On desktop it unfolds from the header's name and logo on hover or keyboard focus (`SiteHeader.jsx`); phones and tablets reach it from the menu, as the `/about-me` page. A desktop-width screen with no hover gets an About pill. The profile photo is `src/assets/profile-photo.png`. A short intro video was considered and parked.
 - **Cursor:** the normal system cursor. The custom glass cursor was removed for good. On the carousel, the focused card shows a small glass circle top right on hover (expand icon, or a padlock on OrthoVive), and glass arrow buttons at the screen edges move to the side cards.
 - **Buttons:** one outlined pill style, `src/components/chrome/pill.js` (menu email and LinkedIn, About's actions).
 - **Motion:** every curve and duration comes from `src/styles/motion.js`. The `reveal` block sets the intro timing. Reduced motion follows the visitor's system setting only (live, in `MotionPreferenceContext.jsx`).

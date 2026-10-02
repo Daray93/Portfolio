@@ -9,8 +9,8 @@ import CopyEmail from "./CopyEmail";
 import { pill } from "./pill";
 
 // Full-screen navigation behind the header's menu button, on phones and
-// tablets (desktop has the header's pill nav instead): three big links
-// centred, email and LinkedIn below. Motion follows the visitor's system
+// tablets (desktop has the header's pill nav instead, and About under the
+// logo): three big links centred, email and LinkedIn below. Motion follows the visitor's system
 // "reduce motion" setting, so there's no switch for it here.
 
 const Panel = styled.div`
@@ -138,9 +138,9 @@ const Social = styled.a`
 `;
 
 const LINKS = [
-  { to: "/", label: "Work" },
-  { to: "/about-me", label: "About" },
+  { to: "/", label: "Case studies" },
   { to: "/websites", label: "Websites" },
+  { to: "/about-me", label: "About" },
 ];
 
 // email and LinkedIn, in whichever row the layout needs
@@ -159,7 +159,7 @@ function ContactLinks({ as }) {
 }
 
 // `current` marks a page as current when the URL isn't one of the three
-// (a case study belongs to Work)
+// (a case study belongs to Case studies)
 export default function SiteMenu({ open, onClose, current }) {
   const { pathname } = useLocation();
   const here = current ?? pathname;
