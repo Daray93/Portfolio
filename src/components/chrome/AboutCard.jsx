@@ -161,7 +161,7 @@ export default function AboutCard({ as = "h2", onNavigate }) {
         <Portrait src={portrait} draggable={false} alt="" />
         <div>
           <Greeting as={as}>Hi, I&apos;m Dara.</Greeting>
-          <Where>Product designer in Ireland</Where>
+          <Where>Product Designer · Ireland</Where>
         </div>
       </Byline>
 
@@ -170,7 +170,7 @@ export default function AboutCard({ as = "h2", onNavigate }) {
         <Link to="/cruciate" onClick={onNavigate}>
           Cruciate
         </Link>
-        . Not knowing the price of a pint became{" "}
+        . The difference in Guinness prices from pub to pub became{" "}
         <Link to="/pints-yurt" onClick={onNavigate}>
           Pints Yurt
         </Link>

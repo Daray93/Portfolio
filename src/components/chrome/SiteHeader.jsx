@@ -237,6 +237,53 @@ const Reveal = styled.div`
   }
 `;
 
+// While the card is open, the page behind all but disappears: a wash of the
+// page's own colour, heavy enough that the project cards are barely there,
+// with a slight blur, under the header (which stays as it is). The
+// homepage's drifting background is held still meanwhile (HOLD, read by
+// Backdrop), because a live blur over a moving background shimmers. The
+// wash never catches the pointer, so moving away still closes the card, and
+// it fades in a beat after the card starts to open, so brushing past the
+// logo doesn't flash the page. Outside the bar, because the docked bar's
+// backdrop blur would make it the box a fixed child is measured from.
+const DIM = 92;
+const HOLD = "holdBackdrop";
+
+const Scrim = styled.div`
+  display: none;
+
+  @media ${DESKTOP} and ${HOVERS} {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    background: color-mix(in srgb, ${({ theme }) => theme.body} ${DIM}%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity ${dur.base}s ${ease.out},
+      visibility 0s linear ${dur.base}s;
+
+    &[data-open] {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity ${dur.slow}s ${ease.out} 0.08s,
+        visibility 0s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &[data-open] {
+      transition: none;
+    }
+  }
+`;
+
 // The card's surface. It unfolds downwards from under the name: clipped to
 // nothing at its top edge, then opened out (the clip reaches past the edges
 // once open, so the shadow isn't cut off).
@@ -244,9 +291,12 @@ const Sheet = styled.div`
   padding: 24px;
   border-radius: 24px;
   background: ${({ theme }) => theme.body};
+  /* nothing dims behind it, so the shadow does the lifting: a close one for
+     the edge, a wide one for the height */
   box-shadow:
     inset 0 0 0 1px ${({ theme }) => theme.border},
-    0 24px 64px -24px rgba(0, 0, 0, ${({ theme }) => (theme.mode === "dark" ? 0.7 : 0.28)});
+    0 6px 18px -8px rgba(0, 0, 0, ${({ theme }) => (theme.mode === "dark" ? 0.6 : 0.16)}),
+    0 28px 72px -24px rgba(0, 0, 0, ${({ theme }) => (theme.mode === "dark" ? 0.8 : 0.34)});
   clip-path: inset(0 -64px 100% -64px);
   opacity: 0;
   transform: translateY(-6px);
@@ -535,51 +585,65 @@ export default function SiteHeader({
 
   const showAbout = aboutOpen && !blocked;
 
+  // the background holds still while the card is open (where the card
+  // shows at all: desktop, with a pointer that hovers)
+  useEffect(() => {
+    const html = document.documentElement;
+    if (showAbout && window.matchMedia(`${DESKTOP} and ${HOVERS}`).matches) html.dataset[HOLD] = "";
+    else delete html.dataset[HOLD];
+    return () => {
+      delete html.dataset[HOLD];
+    };
+  }, [showAbout]);
+
   return (
-    <Bar $overIntro={overIntro} $away={away} $docked={docked}>
-      <Home
-        onMouseEnter={openSoon}
-        onMouseLeave={closeSoon}
-        // keyboard: focusing the logo opens the card, so Tab carries on into it
-        onFocus={() => {
-          clearTimeout(timer.current);
-          setAboutOpen(true);
-        }}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget)) closeNow();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") closeNow();
-        }}
-      >
-        <Logo to="/">
-          <Mark aria-hidden="true" />
-          <Who>
-            <Name>Dara Phillips</Name>
-            <Role>Product designer &amp; developer</Role>
-          </Who>
-        </Logo>
-        <Reveal data-open={showAbout ? "" : undefined} inert={!showAbout}>
-          <Sheet>
-            <AboutCard onNavigate={closeNow} />
-          </Sheet>
-        </Reveal>
-      </Home>
-      <Controls>
-        <PillNav hidden={menuOpen} current={current} />
-        <ThemeToggle />
-        <MenuButton
-          type="button"
-          $open={menuOpen}
-          onClick={onMenuToggle}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="site-menu"
+    <>
+      <Scrim data-open={showAbout ? "" : undefined} aria-hidden="true" />
+      <Bar $overIntro={overIntro} $away={away} $docked={docked}>
+        <Home
+          onMouseEnter={openSoon}
+          onMouseLeave={closeSoon}
+          // keyboard: focusing the logo opens the card, so Tab carries on into it
+          onFocus={() => {
+            clearTimeout(timer.current);
+            setAboutOpen(true);
+          }}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) closeNow();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeNow();
+          }}
         >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </MenuButton>
-      </Controls>
-    </Bar>
+          <Logo to="/">
+            <Mark aria-hidden="true" />
+            <Who>
+              <Name>Dara Phillips</Name>
+              <Role>Product designer &amp; developer</Role>
+            </Who>
+          </Logo>
+          <Reveal data-open={showAbout ? "" : undefined} inert={!showAbout}>
+            <Sheet>
+              <AboutCard onNavigate={closeNow} />
+            </Sheet>
+          </Reveal>
+        </Home>
+        <Controls>
+          <PillNav hidden={menuOpen} current={current} />
+          <ThemeToggle />
+          <MenuButton
+            type="button"
+            $open={menuOpen}
+            onClick={onMenuToggle}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="site-menu"
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </MenuButton>
+        </Controls>
+      </Bar>
+    </>
   );
 }

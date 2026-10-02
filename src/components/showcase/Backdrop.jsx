@@ -34,6 +34,13 @@ const Root = styled.div`
   overflow: hidden;
   background: ${({ theme }) => theme.body};
   transition: background-color 0.3s ease;
+
+  /* held still while the header's About card is open (see SiteHeader): the
+     page behind it is blurred, and a drifting background shimmers under a
+     live blur. It picks up from where it stopped. */
+  html[data-hold-backdrop] & * {
+    animation-play-state: paused !important;
+  }
 `;
 
 // ---------------- ambient ----------------
