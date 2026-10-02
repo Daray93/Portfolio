@@ -43,11 +43,26 @@
       content="Product designer based in Ireland. Case studies in mobile, AI/VR, and health-tech design — designed, built, and shipped end-to-end."
     />
 
+    <!-- The colour a phone's browser uses around the page (status bar,
+         toolbar). The script below and ThemeModeContext.jsx keep it on the
+         page colour of the theme in use. -->
+    <meta name="theme-color" content="#161616" />
+
     <style>
       /* Paints before the app loads, in the visitor's theme (see
          ThemeModeContext.jsx): their saved pick, else their device's
          setting (the script below). Headings share the body font (Poppins,
          see GlobalStyle.jsx); only size and weight set them apart. */
+      /* color-scheme: what the browser draws itself (the area past the
+         page's edges on a phone, scrollbars) follows the theme too */
+      html {
+        color-scheme: dark;
+      }
+
+      html.light {
+        color-scheme: light;
+      }
+
       body {
         font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
         margin: 0;
@@ -79,7 +94,10 @@
           pick = localStorage.getItem("theme-pref");
         } catch (e) {}
         var light = pick ? pick === "light" : matchMedia("(prefers-color-scheme: light)").matches;
-        if (light) document.documentElement.classList.add("light");
+        if (light) {
+          document.documentElement.classList.add("light");
+          document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f2f0ea");
+        }
       })();
     </script>
   </head>

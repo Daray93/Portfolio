@@ -34,9 +34,13 @@ export function ThemeModeProvider({ children }) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // keep the pre-paint class in step, for anything reading it
+  // keep the pre-paint class in step, for anything reading it, and the
+  // colour a phone's browser uses around the page (see index.html)
   useEffect(() => {
     document.documentElement.classList.toggle("light", mode === "light");
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", (mode === "dark" ? darkTheme : lightTheme).body);
   }, [mode]);
 
   const value = useMemo(

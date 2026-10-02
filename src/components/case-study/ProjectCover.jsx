@@ -6,7 +6,7 @@ import ProjectMedia from "../showcase/ProjectMedia";
 import Tagline from "../showcase/Tagline";
 import RollText from "../shared/RollText";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
-import { ease, dur } from "../../styles/motion";
+import { ease, dur, press } from "../../styles/motion";
 import { COVER_INSET, COVER_RADIUS, COVER_PHONE_QUERY } from "../showcase/coverFrame";
 import { useExpandTransition } from "../showcase/ExpandTransition";
 
@@ -224,7 +224,10 @@ const Back = styled(Link)`
   box-shadow: inset 0 0 0 1px var(--glass-edge);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  transition: background-color ${dur.fast}s ${EASE};
+  transition:
+    background-color ${dur.fast}s ${EASE},
+    scale ${dur.fast}s ${EASE};
+  ${press}
 
   /* extra hover room all round: hovering shrinks the frame and carries the
      button a little way inward (see Frame), and the pointer should still
@@ -393,7 +396,10 @@ const Visit = styled.a`
   font-size: 0.95rem;
   font-weight: 500;
   animation: ${fadeUp} ${dur.slow}s ${EASE} 0.2s both;
-  transition: background-color ${dur.fast}s ${EASE};
+  transition:
+    background-color ${dur.fast}s ${EASE},
+    scale ${dur.fast}s ${EASE};
+  ${press}
 
   svg {
     width: 18px;
@@ -583,7 +589,10 @@ const ScrollCue = styled.button`
     backdrop-filter: blur(12px);
     white-space: nowrap;
     text-shadow: none;
-    transition: background-color ${dur.fast}s ${EASE};
+    transition:
+      background-color ${dur.fast}s ${EASE},
+      scale ${dur.fast}s ${EASE};
+    ${press}
 
     &:hover {
       background: var(--glass-hover);

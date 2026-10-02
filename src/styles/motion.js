@@ -29,6 +29,21 @@ export const dur = {
   slower: 1.2, // whole-screen travel, background crossfades
 };
 
+// A button giving a little under a press, the same everywhere: pills and
+// other wide buttons with `press`, small round icon buttons (where 3% would
+// be a pixel) with `pressSmall`. It uses `scale`, not `transform`, so it adds
+// to whatever transform the button already has. Dropped into a styled
+// component's styles; the component lists `scale` in its own transition so
+// letting go eases back.
+const pressed = (to) => `
+  &:active {
+    scale: ${to};
+    transition-duration: 0.1s;
+  }
+`;
+export const press = pressed(0.97);
+export const pressSmall = pressed(0.9);
+
 // gap between items revealed in sequence
 export const stagger = 0.08;
 

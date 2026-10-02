@@ -5,7 +5,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { auth, authReady } from "../../firebase";
 import RollText from "./RollText";
-import { ease, dur } from "../../styles/motion";
+import { ease, dur, press } from "../../styles/motion";
 
 // Shared Firebase Auth account gating every NDA-protected case study.
 // The real password lives only in Firebase Auth — never in this repo.
@@ -302,7 +302,9 @@ const pill = css`
   cursor: pointer;
   transition:
     border-color ${dur.fast}s ${ease.out},
-    opacity ${dur.fast}s ${ease.out};
+    opacity ${dur.fast}s ${ease.out},
+    scale ${dur.fast}s ${ease.out};
+  ${press}
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.text};

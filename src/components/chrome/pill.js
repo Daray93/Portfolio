@@ -1,5 +1,5 @@
 import { css } from "styled-components";
-import { ease, dur } from "../../styles/motion";
+import { ease, dur, press } from "../../styles/motion";
 
 // The site's outlined pill button (the menu's email and LinkedIn, About's
 // actions): 48px tall, a hairline border, the text colour on hover.
@@ -18,7 +18,9 @@ export const pill = css`
   color: ${({ theme }) => theme.text};
   transition:
     border-color ${dur.fast}s ${ease.out},
-    background-color ${dur.fast}s ${ease.out};
+    background-color ${dur.fast}s ${ease.out},
+    scale ${dur.fast}s ${ease.out};
+  ${press}
 
   svg {
     flex: none;

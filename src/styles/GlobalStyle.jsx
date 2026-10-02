@@ -25,8 +25,15 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 400;
     background: ${({ theme }) => theme.body};
     color: ${({ theme }) => theme.text};
-    transition: background 0.3s ease, color 0.3s ease;
+    /* No fade between themes: iPhone Safari colours the area around the
+       page from this background as it changes, and a fade left it on the
+       old theme's colour (cream around a dark page). */
     overflow-x: hidden;
+  }
+
+  /* what the browser draws itself follows the theme too (see index.html) */
+  html {
+    color-scheme: ${({ theme }) => theme.mode};
   }
 
   /* ---------------- Text selection ---------------- */

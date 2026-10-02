@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import styled, { css } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMoon, FiSun } from "react-icons/fi";
-import { ease, easeArr, dur } from "../../styles/motion";
+import { ease, easeArr, dur, pressSmall } from "../../styles/motion";
 import { useMotionPreference } from "../../styles/MotionPreferenceContext";
 import { useThemeMode } from "../../styles/ThemeModeContext";
 import AboutCard from "./AboutCard";
@@ -165,7 +165,9 @@ const Mark = styled.span`
   backdrop-filter: blur(20px);
   box-shadow: inset 0 0 0 1px
     ${({ theme }) => (theme.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)")};
-  transition: background-color ${dur.fast}s ${ease.out};
+  transition:
+    background-color ${dur.fast}s ${ease.out},
+    scale ${dur.fast}s ${ease.out};
 
   /* the logo's shape as a mask, filled with the text colour, so it's
      off-white on dark and near-black on light like the rest of the header */
@@ -180,6 +182,12 @@ const Mark = styled.span`
 
   ${Logo}:hover & {
     background: ${({ theme }) => theme.buttonGhostHoverBg};
+  }
+
+  /* pressed: the circle gives, like the round buttons opposite */
+  ${Logo}:active & {
+    scale: 0.92;
+    transition-duration: 0.1s;
   }
 `;
 
@@ -223,7 +231,7 @@ const Reveal = styled.div`
     position: absolute;
     top: 100%;
     left: -12px;
-    width: 384px;
+    width: 408px;
     padding-top: 14px;
     visibility: hidden;
     pointer-events: none;
@@ -288,7 +296,7 @@ const Scrim = styled.div`
 // nothing at its top edge, then opened out (the clip reaches past the edges
 // once open, so the shadow isn't cut off).
 const Sheet = styled.div`
-  padding: 24px;
+  padding: 28px;
   border-radius: 24px;
   background: ${({ theme }) => theme.body};
   /* nothing dims behind it, so the shadow does the lifting: a close one for
@@ -419,12 +427,28 @@ const ThemeButton = styled.button`
   background: transparent;
   color: inherit;
   cursor: pointer;
-  transition: background-color ${dur.fast}s ${ease.out};
+  transition:
+    background-color ${dur.fast}s ${ease.out},
+    scale ${dur.fast}s ${ease.out};
+  ${pressSmall}
 
+  /* Sun and moon share the middle; the one on show is the mode a press
+     switches to. Switching, one turns and shrinks away as the other turns in. */
   svg {
+    grid-area: 1 / 1;
     width: 18px;
     height: 18px;
     stroke-width: 1.75;
+    transition:
+      opacity ${dur.fast}s ${ease.out},
+      rotate ${dur.base}s ${ease.out},
+      scale ${dur.base}s ${ease.out};
+  }
+
+  svg[data-off] {
+    opacity: 0;
+    rotate: -90deg;
+    scale: 0.5;
   }
 
   &:hover {
@@ -446,7 +470,8 @@ function ThemeToggle() {
       onClick={toggleMode}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {dark ? <FiSun aria-hidden="true" /> : <FiMoon aria-hidden="true" />}
+      <FiSun aria-hidden="true" data-off={dark ? undefined : ""} />
+      <FiMoon aria-hidden="true" data-off={dark ? "" : undefined} />
     </ThemeButton>
   );
 }
@@ -462,6 +487,8 @@ const MenuButton = styled.button`
   background: transparent;
   color: inherit;
   cursor: pointer;
+  transition: scale ${dur.fast}s ${ease.out};
+  ${pressSmall}
 
   span {
     position: absolute;

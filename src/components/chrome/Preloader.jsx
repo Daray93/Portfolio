@@ -25,7 +25,7 @@ const SEEN_KEY = "preloaded";
 // TEMPORARY, for testing: play on every fresh page load (still skipped when
 // coming back to the homepage within the site). Set to false before
 // deploying so it's first visit only again.
-const EVERY_LOAD = true;
+const EVERY_LOAD = false;
 let seenThisLoad = false;
 // long enough for the name to arrive in full and be read, however fast
 // the images load: it's fully in at ARRIVE_S, then holds

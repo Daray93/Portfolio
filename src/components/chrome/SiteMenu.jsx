@@ -129,11 +129,17 @@ const Social = styled.a`
     transition:
       color ${dur.fast}s ${ease.out},
       border-color ${dur.fast}s ${ease.out},
-      background-color ${dur.fast}s ${ease.out};
+      background-color ${dur.fast}s ${ease.out},
+      scale ${dur.fast}s ${ease.out};
   }
 
   &&&:hover {
     color: ${({ theme }) => theme.linkedin};
+  }
+
+  /* the pill's quick press, which the transition above would slow */
+  &&&:active {
+    transition-duration: 0.1s;
   }
 `;
 

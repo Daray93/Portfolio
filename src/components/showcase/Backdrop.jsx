@@ -32,8 +32,8 @@ const Root = styled.div`
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  /* switches with the theme at once, no fade (see GlobalStyle) */
   background: ${({ theme }) => theme.body};
-  transition: background-color 0.3s ease;
 
   /* held still while the header's About card is open (see SiteHeader): the
      page behind it is blurred, and a drifting background shimmers under a

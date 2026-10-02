@@ -793,11 +793,18 @@ const PagerButton = styled.button`
     opacity: ${({ $on }) => ($on ? 1 : 0.5)};
     transition:
       width ${dur.slow}s ${ease.inOut},
-      opacity ${dur.fast}s ${ease.out};
+      opacity ${dur.fast}s ${ease.out},
+      scale ${dur.fast}s ${ease.out};
   }
 
   &:hover::before {
     opacity: 1;
+  }
+
+  /* pressed: the mark gives a little */
+  &:active::before {
+    scale: 0.8;
+    transition-duration: 0.1s;
   }
 
   @media (prefers-reduced-motion: reduce) {
