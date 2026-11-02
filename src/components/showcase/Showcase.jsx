@@ -54,7 +54,7 @@ const onPhone = window.matchMedia(PHONE_QUERY).matches;
 // just text)
 const preloadSources = (items) =>
   items
-    .filter((p) => p.media.src && p.media.type !== "video")
+    .filter((p) => p.media.src && p.media.type !== "video" && !/\.(mp4|webm|mov)(\?|$)/i.test(p.media.src))
     .map((p) => (onPhone && p.media.mobileSrc) || p.media.src);
 
 // A picture of the card for the background to blur: a screenshot, or what a
@@ -66,7 +66,7 @@ function backdropImage(item) {
   if (!m || !m.src || /\.(mp4|webm|mov|svg)(\?|$)/i.test(m.src)) return null;
   // a contained picture (a composition on a transparent ground) blurs to mud
   if (m.type === "image") return m.fit === "contain" ? null : (onPhone && m.mobileSrc) || m.src;
-  if (m.type === "tablet" || m.type === "desktop") return m.src;
+  if (m.type === "tablet" || m.type === "desktop" || m.type === "laptop") return m.src;
   return null;
 }
 

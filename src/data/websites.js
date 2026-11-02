@@ -10,34 +10,47 @@
 // years        optional
 // url          the live address
 // media        what fills the card: { type: "image", src } for a finished
-//              image; { type: "tablet" | "desktop", src } for a screenshot or
+//              image; { type: "tablet" | "laptop" | "desktop", src } for a screenshot or
 //              screen recording shown on that device (add `split` -- a second
 //              screenshot of the same page, e.g. its dark mode -- to split the
-//              screen diagonally between the two); or { type: "wordmark",
+//              screen diagonally between the two; or, on a desktop, `phone` --
+//              a 9:16 phone screenshot of the same page, shown on a phone
+//              standing in front of it); or { type: "wordmark",
 //              ink } (the name in `ink` on the `panel` colour) until there's
 //              something to show
 //
-// Each site's media lives in its own folder, src/websites/<id>/ (IBHF's
-// laptop shot is shared with its case study, in src/case-studies/ibhf/assets/).
+// Each site's media lives in its own folder, src/websites/<id>/.
 // backdrop     [key light, floor bounce, base] for the page background
 
+import jessicaRecording from "../websites/jessica-amir/jessica-amir.mp4";
+import jessicaPhone from "../websites/jessica-amir/screen-phone.webp";
 import aliceScreen from "../websites/alice-abreu-music/screen.webp";
 import miseRecording from "../websites/mise/mise.mp4";
 import gulfemLight from "../websites/gulfem-cevheribucak/screen-light.webp";
 import gulfemDark from "../websites/gulfem-cevheribucak/screen-dark.webp";
-import ibhfCard from "../case-studies/ibhf/assets/ibhf-cell.png";
-import ibhfCardPhone from "../websites/ibhf/card-phone.webp";
+import ibhfRecording from "../websites/ibhf/ibhf.mp4";
 
 const websites = [
+  {
+    id: "jessica-amir",
+    title: "Jessica Amir",
+    description: "Website for an investment strategist",
+    role: "Design & Development",
+    url: "https://jessica-amir.web.app/",
+    // a tour of the site on a desktop, with the phone version in front
+    media: { type: "desktop", src: jessicaRecording, phone: jessicaPhone },
+    panel: "#e4e5e7",
+    // the site is black and white; a cool grey to match
+    backdrop: ["#3a3d42", "#9a9ea6", "#040405"],
+  },
   {
     id: "alice-abreu-music",
     title: "Alice Abreu Music",
     description: "Website for a working musician",
     role: "Design & Development",
     url: "https://alice-abreu-music.web.app/",
-    // the top of the homepage on a desktop screen (full-page.png beside it
-    // is the whole page, kept as the source)
-    media: { type: "desktop", src: aliceScreen },
+    // the top of the homepage on a laptop
+    media: { type: "laptop", src: aliceScreen },
     panel: "#e9e5f7",
     backdrop: ["#5a2d8a", "#9a78c8", "#040206"],
   },
@@ -47,8 +60,7 @@ const websites = [
     description: "Academic portfolio for a researcher",
     role: "Design & Development",
     url: "https://gulfem-cevheribucak.web.app/",
-    // the homepage in light and dark, split on a diagonal (the full pages
-    // are kept beside the crops as the source)
+    // the homepage in light and dark, split on a diagonal
     media: { type: "desktop", src: gulfemLight, split: gulfemDark },
     panel: "#e7e3dc",
     // her brand colour
@@ -70,10 +82,9 @@ const websites = [
     title: "Irish Bee & Heritage Foundation",
     description: "Beekeeping courses and online shop",
     role: "Design & Development",
-    url: "https://ibhf.ie",
-    // the site on a laptop; on phones the same laptop, centred on a taller
-    // canvas of its backdrop (card-phone.webp, made from ibhf-cell.png)
-    media: { type: "image", src: ibhfCard, mobileSrc: ibhfCardPhone },
+    url: "https://ibhf-site.web.app/",
+    // a tour of the site on a laptop
+    media: { type: "laptop", src: ibhfRecording },
     panel: "#eeedeb",
     backdrop: ["#5e440a", "#c89a3a", "#050402"],
   },

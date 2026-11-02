@@ -65,15 +65,16 @@ const Logo = styled.img`
 `;
 
 // A screenshot or screen recording shown on a device, centred on the panel
-// colour -- a landscape tablet (4:3) or a desktop monitor (16:10 on a
-// stand). Drawn in CSS, so it stays sharp at any size, a card or grown to
-// full screen. The stage is a size container, so the device is as big as
+// colour -- a landscape tablet (4:3), a desktop monitor (16:9 on a stand)
+// or a laptop (16:9 on its base). Drawn in CSS, so it stays sharp at any
+// size, a card or grown to full screen. The stage is a size container, so the device is as big as
 // fits either way (cqw/cqh); the screenshot or recording fills its screen,
 // anchored to the top (a web page reads from its header down).
 const DEVICES = {
   // width / total height (the monitor's includes its stand)
   tablet: { ratio: 4 / 3 },
-  desktop: { ratio: 1.36 },
+  desktop: { ratio: 1.52 },
+  laptop: { ratio: 1.97 },
 };
 
 const DeviceStage = styled.div`
@@ -131,6 +132,7 @@ const Tablet = styled.div`
 // a slim monitor: thin even bezels, a camera dot, then a neck and foot
 const Desktop = styled.div`
   --w: min(100cqw, calc(100cqh * ${DEVICES.desktop.ratio}));
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,7 +142,7 @@ const Desktop = styled.div`
 const Monitor = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   padding: calc(var(--w) * 0.014);
   border-radius: calc(var(--w) * 0.018);
   background: #0c0c0e;
@@ -183,6 +185,92 @@ const Foot = styled.div`
   box-shadow: 0 calc(var(--w) * 0.01) calc(var(--w) * 0.03) rgba(0, 0, 0, 0.3);
 `;
 
+// a laptop: the lid (thin bezels, a deeper chin) on a base a little wider
+// than it, with the notch for opening it
+const Laptop = styled.div`
+  --w: min(100cqw, calc(100cqh * ${DEVICES.laptop.ratio}));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--w);
+`;
+
+const Lid = styled.div`
+  position: relative;
+  width: 82%;
+  padding: calc(var(--w) * 0.01) calc(var(--w) * 0.01) calc(var(--w) * 0.025);
+  border-radius: calc(var(--w) * 0.016) calc(var(--w) * 0.016) 0 0;
+  background: #0c0c0e;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+
+  /* the camera, centred on the top bezel */
+  &::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--w) * 0.004);
+    left: 50%;
+    width: calc(var(--w) * 0.003);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #1f2a33;
+    transform: translateX(-50%);
+  }
+
+  img,
+  video {
+    ${screenFill}
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: calc(var(--w) * 0.004);
+  }
+`;
+
+const Base = styled.div`
+  position: relative;
+  width: 100%;
+  height: calc(var(--w) * 0.022);
+  border-radius: 0 0 calc(var(--w) * 0.02) calc(var(--w) * 0.02) / 0 0 calc(var(--w) * 0.012) calc(var(--w) * 0.012);
+  background: linear-gradient(to bottom, #e4e4e8, #c2c2c7 45%, #8e8e93);
+  box-shadow: 0 calc(var(--w) * 0.025) calc(var(--w) * 0.06) rgba(0, 0, 0, 0.4);
+
+  /* the notch for lifting the lid */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 14%;
+    height: 40%;
+    border-radius: 0 0 calc(var(--w) * 0.008) calc(var(--w) * 0.008);
+    background: linear-gradient(to bottom, #9a9a9f, #b4b4b9);
+    transform: translateX(-50%);
+  }
+`;
+
+// the same page on a phone (9:16), standing on the desk in front of the
+// monitor's bottom-right corner, sized off the monitor so the two scale
+// together
+const Phone = styled.div`
+  position: absolute;
+  right: calc(var(--w) * -0.05);
+  bottom: 0;
+  width: calc(var(--w) * 0.19);
+  padding: calc(var(--w) * 0.007);
+  border-radius: calc(var(--w) * 0.028);
+  background: #0c0c0e;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 0 0 calc(var(--w) * 0.002) #2a2a2e,
+    0 calc(var(--w) * 0.02) calc(var(--w) * 0.05) rgba(0, 0, 0, 0.45);
+
+  img {
+    ${screenFill}
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: calc(var(--w) * 0.021);
+  }
+`;
+
 const isVideo = (src) => /\.(mp4|webm|mov)(\?|$)/i.test(src);
 
 // Two screenshots of the same page -- light and dark -- split on a diagonal:
@@ -218,7 +306,7 @@ function Screen({ src, split }) {
   );
 }
 
-function Device({ type, src, split }) {
+function Device({ type, src, split, phone }) {
   return (
     <DeviceStage>
       {type === "desktop" ? (
@@ -228,7 +316,19 @@ function Device({ type, src, split }) {
           </Monitor>
           <Neck />
           <Foot />
+          {phone && (
+            <Phone>
+              <img src={phone} alt="" draggable={false} />
+            </Phone>
+          )}
         </Desktop>
+      ) : type === "laptop" ? (
+        <Laptop>
+          <Lid>
+            <Screen src={src} split={split} />
+          </Lid>
+          <Base />
+        </Laptop>
       ) : (
         <Tablet>
           <Screen src={src} split={split} />
@@ -359,8 +459,8 @@ export default function ProjectMedia({ project, className, onReady, startTime, b
             <AvocadoJumpingJack fill showTimer={false} handoff={false} rigScale={0.9} />
           </div>
         </AvocadoStage>
-      ) : media.type === "tablet" || media.type === "desktop" ? (
-        <Device type={media.type} src={media.src} split={media.split} />
+      ) : media.type in DEVICES ? (
+        <Device type={media.type} src={media.src} split={media.split} phone={media.phone} />
       ) : media.type === "wordmark" ? (
         <Wordmark $ink={media.ink} aria-hidden="true">
           <span>{project.title}</span>
